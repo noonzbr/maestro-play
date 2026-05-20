@@ -160,7 +160,7 @@ export default function HomePage() {
               &ldquo;The most powerful professionals of this decade won&apos;t be the ones who know how to code. They&apos;ll be the ones who know how to conduct.&rdquo;
             </blockquote>
             <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "var(--muted)" }}>
-              Felipe Mercado · Maestro Academy
+              Felipe Maestro · Maestro Academy
             </p>
           </div>
         </section>
@@ -226,20 +226,49 @@ export default function HomePage() {
         </section>
 
         {/* ABOUT FELIPE */}
-        <section style={{ padding: "5rem 2rem", maxWidth: "900px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "3rem", alignItems: "center" }}>
+        <section style={{ padding: "5rem 2rem", maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
           <div className="reveal" style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ width: "200px", height: "200px", borderRadius: "50%", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", padding: "3px" }}>
-              <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "4rem" }}>🎵</div>
+            <div style={{ position: "relative" }}>
+              {/* Gradient border frame */}
+              <div style={{ width: "260px", height: "300px", borderRadius: "20px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", padding: "3px" }}>
+                <div style={{ width: "100%", height: "100%", borderRadius: "18px", overflow: "hidden", background: "var(--bg-secondary)" }}>
+                  <img
+                    src="/images/felipe.jpg"
+                    alt="Felipe Maestro"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
+                    onError={e => {
+                      // Fallback if image not yet placed
+                      const t = e.currentTarget
+                      t.style.display = "none"
+                      const parent = t.parentElement
+                      if (parent) {
+                        parent.style.display = "flex"
+                        parent.style.alignItems = "center"
+                        parent.style.justifyContent = "center"
+                        parent.style.fontSize = "5rem"
+                        parent.innerHTML = "🎵"
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              {/* Floating label */}
+              <div style={{ position: "absolute", bottom: "-1rem", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg,#00d4f0,#e040fb)", borderRadius: "100px", padding: "0.4rem 1.1rem", whiteSpace: "nowrap" }}>
+                <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.72rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#08060f" }}>Meet Your Maestro</span>
+              </div>
             </div>
           </div>
           <div>
-            <div className="label-caps reveal" style={{ color: "var(--muted)", marginBottom: "1rem" }}>The Conductor</div>
-            <h2 className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(1.8rem, 4vw, 2.5rem)", color: "#fff", marginBottom: "1rem" }}>Felipe Mercado</h2>
-            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", lineHeight: 1.8, marginBottom: "1.5rem" }}>
-              Founder of Maestro Academy. AI educator, strategist, and firm believer that the future belongs to professionals who learn to conduct AI — not just consume it.
+            <div className="label-caps reveal" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>AI Interaction Architect & Founder</div>
+            <h2 className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", marginBottom: "1rem", lineHeight: 1.05 }}>Felipe Maestro</h2>
+            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.75)", lineHeight: 1.85, marginBottom: "1rem" }}>
+              Felipe built Maestro Academy around one conviction: <strong style={{ color: "#fff" }}>you don&apos;t need to be a developer to use AI like a professional.</strong> You just need a system.
             </p>
-            <a className="reveal" href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer" style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.875rem", color: "var(--cyan)", textDecoration: "none", borderBottom: "1px solid rgba(0,212,240,0.3)", paddingBottom: "2px" }}>
-              aimaestro.academy ↗
+            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.6)", lineHeight: 1.85, marginBottom: "2rem" }}>
+              After developing the Maestro Method — a 4-part prompting framework — Felipe set out to teach regular people how to conduct AI with the precision and intentionality of an orchestra conductor.
+            </p>
+            <a className="reveal" href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "rgba(255,255,255,0.9)", padding: "0.6rem 1.4rem", borderRadius: "100px", textDecoration: "none", transition: "opacity 0.2s" }}>
+              Learn from Felipe ↗
             </a>
           </div>
         </section>
