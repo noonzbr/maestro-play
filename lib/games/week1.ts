@@ -6,6 +6,7 @@ export const week1: Game = {
   free: true,
   title: "Welcome to the Exciting World of AI",
   emoji: "🎸",
+  icon: "guitar" as const,
   duration: "8 min",
   description: "Follow Jake, a passionate 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.",
   tagline: "Every maestro was once just a kid with a guitar.",

@@ -25,6 +25,7 @@ export type Game = {
   free: boolean
   title: string
   emoji: string
+  icon?: "guitar" | "baton" | "musicNotes" | "tuningFork" | "gramophone" | "harp" | "metronome" | "headphones" | "volume"
   duration: string
   description: string
   tagline: string

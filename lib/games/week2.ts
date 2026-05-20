@@ -6,6 +6,7 @@ export const week2: Game = {
   free: true,
   title: "Discover How AI Works",
   emoji: "🧠",
+  icon: "headphones" as const,
   duration: "7 min",
   description: "Understand what's actually happening inside AI — why your inputs produce the outputs they do.",
   tagline: "Same tool. Wildly different results. Here's why.",

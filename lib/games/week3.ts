@@ -7,6 +7,7 @@ export const week3: Game = {
   price: 4.99,
   title: "AI for Professionals",
   emoji: "⚡",
+  icon: "baton" as const,
   duration: "8 min",
   description: "Apply AI to your actual work. Master prioritization, email, and the Maestro Method prompt framework.",
   tagline: "Your inbox. Your meetings. Your backlog. Conducted.",

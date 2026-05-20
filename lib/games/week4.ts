@@ -7,6 +7,7 @@ export const week4: Game = {
   price: 4.99,
   title: "The Conductor Test",
   emoji: "🏆",
+  icon: "musicNotes" as const,
   duration: "10 min",
   description: "The final test. Diagnose broken AI interactions, build perfect prompts, earn your Conductor status.",
   tagline: "This is where everything comes together.",
