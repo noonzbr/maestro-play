@@ -41,7 +41,7 @@ const PANELS = [
   },
   {
     icon: "musicNotes" as const,
-    label: "THIS IS MARCO'S STORY.",
+    label: "THIS IS JAKE'S STORY.",
     lines: [
       "A guitarist who became a conductor.",
       "An AI orchestra waiting for its maestro.",
