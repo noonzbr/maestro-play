@@ -8,6 +8,7 @@ import XPCounter from "./XPCounter"
 import FloatingNotes from "./FloatingNotes"
 import StoryIntro from "./StoryIntro"
 import GameIcon from "./GameIcon"
+import DialogueScene from "./DialogueScene"
 import { useSoundEngine, SoundMood } from "./SoundEngine"
 
 type Props = { game: Game }
@@ -73,6 +74,7 @@ export default function GameEngine({ game }: Props) {
   const [showXpBurst, setShowXpBurst] = useState(false)
   const [burstKey, setBurstKey] = useState(0)
   const [fadeIn, setFadeIn] = useState(false)
+  const [dialogueDone, setDialogueDone] = useState(false)
 
   const sound = useSoundEngine()
 
@@ -161,6 +163,11 @@ export default function GameEngine({ game }: Props) {
     if (state === "complete") sound.stopAmbient()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
+
+  // Reset dialogue when moving to a new scene
+  useEffect(() => {
+    setDialogueDone(false)
+  }, [sceneIndex])
 
   const handleAnswer = useCallback((choice: Choice) => {
     if (state !== "playing") return
@@ -330,6 +337,14 @@ export default function GameEngine({ game }: Props) {
             </p>
           </div>
         </div>
+      )}
+
+      {/* ——— DIALOGUE OVERLAY ——— */}
+      {state === "playing" && currentScene?.dialogue?.length && !dialogueDone && (
+        <DialogueScene
+          scene={currentScene}
+          onComplete={() => setDialogueDone(true)}
+        />
       )}
 
       {/* ——— GAME CONTENT ——— */}

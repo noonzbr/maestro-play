@@ -1,3 +1,10 @@
+export type DialogueLine = {
+  speaker: string
+  avatar: "jake" | "npc"
+  npcKey?: "default" | "senora_vega" | "marcus" | "ai"
+  text: string
+}
+
 export type Choice = {
   label: string
   text: string
@@ -13,6 +20,7 @@ export type Scene = {
   scenarioText?: string
   npcLine?: string
   concept?: { title: string; body: string }
+  dialogue?: DialogueLine[]
   question?: string
   choices?: Choice[]
   xpAward: number

@@ -138,6 +138,7 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
   }
 
   const isBoss = scene.type === "boss"
+  const hasDialogue = !!(scene.dialogue?.length)
 
   return (
     <div>
@@ -182,8 +183,8 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
         </div>
       )}
 
-      {/* Scenario card */}
-      {(scene.scenarioText || scene.npcLine) && (
+      {/* Scenario card — hidden when dialogue already told the story */}
+      {!hasDialogue && (scene.scenarioText || scene.npcLine) && (
         <div style={{
           background: isBoss ? "rgba(224,64,251,0.04)" : "rgba(0,212,240,0.04)",
           border: `1px solid ${isBoss ? "rgba(224,64,251,0.2)" : "rgba(0,212,240,0.15)"}`,
@@ -205,8 +206,8 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
         </div>
       )}
 
-      {/* Concept card — teach before testing */}
-      {scene.concept && (
+      {/* Concept card — hidden when dialogue introduced the concept organically */}
+      {!hasDialogue && scene.concept && (
         <div style={{
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(255,255,255,0.1)",

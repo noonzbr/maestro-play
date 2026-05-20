@@ -194,18 +194,20 @@ export function useSoundEngine() {
       const lpf = ctx.createBiquadFilter()
       lpf.type = "lowpass"
       lpf.frequency.setValueAtTime(
-        mood === "revelation" ? 1600 : mood === "boss" ? 700 : 900,
+        mood === "revelation" ? 1600 : mood === "boss" ? 700 : 1900,
         ctx.currentTime
       )
       lpf.connect(master)
       master.connect(ctx.destination)
 
       // Scale selection — each tells a different emotional story
-      const normalNotes  = [220, 261.63, 293.66, 329.63, 392.0]  // Am pentatonic — hopeful mystery
+      // E major pentatonic: E4 G#4 B4 E5 — bright, upbeat rock feel
+      const normalNotes  = [329.63, 415.30, 493.88, 659.25, 493.88, 415.30, 329.63, 493.88]
       const bossNotes    = [146.83, 174.61, 220.0, 261.63, 311.13] // Dm minor — tension
       const revealNotes  = [110, 164.81, 246.94, 329.63]           // Am suspended — transcendence
       const notes = mood === "boss" ? bossNotes : mood === "revelation" ? revealNotes : normalNotes
-      const tempo = mood === "boss" ? 0.4 : mood === "revelation" ? 1.1 : 0.62
+      const tempo = mood === "boss" ? 0.4 : mood === "revelation" ? 1.1 : 0.26
+      const oscType: OscillatorType = mood === "normal" ? "triangle" : "sine"
 
       let step = 0
       let nextTime = ctx.currentTime + 0.1
@@ -218,15 +220,33 @@ export function useSoundEngine() {
           const freq = notes[step % notes.length]
           const osc = ctx.createOscillator()
           const g = ctx.createGain()
-          osc.type = "sine"
+          osc.type = oscType
           osc.frequency.setValueAtTime(freq, nextTime)
           g.gain.setValueAtTime(0, nextTime)
-          g.gain.linearRampToValueAtTime(0.75, nextTime + 0.05)
-          g.gain.exponentialRampToValueAtTime(0.0001, nextTime + tempo * 1.9)
+          g.gain.linearRampToValueAtTime(0.65, nextTime + 0.04)
+          g.gain.exponentialRampToValueAtTime(0.0001, nextTime + tempo * 1.7)
           osc.connect(g)
           g.connect(lpf)
           osc.start(nextTime)
           osc.stop(nextTime + tempo * 2)
+
+          // Bass note every 4 steps — E2/A2 rock pulse
+          if (mood === "normal" && step % 4 === 0) {
+            const bassSeq = [82.41, 82.41, 110.0, 82.41]
+            const bFreq = bassSeq[Math.floor(step / 4) % bassSeq.length]
+            const bOsc = ctx.createOscillator()
+            const bG = ctx.createGain()
+            bOsc.type = "sawtooth"
+            bOsc.frequency.setValueAtTime(bFreq, nextTime)
+            bG.gain.setValueAtTime(0, nextTime)
+            bG.gain.linearRampToValueAtTime(0.45, nextTime + 0.03)
+            bG.gain.exponentialRampToValueAtTime(0.0001, nextTime + tempo * 3.5)
+            bOsc.connect(bG)
+            bG.connect(lpf)
+            bOsc.start(nextTime)
+            bOsc.stop(nextTime + tempo * 4)
+          }
+
           step++
           nextTime += tempo
         }

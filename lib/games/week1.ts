@@ -19,6 +19,16 @@ export const week1: Game = {
       scenarioText:
         "Jake plays guitar three hours every day, without exception. He hears melodies in his sleep and wakes up reaching for his fretboard. His bandmates have gone all-in on AI — generated beats, AI lyrics, entire EPs finished in a weekend. They think Jake is falling behind.",
       npcLine: "Dude. I made an entire EP this weekend with AI. While you were tabbing that one riff for the third week.",
+      dialogue: [
+        { speaker: "Marcus", avatar: "npc" as const, npcKey: "marcus" as const, text: "Dude. I made an entire EP this weekend with AI. While you were tabbing that one riff for the third week." },
+        { speaker: "Jake", avatar: "jake" as const, text: "It's a complex riff. The feeling has to be exactly right." },
+        { speaker: "Marcus", avatar: "npc" as const, npcKey: "marcus" as const, text: "Just type 'write me a song' and you're done in five minutes. Try it." },
+        { speaker: "Jake", avatar: "jake" as const, text: "...okay. 'Write me a song.'" },
+        { speaker: "Jake", avatar: "jake" as const, text: "This is elevator music. Completely generic. No soul whatsoever." },
+        { speaker: "Marcus", avatar: "npc" as const, npcKey: "marcus" as const, text: "Right. Because you told it nothing. AI is like an orchestra — every instrument ready, but zero direction." },
+        { speaker: "Jake", avatar: "jake" as const, text: "So I have to... conduct it?" },
+        { speaker: "Marcus", avatar: "npc" as const, npcKey: "marcus" as const, text: "Exactly. Tell it what you hear in your head. The more specific you are, the better the output." },
+      ],
       concept: {
         title: "The Conductor Principle",
         body: "AI produces exactly what you describe — no more, no less. Like an orchestra without a conductor, it has all the instruments but no direction. Vague input gives vague output. Precision gives precision.",
@@ -64,6 +74,15 @@ export const week1: Game = {
       scenarioText:
         "Señora Vega plays an AI-composed string quartet for the class. Technically perfect — not one wrong note, ideal structure, textbook form. But Jake feels it immediately. Like a brilliant forgery. Every element correct, something essential absent. She notices his expression and calls on him.",
       npcLine: "Jake. You're making your 'something is wrong' face. Tell the class what you hear.",
+      dialogue: [
+        { speaker: "Señora Vega", avatar: "npc" as const, npcKey: "senora_vega" as const, text: "Listen closely to this piece." },
+        { speaker: "Jake", avatar: "jake" as const, text: "It's... technically perfect. Not one wrong note. Ideal structure, textbook form." },
+        { speaker: "Señora Vega", avatar: "npc" as const, npcKey: "senora_vega" as const, text: "Jake. You're making your 'something is wrong' face. Tell the class what you hear." },
+        { speaker: "Jake", avatar: "jake" as const, text: "It's hollow. Like a robot trying to cry. Every element correct — but there's nobody home." },
+        { speaker: "Señora Vega", avatar: "npc" as const, npcKey: "senora_vega" as const, text: "Exactly right. This was AI given one instruction: 'write a sad string quartet.'" },
+        { speaker: "Jake", avatar: "jake" as const, text: "So the AI didn't know what KIND of sad. It just... guessed average sadness." },
+        { speaker: "Señora Vega", avatar: "npc" as const, npcKey: "senora_vega" as const, text: "The AI mirrors its conductor. You are the feeling. It is the instrument. Emotional depth must come from your instructions." },
+      ],
       concept: {
         title: "Emotion Doesn't Come From the AI",
         body: "AI mirrors its conductor. Emotional depth, tension, and meaning must be injected through your instructions — the AI has processed millions of emotional works, but it has no feeling of its own. You are the feeling. It is the instrument.",
@@ -109,6 +128,15 @@ export const week1: Game = {
       scenarioText:
         "Two weeks of experimenting. Three hours every night. Jake has filled a notebook with what works and what doesn't. Tonight, something shifts — the AI stops producing generic output and starts producing exactly what he hears in his head. Not because the AI changed. Because Jake did.",
       npcLine: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor.",
+      dialogue: [
+        { speaker: "Jake", avatar: "jake" as const, text: "Two weeks of experiments. Three hours every night. I've filled an entire notebook with what works and what doesn't." },
+        { speaker: "AI", avatar: "npc" as const, npcKey: "ai" as const, text: "Ready for your next prompt." },
+        { speaker: "Jake", avatar: "jake" as const, text: "A fingerstyle piece in Am. 68 BPM. The grief of watching someone you love choose to leave. The suspended chord never resolves." },
+        { speaker: "AI", avatar: "npc" as const, npcKey: "ai" as const, text: "Composing..." },
+        { speaker: "Jake", avatar: "jake" as const, text: "This is... exactly what I hear in my head. Not because the AI changed. Because I learned how to direct it." },
+        { speaker: "AI", avatar: "npc" as const, npcKey: "ai" as const, text: "Your musical expertise is your advantage. A beginner says 'make it good.' You describe exact texture, tension, and arc." },
+        { speaker: "Jake", avatar: "jake" as const, text: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor." },
+      ],
       concept: {
         title: "Expertise × AI = Force Multiplication",
         body: "Deep domain knowledge doesn't become obsolete with AI — it becomes a superpower. A musician can describe exactly the texture, tension, and arc of what they want. A beginner can only say 'make it good.' The gap in output is enormous.",
