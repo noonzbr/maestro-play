@@ -12,6 +12,7 @@ export type Scene = {
   location?: string
   scenarioText?: string
   npcLine?: string
+  concept?: { title: string; body: string }
   question?: string
   choices?: Choice[]
   xpAward: number

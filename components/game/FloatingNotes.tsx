@@ -56,8 +56,11 @@ export default function FloatingNotes({ mood = "normal" }: { mood?: SoundMood })
     document.head.appendChild(s)
   }, [])
 
-  const speedMult = mood === "boss" ? 0.72 : mood === "revelation" ? 1.5 : 1
-  const glow = mood === "revelation"
+  // No moving elements during revelation — reduces motion/vertigo
+  if (mood === "revelation") return null
+
+  const speedMult = mood === "boss" ? 0.72 : 1
+  const glow = false
 
   return (
     <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 5, overflow: "hidden" }}>

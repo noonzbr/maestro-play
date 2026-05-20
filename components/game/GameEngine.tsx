@@ -123,8 +123,16 @@ export default function GameEngine({ game }: Props) {
         100% { transform:scale(1); }
       }
       @keyframes revelation-glow {
-        0%,100% { opacity:0.4; transform:scale(0.95); }
-        50%     { opacity:0.8; transform:scale(1.05); }
+        0%,100% { opacity:0.35; }
+        50%     { opacity:0.65; }
+      }
+      @keyframes float {
+        0%,100% { opacity:0.7; transform:scale(1); }
+        50%     { opacity:1;   transform:scale(1.08); }
+      }
+      @keyframes pulse-glow {
+        0%,100% { opacity:0.4; }
+        50%     { opacity:1; }
       }
       @keyframes maestro-pulse {
         0%,100% { filter:drop-shadow(0 0 12px rgba(0,212,240,0.4)); }

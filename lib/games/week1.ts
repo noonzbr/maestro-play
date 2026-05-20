@@ -18,6 +18,10 @@ export const week1: Game = {
       scenarioText:
         "Jake plays guitar three hours every day, without exception. He hears melodies in his sleep and wakes up reaching for his fretboard. His bandmates have gone all-in on AI — generated beats, AI lyrics, entire EPs finished in a weekend. They think Jake is falling behind.",
       npcLine: "Dude. I made an entire EP this weekend with AI. While you were tabbing that one riff for the third week.",
+      concept: {
+        title: "The Conductor Principle",
+        body: "AI produces exactly what you describe — no more, no less. Like an orchestra without a conductor, it has all the instruments but no direction. Vague input gives vague output. Precision gives precision.",
+      },
       question: "Jake types 'write me a song' into an AI. The result sounds like elevator music — technically fine, completely soulless. What went wrong?",
       choices: [
         {
@@ -59,6 +63,10 @@ export const week1: Game = {
       scenarioText:
         "Señora Vega plays an AI-composed string quartet for the class. Technically perfect — not one wrong note, ideal structure, textbook form. But Jake feels it immediately. Like a brilliant forgery. Every element correct, something essential absent. She notices his expression and calls on him.",
       npcLine: "Jake. You're making your 'something is wrong' face. Tell the class what you hear.",
+      concept: {
+        title: "Emotion Doesn't Come From the AI",
+        body: "AI mirrors its conductor. Emotional depth, tension, and meaning must be injected through your instructions — the AI has processed millions of emotional works, but it has no feeling of its own. You are the feeling. It is the instrument.",
+      },
       question: "Jake says the piece is 'technically perfect but hollow — like a robot trying to cry.' Señora Vega nods. 'Exactly right.' Why does AI-generated work often feel emotionally empty?",
       choices: [
         {
@@ -100,6 +108,10 @@ export const week1: Game = {
       scenarioText:
         "Two weeks of experimenting. Three hours every night. Jake has filled a notebook with what works and what doesn't. Tonight, something shifts — the AI stops producing generic output and starts producing exactly what he hears in his head. Not because the AI changed. Because Jake did.",
       npcLine: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor.",
+      concept: {
+        title: "Expertise × AI = Force Multiplication",
+        body: "Deep domain knowledge doesn't become obsolete with AI — it becomes a superpower. A musician can describe exactly the texture, tension, and arc of what they want. A beginner can only say 'make it good.' The gap in output is enormous.",
+      },
       question: "Jake realizes his years of musical training — rhythm, tension, release, dynamics, emotional arc — aren't obsolete in the AI age. They've become his superpower. What did he understand that most people never do?",
       choices: [
         {

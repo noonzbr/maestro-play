@@ -14,7 +14,7 @@ type Props = {
   streakCount?: number
 }
 
-function useTypewriter(text: string, speed = 18, active = true) {
+function useTypewriter(text: string, speed = 28, active = true) {
   const [displayed, setDisplayed] = useState("")
   const [done, setDone] = useState(false)
 
@@ -59,7 +59,7 @@ function RevelationScene({ scene, onNext }: { scene: Scene; onNext: () => void }
         fontSize: "3.5rem",
         marginBottom: "2rem",
         filter: "drop-shadow(0 0 20px rgba(0,212,240,0.6))",
-        animation: "float 6s ease-in-out infinite",
+        animation: "float 5s ease-in-out infinite",
         display: "inline-block",
       }}>
         ♪
@@ -190,7 +190,7 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
           borderLeft: `3px solid ${isBoss ? "var(--pink)" : "var(--cyan)"}`,
           borderRadius: "0 12px 12px 0",
           padding: "1.25rem 1.5rem",
-          marginBottom: "2rem",
+          marginBottom: "1.5rem",
         }}>
           {scene.npcLine && (
             <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.1rem", color: isBoss ? "var(--pink)" : "var(--cyan)", marginBottom: scene.scenarioText ? "0.75rem" : 0, lineHeight: 1.5 }}>
@@ -205,19 +205,74 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
         </div>
       )}
 
-      {/* Question */}
-      {scene.question && (
-        <h2 style={{
-          fontFamily: "Inter, sans-serif",
-          fontWeight: 700,
-          fontSize: "clamp(1rem, 2.5vw, 1.2rem)",
-          color: "#fff",
-          lineHeight: 1.45,
-          marginBottom: "1.5rem",
-          letterSpacing: "-0.01em",
+      {/* Concept card — teach before testing */}
+      {scene.concept && (
+        <div style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "14px",
+          padding: "1rem 1.25rem",
+          marginBottom: "1.75rem",
+          animation: "scene-fade-in 0.5s 0.1s ease both",
         }}>
-          {scene.question}
-        </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <GameIcon name="tuningFork" size={18} />
+            <span style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 800,
+              fontSize: "0.62rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.45)",
+            }}>
+              {scene.concept.title}
+            </span>
+          </div>
+          <p style={{
+            fontFamily: "Inter, sans-serif",
+            fontSize: "0.9rem",
+            color: "rgba(240,238,255,0.7)",
+            lineHeight: 1.7,
+            margin: 0,
+          }}>
+            {scene.concept.body}
+          </p>
+        </div>
+      )}
+
+      {/* Challenge label + question */}
+      {scene.question && (
+        <>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginBottom: "0.6rem",
+          }}>
+            <GameIcon name={isBoss ? "baton" : "headphones"} size={16} />
+            <span style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 800,
+              fontSize: "0.6rem",
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: isBoss ? "var(--pink)" : "rgba(0,212,240,0.6)",
+            }}>
+              {isBoss ? "Final Challenge" : "Your Turn"}
+            </span>
+          </div>
+          <h2 style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 700,
+            fontSize: "clamp(1rem, 2.5vw, 1.15rem)",
+            color: "#fff",
+            lineHeight: 1.5,
+            marginBottom: "1.25rem",
+            letterSpacing: "-0.01em",
+          }}>
+            {scene.question}
+          </h2>
+        </>
       )}
 
       {/* Choices */}
