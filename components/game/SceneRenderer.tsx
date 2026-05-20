@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Scene, Choice } from "@/lib/games/types"
 import ChoiceButton from "./ChoiceButton"
+import GameIcon from "./GameIcon"
 
 type Props = {
   scene: Scene
@@ -153,7 +154,7 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
               borderRadius: "100px",
               padding: "0.28rem 0.75rem",
             }}>
-              <span style={{ fontSize: "0.8rem" }}>{isBoss ? "⚡" : "🎸"}</span>
+              <GameIcon name={isBoss ? "baton" : "guitar"} size={20} />
               <span style={{
                 fontFamily: "Inter, sans-serif",
                 fontWeight: 700,

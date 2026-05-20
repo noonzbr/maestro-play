@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Game } from "@/lib/games/types"
 import { allGames } from "@/lib/games"
+import GameIcon from "./GameIcon"
 
 type Props = {
   game: Game
@@ -71,44 +72,47 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
       )}
 
       <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
-        {/* Phase 0: Guitar fading */}
+        {/* Phase 0: The Guitarist — last time he was just Marco */}
         {phase === 0 && (
-          <div style={{ animation: "scene-fade-in 0.6s ease both" }}>
-            <div style={{ fontSize: "5.5rem", marginBottom: "1.5rem", animation: "maestro-pulse 2s ease-in-out infinite" }}>🎸</div>
-            <p style={{
-              fontFamily: "Cormorant Garamond, serif",
-              fontStyle: "italic",
-              fontSize: "1.4rem",
-              color: "rgba(240,238,255,0.45)",
-            }}>
-              Something just changed...
+          <div style={{ textAlign: "center", animation: "scene-fade-in 0.7s ease both" }}>
+            <div style={{ position: "relative", width: "180px", margin: "0 auto 1.25rem" }}>
+              <img src="/images/guitarplayer1.png" alt="Marco" style={{ width: "100%", display: "block", animation: "maestro-pulse 2.5s ease-in-out infinite" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
+            </div>
+            <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.35rem", color: "rgba(240,238,255,0.5)" }}>
+              The last time he was just a guitarist...
             </p>
           </div>
         )}
 
-        {/* Phase 1: Guitar exits, baton arrives */}
+        {/* Phase 1: The transformation crossfade */}
         {phase === 1 && (
-          <div>
-            <div style={{ position: "relative", height: "120px", marginBottom: "1.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ fontSize: "5.5rem", position: "absolute", animation: "guitar-fade 0.7s ease forwards" }}>🎸</div>
-              <div style={{ fontSize: "5.5rem", position: "absolute", animation: "baton-arrive 0.9s 0.4s cubic-bezier(0.16,1,0.3,1) both" }}>🎼</div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ position: "relative", width: "200px", margin: "0 auto 1.25rem", height: "280px" }}>
+              <img
+                src="/images/guitarplayer1.png"
+                alt="Marco"
+                style={{ position: "absolute", inset: 0, width: "100%", animation: "guitar-fade 0.8s ease forwards" }}
+              />
+              <img
+                src="/images/maestroplayer1.png"
+                alt="The Maestro"
+                style={{ position: "absolute", inset: 0, width: "100%", objectFit: "cover", objectPosition: "top", animation: "baton-arrive 1s 0.3s cubic-bezier(0.16,1,0.3,1) both" }}
+              />
             </div>
-            <p style={{
-              fontFamily: "Cormorant Garamond, serif",
-              fontStyle: "italic",
-              fontSize: "1.5rem",
-              color: "var(--cyan)",
-              animation: "scene-fade-in 0.6s 0.6s ease both",
-            }}>
+            <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.5rem", color: "var(--cyan)", animation: "scene-fade-in 0.6s 0.5s ease both" }}>
               The Maestro has arrived.
             </p>
           </div>
         )}
 
-        {/* Phase 2: Title appears */}
+        {/* Phase 2: Full title */}
         {phase >= 2 && (
-          <div>
-            <div style={{ fontSize: "5.5rem", marginBottom: "1.5rem", animation: "maestro-pulse 2.5s ease-in-out infinite" }}>🎼</div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ position: "relative", width: "200px", margin: "0 auto 1.25rem" }}>
+              <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
+            </div>
             <p style={{
               fontFamily: "Inter, sans-serif",
               fontWeight: 900,
@@ -175,7 +179,10 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
         {/* Week 1 special ending */}
         {game.week === 1 ? (
           <>
-            <div style={{ fontSize: "4rem", marginBottom: "1rem", animation: "maestro-pulse 3s ease-in-out infinite" }}>🎼</div>
+            <div style={{ position: "relative", width: "180px", margin: "0 auto 1rem" }}>
+              <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
+            </div>
             <div style={{
               display: "inline-flex",
               alignItems: "center",
@@ -183,12 +190,12 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
               background: "rgba(0,212,240,0.08)",
               border: "1px solid rgba(0,212,240,0.25)",
               borderRadius: "100px",
-              padding: "0.35rem 1rem",
+              padding: "0.35rem 0.75rem",
               marginBottom: "1.25rem",
             }}>
-              <span style={{ fontSize: "0.8rem" }}>🎸</span>
+              <GameIcon name="guitar" size={22} />
               <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--cyan)" }}>Conductor Awakened</span>
-              <span style={{ fontSize: "0.8rem" }}>🎼</span>
+              <GameIcon name="baton" size={22} />
             </div>
             <h1 style={{
               fontFamily: "Cormorant Garamond, serif",
@@ -209,7 +216,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
           </>
         ) : isFinalGame ? (
           <>
-            <div style={{ fontSize: "4rem", marginBottom: "1.5rem" }}>🎓</div>
+            <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}><GameIcon name="baton" size={72} /></div>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Conductor Certified</div>
             <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1rem" }}>
               You are now a<br />
@@ -223,7 +230,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
           </>
         ) : (
           <>
-            <div style={{ fontSize: "3.5rem", marginBottom: "1.5rem" }}>🎵</div>
+            <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}><GameIcon name="musicNotes" size={72} /></div>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Scene Complete</div>
             <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1rem" }}>
               {game.title}

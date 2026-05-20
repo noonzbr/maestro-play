@@ -6,10 +6,12 @@ import SceneRenderer from "./SceneRenderer"
 import EndScreen from "./EndScreen"
 import XPCounter from "./XPCounter"
 import FloatingNotes from "./FloatingNotes"
+import StoryIntro from "./StoryIntro"
+import GameIcon from "./GameIcon"
 import { useSoundEngine, SoundMood } from "./SoundEngine"
 
 type Props = { game: Game }
-type GameState = "intro" | "transitioning" | "playing" | "answered" | "complete"
+type GameState = "story" | "intro" | "transitioning" | "playing" | "answered" | "complete"
 
 function XPBurst({ xp }: { xp: number }) {
   return (
@@ -61,7 +63,7 @@ function CorrectBurst() {
 
 export default function GameEngine({ game }: Props) {
   const [sceneIndex, setSceneIndex] = useState(0)
-  const [state, setState] = useState<GameState>("intro")
+  const [state, setState] = useState<GameState>("story")
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
   const [totalXp, setTotalXp] = useState(0)
   const [lastXp, setLastXp] = useState(0)
@@ -215,6 +217,15 @@ export default function GameEngine({ game }: Props) {
     }, 400)
   }
 
+  if (state === "story") {
+    return (
+      <StoryIntro
+        onComplete={() => setState("intro")}
+        startMusic={() => sound.startAmbient("normal")}
+      />
+    )
+  }
+
   if (state === "complete") {
     return <EndScreen game={game} totalXp={totalXp} streak={streak} />
   }
@@ -251,7 +262,7 @@ export default function GameEngine({ game }: Props) {
       {/* Top bar */}
       <div style={{ position: "fixed", top: "3px", left: 0, right: 0, padding: "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(8,6,15,0.75)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)", zIndex: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.875rem", color: "#fff" }}>{game.emoji}</span>
+          <GameIcon name="guitar" size={28} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
           {state !== "intro" && (
@@ -274,8 +285,8 @@ export default function GameEngine({ game }: Props) {
       {state === "intro" && (
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "6rem 2rem 2rem", animation: "scene-fade-in 0.7s ease both" }}>
           <div style={{ maxWidth: "560px", width: "100%", textAlign: "center" }}>
-            <div style={{ fontSize: "5rem", marginBottom: "1.5rem", animation: "maestro-pulse 3s ease-in-out infinite" }}>
-              {game.emoji}
+            <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "center", animation: "maestro-pulse 3s ease-in-out infinite" }}>
+              <GameIcon name="guitar" size={88} />
             </div>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>
               Week {game.week} · {game.duration}
@@ -330,13 +341,13 @@ export default function GameEngine({ game }: Props) {
           {/* Scene label */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.75rem" }}>
             {isBoss ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(224,64,251,0.1)", border: "1px solid rgba(224,64,251,0.25)", borderRadius: "100px", padding: "0.3rem 0.9rem" }}>
-                <span style={{ fontSize: "0.8rem" }}>⚡</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(224,64,251,0.1)", border: "1px solid rgba(224,64,251,0.25)", borderRadius: "100px", padding: "0.3rem 0.9rem 0.3rem 0.5rem" }}>
+                <GameIcon name="baton" size={22} />
                 <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--pink)" }}>Conductor Test</span>
               </div>
             ) : currentScene.type === "revelation" ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.2)", borderRadius: "100px", padding: "0.3rem 0.9rem" }}>
-                <span style={{ fontSize: "0.8rem" }}>✨</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.2)", borderRadius: "100px", padding: "0.3rem 0.9rem 0.3rem 0.5rem" }}>
+                <GameIcon name="musicNotes" size={22} />
                 <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--cyan)" }}>Revelation</span>
               </div>
             ) : (
