@@ -7,18 +7,18 @@ export const week1: Game = {
   title: "Welcome to the Exciting World of AI",
   emoji: "🎸",
   duration: "8 min",
-  description: "Follow Marco, a passionate 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.",
+  description: "Follow Jake, a passionate 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.",
   tagline: "Every maestro was once just a kid with a guitar.",
   scenes: [
     {
       id: "w1-s1",
       type: "scenario",
-      character: "Marco, 17",
+      character: "Jake, 17",
       location: "BEDROOM · TUESDAY · 11:47 PM",
       scenarioText:
-        "Marco plays guitar three hours every day, without exception. He hears melodies in his sleep and wakes up reaching for his fretboard. His bandmates have gone all-in on AI — generated beats, AI lyrics, entire EPs finished in a weekend. They think Marco is falling behind.",
+        "Jake plays guitar three hours every day, without exception. He hears melodies in his sleep and wakes up reaching for his fretboard. His bandmates have gone all-in on AI — generated beats, AI lyrics, entire EPs finished in a weekend. They think Jake is falling behind.",
       npcLine: "Dude. I made an entire EP this weekend with AI. While you were tabbing that one riff for the third week.",
-      question: "Marco types 'write me a song' into an AI. The result sounds like elevator music — technically fine, completely soulless. What went wrong?",
+      question: "Jake types 'write me a song' into an AI. The result sounds like elevator music — technically fine, completely soulless. What went wrong?",
       choices: [
         {
           label: "A",
@@ -57,9 +57,9 @@ export const week1: Game = {
       character: "Señora Vega",
       location: "MUSIC CLASS · WEDNESDAY · 3:21 PM",
       scenarioText:
-        "Señora Vega plays an AI-composed string quartet for the class. Technically perfect — not one wrong note, ideal structure, textbook form. But Marco feels it immediately. Like a brilliant forgery. Every element correct, something essential absent. She notices his expression and calls on him.",
-      npcLine: "Marco. You're making your 'something is wrong' face. Tell the class what you hear.",
-      question: "Marco says the piece is 'technically perfect but hollow — like a robot trying to cry.' Señora Vega nods. 'Exactly right.' Why does AI-generated work often feel emotionally empty?",
+        "Señora Vega plays an AI-composed string quartet for the class. Technically perfect — not one wrong note, ideal structure, textbook form. But Jake feels it immediately. Like a brilliant forgery. Every element correct, something essential absent. She notices his expression and calls on him.",
+      npcLine: "Jake. You're making your 'something is wrong' face. Tell the class what you hear.",
+      question: "Jake says the piece is 'technically perfect but hollow — like a robot trying to cry.' Señora Vega nods. 'Exactly right.' Why does AI-generated work often feel emotionally empty?",
       choices: [
         {
           label: "A",
@@ -95,12 +95,12 @@ export const week1: Game = {
     {
       id: "w1-s3",
       type: "boss",
-      character: "Marco",
+      character: "Jake",
       location: "PRACTICE ROOM · FRIDAY · 2:14 AM",
       scenarioText:
-        "Two weeks of experimenting. Three hours every night. Marco has filled a notebook with what works and what doesn't. Tonight, something shifts — the AI stops producing generic output and starts producing exactly what he hears in his head. Not because the AI changed. Because Marco did.",
+        "Two weeks of experimenting. Three hours every night. Jake has filled a notebook with what works and what doesn't. Tonight, something shifts — the AI stops producing generic output and starts producing exactly what he hears in his head. Not because the AI changed. Because Jake did.",
       npcLine: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor.",
-      question: "Marco realizes his years of musical training — rhythm, tension, release, dynamics, emotional arc — aren't obsolete in the AI age. They've become his superpower. What did he understand that most people never do?",
+      question: "Jake realizes his years of musical training — rhythm, tension, release, dynamics, emotional arc — aren't obsolete in the AI age. They've become his superpower. What did he understand that most people never do?",
       choices: [
         {
           label: "A",
@@ -114,7 +114,7 @@ export const week1: Game = {
           text: "That deep expertise makes you a dramatically more powerful AI conductor",
           correct: true,
           feedback:
-            "THIS IS THE ENTIRE GAME. A surgeon's clinical knowledge makes them a better medical AI user. A lawyer's case knowledge makes them better at legal AI. Marco's musical ear lets him conduct AI with extraordinary precision. Expertise × AI = force multiplication.",
+            "THIS IS THE ENTIRE GAME. A surgeon's clinical knowledge makes them a better medical AI user. A lawyer's case knowledge makes them better at legal AI. Jake's musical ear lets him conduct AI with extraordinary precision. Expertise × AI = force multiplication.",
         },
         {
           label: "C",
@@ -137,7 +137,7 @@ export const week1: Game = {
       id: "w1-s4",
       type: "revelation",
       revealText:
-        "You were never just a guitarist. You were always a conductor waiting for an orchestra to arrive. The AI is your ensemble — a hundred instruments, ready to play exactly what you hear in your head. All you needed was to learn how to raise the baton. Marco sets down his guitar. Opens the AI interface. And for the first time, types with the precision of a conductor who knows exactly what he wants. The composition he's been hearing in his dreams for three years? It's finally time. The Maestro has arrived.",
+        "You were never just a guitarist. You were always a conductor waiting for an orchestra to arrive. The AI is your ensemble — a hundred instruments, ready to play exactly what you hear in your head. All you needed was to learn how to raise the baton. Jake sets down his guitar. Opens the AI interface. And for the first time, types with the precision of a conductor who knows exactly what he wants. The composition he's been hearing in his dreams for three years? It's finally time. The Maestro has arrived.",
       xpAward: 200,
     },
   ],

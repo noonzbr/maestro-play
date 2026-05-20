@@ -72,12 +72,11 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
       )}
 
       <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
-        {/* Phase 0: The Guitarist — last time he was just Marco */}
+        {/* Phase 0: The Guitarist — last time he was just Jake */}
         {phase === 0 && (
           <div style={{ textAlign: "center", animation: "scene-fade-in 0.7s ease both" }}>
-            <div style={{ position: "relative", width: "180px", margin: "0 auto 1.25rem" }}>
-              <img src="/images/guitarplayer1.png" alt="Marco" style={{ width: "100%", display: "block", animation: "maestro-pulse 2.5s ease-in-out infinite" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "35%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
+            <div style={{ width: "180px", margin: "0 auto 1.25rem" }}>
+              <img src="/images/guitarplayer1.png" alt="Jake" style={{ width: "100%", display: "block", animation: "maestro-pulse 2.5s ease-in-out infinite" }} />
             </div>
             <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.35rem", color: "rgba(240,238,255,0.5)" }}>
               The last time he was just a guitarist...
@@ -91,7 +90,7 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
             <div style={{ position: "relative", width: "200px", margin: "0 auto 1.25rem", height: "280px" }}>
               <img
                 src="/images/guitarplayer1.png"
-                alt="Marco"
+                alt="Jake"
                 style={{ position: "absolute", inset: 0, width: "100%", animation: "guitar-fade 0.8s ease forwards" }}
               />
               <img
@@ -109,9 +108,8 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
         {/* Phase 2: Full title */}
         {phase >= 2 && (
           <div style={{ textAlign: "center" }}>
-            <div style={{ position: "relative", width: "200px", margin: "0 auto 1.25rem" }}>
+            <div style={{ width: "200px", margin: "0 auto 1.25rem" }}>
               <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
             </div>
             <p style={{
               fontFamily: "Inter, sans-serif",
@@ -139,7 +137,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
   const shareText = isFinalGame
     ? `I just earned Maestro Conductor status on @MaestroPlay! 🎼 AI literacy in 4 weeks. No code required. ${totalXp} XP earned. Try it free: maestroplay.app`
     : game.week === 1
-    ? `Marco's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: maestroplay.app`
+    ? `Jake's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: maestroplay.app`
     : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: maestroplay.app`
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
@@ -179,9 +177,8 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
         {/* Week 1 special ending */}
         {game.week === 1 ? (
           <>
-            <div style={{ position: "relative", width: "180px", margin: "0 auto 1rem" }}>
+            <div style={{ width: "180px", margin: "0 auto 1rem" }}>
               <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "30%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
             </div>
             <div style={{
               display: "inline-flex",
@@ -211,7 +208,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
               </em>
             </h1>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "var(--muted)", lineHeight: 1.7, marginBottom: "2rem" }}>
-              Marco&apos;s story is just beginning. The orchestra awaits.
+              Jake&apos;s story is just beginning. The orchestra awaits.
             </p>
           </>
         ) : isFinalGame ? (

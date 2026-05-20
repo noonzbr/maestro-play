@@ -13,7 +13,7 @@ const PANELS = [
     icon: "guitar" as const,
     label: "THE GUITARIST",
     lines: [
-      "Meet Marco.",
+      "Meet Jake.",
       "17 years old.",
       "Guitar for three hours,\nevery single day.",
     ],
@@ -25,7 +25,7 @@ const PANELS = [
       "His bandmates just released a full EP.",
       "Made entirely with AI.",
       "In one weekend.",
-      "Marco was still tabbing the same riff.",
+      "Jake was still tabbing the same riff.",
       "For three weeks.",
     ],
   },
@@ -187,22 +187,11 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
         animation: "si-char-glow 4s ease-in-out infinite, si-fade-in 1s ease both",
         zIndex: 5,
       }}>
-        {/* Fade-out masks on all edges so the image blends seamlessly */}
-        <div style={{ position: "relative" }}>
-          <img
+        <img
             src="/images/guitarplayer1.png"
-            alt="Marco"
+            alt="Jake"
             style={{ width: "100%", display: "block" }}
           />
-          {/* bottom */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "45%", background: "linear-gradient(to top, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
-          {/* left */}
-          <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: "22%", background: "linear-gradient(to right, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
-          {/* right */}
-          <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, width: "22%", background: "linear-gradient(to left, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
-          {/* top */}
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "20%", background: "linear-gradient(to bottom, var(--bg-primary) 0%, transparent 100%)", pointerEvents: "none" }} />
-        </div>
       </div>
 
       {/* Story card — bottom panel */}
@@ -292,7 +281,7 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.35)" }}
                 onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "" }}
               >
-                Begin Marco&apos;s Journey →
+                Begin Jake&apos;s Journey →
               </button>
             </>
           ) : !current.isFinal ? (
