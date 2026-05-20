@@ -5,12 +5,13 @@ import { Game, Scene, Choice } from "@/lib/games/types"
 import SceneRenderer from "./SceneRenderer"
 import EndScreen from "./EndScreen"
 import XPCounter from "./XPCounter"
+import FloatingNotes from "./FloatingNotes"
+import { useSoundEngine, SoundMood } from "./SoundEngine"
 
 type Props = { game: Game }
 type GameState = "intro" | "transitioning" | "playing" | "answered" | "complete"
 
-// Floating XP burst
-function XPBurst({ xp, key: k }: { xp: number; key: string }) {
+function XPBurst({ xp }: { xp: number }) {
   return (
     <div style={{
       position: "fixed",
@@ -29,7 +30,6 @@ function XPBurst({ xp, key: k }: { xp: number; key: string }) {
   )
 }
 
-// Particle confetti burst on correct answer
 function CorrectBurst() {
   const dots = Array.from({ length: 18 }, (_, i) => i)
   return (
@@ -72,56 +72,85 @@ export default function GameEngine({ game }: Props) {
   const [burstKey, setBurstKey] = useState(0)
   const [fadeIn, setFadeIn] = useState(false)
 
+  const sound = useSoundEngine()
+
   const currentScene = game.scenes[sceneIndex]
   const totalScenes = game.scenes.length
   const maxXp = game.scenes.reduce((sum, s) => sum + s.xpAward, 0)
 
+  const currentMood: SoundMood =
+    currentScene?.type === "boss" ? "boss" :
+    currentScene?.type === "revelation" ? "revelation" : "normal"
+
+  // Keyframe injection
   useEffect(() => {
-    // Inject keyframes for animations
     const id = "maestro-keyframes"
-    if (!document.getElementById(id)) {
-      const style = document.createElement("style")
-      style.id = id
-      style.textContent = `
-        @keyframes xp-burst {
-          0% { opacity: 0; transform: translateY(0) scale(0.5); }
-          20% { opacity: 1; transform: translateY(-8px) scale(1.2); }
-          80% { opacity: 1; transform: translateY(-32px) scale(1); }
-          100% { opacity: 0; transform: translateY(-56px) scale(0.8); }
-        }
-        @keyframes scene-fade-in {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes particle-fly-0 {
-          0% { opacity: 1; transform: rotate(var(--r,0deg)) translateY(0); }
-          100% { opacity: 0; transform: rotate(var(--r,0deg)) translateY(-160px) scale(0); }
-        }
-        @keyframes particle-fly-1 {
-          0% { opacity: 1; transform: rotate(var(--r,0deg)) translateY(0); }
-          100% { opacity: 0; transform: rotate(var(--r,0deg)) translateY(-140px) translateX(40px) scale(0); }
-        }
-        @keyframes particle-fly-2 {
-          0% { opacity: 1; transform: rotate(var(--r,0deg)) translateY(0); }
-          100% { opacity: 0; transform: rotate(var(--r,0deg)) translateY(-180px) translateX(-30px) scale(0); }
-        }
-        @keyframes particle-fly-3 {
-          0% { opacity: 1; transform: rotate(var(--r,0deg)) translateY(0); }
-          100% { opacity: 0; transform: rotate(var(--r,0deg)) translateY(-120px) translateX(60px) scale(0); }
-        }
-        @keyframes streak-pop {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.4); }
-          100% { transform: scale(1); }
-        }
-        @keyframes revelation-glow {
-          0%, 100% { opacity: 0.4; transform: scale(0.95); }
-          50% { opacity: 0.8; transform: scale(1.05); }
-        }
-      `
-      document.head.appendChild(style)
-    }
+    if (document.getElementById(id)) return
+    const style = document.createElement("style")
+    style.id = id
+    style.textContent = `
+      @keyframes xp-burst {
+        0%   { opacity:0; transform:translateY(0) scale(0.5); }
+        20%  { opacity:1; transform:translateY(-8px) scale(1.2); }
+        80%  { opacity:1; transform:translateY(-32px) scale(1); }
+        100% { opacity:0; transform:translateY(-56px) scale(0.8); }
+      }
+      @keyframes scene-fade-in {
+        from { opacity:0; transform:translateY(16px); }
+        to   { opacity:1; transform:translateY(0); }
+      }
+      @keyframes particle-fly-0 {
+        0%   { opacity:1; transform:rotate(var(--r,0deg)) translateY(0); }
+        100% { opacity:0; transform:rotate(var(--r,0deg)) translateY(-160px) scale(0); }
+      }
+      @keyframes particle-fly-1 {
+        0%   { opacity:1; transform:rotate(var(--r,0deg)) translateY(0); }
+        100% { opacity:0; transform:rotate(var(--r,0deg)) translateY(-140px) translateX(40px) scale(0); }
+      }
+      @keyframes particle-fly-2 {
+        0%   { opacity:1; transform:rotate(var(--r,0deg)) translateY(0); }
+        100% { opacity:0; transform:rotate(var(--r,0deg)) translateY(-180px) translateX(-30px) scale(0); }
+      }
+      @keyframes particle-fly-3 {
+        0%   { opacity:1; transform:rotate(var(--r,0deg)) translateY(0); }
+        100% { opacity:0; transform:rotate(var(--r,0deg)) translateY(-120px) translateX(60px) scale(0); }
+      }
+      @keyframes streak-pop {
+        0%   { transform:scale(1); }
+        50%  { transform:scale(1.4); }
+        100% { transform:scale(1); }
+      }
+      @keyframes revelation-glow {
+        0%,100% { opacity:0.4; transform:scale(0.95); }
+        50%     { opacity:0.8; transform:scale(1.05); }
+      }
+      @keyframes maestro-pulse {
+        0%,100% { filter:drop-shadow(0 0 12px rgba(0,212,240,0.4)); }
+        50%     { filter:drop-shadow(0 0 28px rgba(0,212,240,0.9)); }
+      }
+    `
+    document.head.appendChild(style)
   }, [])
+
+  // Mood & revelation sound when scene starts
+  useEffect(() => {
+    if (state !== "playing") return
+    if (currentScene?.type === "revelation") {
+      sound.setMood("revelation")
+      sound.playRevelation()
+    } else if (currentScene?.type === "boss") {
+      sound.setMood("boss")
+    } else {
+      sound.setMood("normal")
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneIndex, state])
+
+  // Stop music when game ends
+  useEffect(() => {
+    if (state === "complete") sound.stopAmbient()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
 
   const handleAnswer = useCallback((choice: Choice) => {
     if (state !== "playing") return
@@ -133,29 +162,38 @@ export default function GameEngine({ game }: Props) {
     setTotalXp(prev => prev + xpEarned)
 
     if (choice.correct) {
-      setStreakCount(prev => prev + 1)
-      setStreak(prev => Math.max(prev, streakCount + 1))
+      sound.playCorrect()
+      setTimeout(() => sound.playXP(), 380)
+      const newStreak = streakCount + 1
+      setStreakCount(newStreak)
+      setStreak(prev => Math.max(prev, newStreak))
+      if (newStreak >= 2) setTimeout(() => sound.playStreak(), 620)
       setShowBurst(true)
       setTimeout(() => setShowBurst(false), 1200)
     } else {
+      sound.playWrong()
       setStreakCount(0)
     }
 
     setShowXpBurst(true)
     setBurstKey(k => k + 1)
     setTimeout(() => setShowXpBurst(false), 1500)
-  }, [state, currentScene, streakCount])
+  }, [state, currentScene, streakCount, sound])
 
   const handleNext = useCallback(() => {
+    sound.playClick()
+
     if (currentScene.type === "revelation") {
       setTotalXp(prev => prev + currentScene.xpAward)
     }
 
     if (sceneIndex + 1 >= totalScenes) {
+      sound.stopAmbient()
       setState("complete")
       return
     }
 
+    sound.playTransition()
     setState("transitioning")
     setFadeIn(false)
     setTimeout(() => {
@@ -165,9 +203,11 @@ export default function GameEngine({ game }: Props) {
       setState("playing")
       setFadeIn(true)
     }, 320)
-  }, [sceneIndex, totalScenes, currentScene])
+  }, [sceneIndex, totalScenes, currentScene, sound])
 
   const handleStart = () => {
+    sound.playClick()
+    sound.startAmbient("normal")
     setState("transitioning")
     setTimeout(() => {
       setState("playing")
@@ -185,13 +225,18 @@ export default function GameEngine({ game }: Props) {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
 
+      {/* Floating musical notes — always present */}
+      <FloatingNotes mood={currentMood} />
+
       {/* Ambient background */}
       <div style={{
         position: "fixed", inset: 0, pointerEvents: "none",
         background: isBoss
           ? "radial-gradient(ellipse at 50% 30%, rgba(224,64,251,0.06) 0%, transparent 55%), radial-gradient(ellipse at 30% 70%, rgba(123,47,190,0.07) 0%, transparent 50%)"
+          : currentScene?.type === "revelation"
+          ? "radial-gradient(ellipse at 50% 40%, rgba(0,212,240,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 60%, rgba(123,47,190,0.08) 0%, transparent 50%)"
           : "radial-gradient(ellipse at 20% 50%, rgba(0,212,240,0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(123,47,190,0.06) 0%, transparent 50%)",
-        transition: "background 1s ease",
+        transition: "background 1.2s ease",
       }} />
 
       {/* Particle burst on correct */}
@@ -207,7 +252,6 @@ export default function GameEngine({ game }: Props) {
       <div style={{ position: "fixed", top: "3px", left: 0, right: 0, padding: "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(8,6,15,0.75)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)", zIndex: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.875rem", color: "#fff" }}>{game.emoji}</span>
-          <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.8rem", color: "rgba(240,238,255,0.6)", display: "none" }}>{game.title}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
           {state !== "intro" && (
@@ -230,8 +274,7 @@ export default function GameEngine({ game }: Props) {
       {state === "intro" && (
         <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "6rem 2rem 2rem", animation: "scene-fade-in 0.7s ease both" }}>
           <div style={{ maxWidth: "560px", width: "100%", textAlign: "center" }}>
-            {/* Big emoji */}
-            <div style={{ fontSize: "5rem", marginBottom: "1.5rem", filter: "drop-shadow(0 0 24px rgba(0,212,240,0.4))" }}>
+            <div style={{ fontSize: "5rem", marginBottom: "1.5rem", animation: "maestro-pulse 3s ease-in-out infinite" }}>
               {game.emoji}
             </div>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>
@@ -249,7 +292,7 @@ export default function GameEngine({ game }: Props) {
 
             {/* Scene preview pills */}
             <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginBottom: "2.5rem", flexWrap: "wrap" }}>
-              {game.scenes.map((s, i) => (
+              {game.scenes.map((_, i) => (
                 <div key={i} style={{ width: "28px", height: "5px", borderRadius: "3px", background: "rgba(255,255,255,0.12)" }} />
               ))}
             </div>

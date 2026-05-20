@@ -5,121 +5,130 @@ export const week1: Game = {
   week: 1,
   free: true,
   title: "Welcome to the Exciting World of AI",
-  emoji: "🎵",
-  duration: "6 min",
-  description: "Discover why most people get poor results from AI — and what the 10x users do differently.",
-  tagline: "The era of AI is here. Which seat are you in?",
+  emoji: "🎸",
+  duration: "8 min",
+  description: "Follow Marco, a passionate 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.",
+  tagline: "Every maestro was once just a kid with a guitar.",
   scenes: [
     {
       id: "w1-s1",
       type: "scenario",
+      character: "Marco, 17",
+      location: "BEDROOM · TUESDAY · 11:47 PM",
       scenarioText:
-        "It's 2026. Your colleague automated her weekly report in 4 minutes. You spent 3 hours. Same company. Same data. Same AI tool. She's been promoted twice this year. You're still copying and pasting.",
-      question: "What is the biggest reason most people get poor results from AI?",
+        "Marco plays guitar three hours every day, without exception. He hears melodies in his sleep and wakes up reaching for his fretboard. His bandmates have gone all-in on AI — generated beats, AI lyrics, entire EPs finished in a weekend. They think Marco is falling behind.",
+      npcLine: "Dude. I made an entire EP this weekend with AI. While you were tabbing that one riff for the third week.",
+      question: "Marco types 'write me a song' into an AI. The result sounds like elevator music — technically fine, completely soulless. What went wrong?",
       choices: [
         {
           label: "A",
-          text: "AI isn't smart enough yet for real professional work",
+          text: "The AI isn't creative enough for real music",
           correct: false,
           feedback:
-            "Not quite. AI models like Claude and GPT-4 are extraordinarily capable. The bottleneck is almost never the model — it's the instructions it receives.",
+            "AI has composed pieces indistinguishable from human work. Creativity isn't the gap — direction is. Even a full orchestra sounds like noise without a conductor.",
         },
         {
           label: "B",
-          text: "They don't pay for the Pro subscription",
+          text: "He needed a better, paid AI model",
           correct: false,
           feedback:
-            "Tempting, but wrong. Free tiers are powerful. Paid subscriptions give you more capacity — but the same bad inputs produce the same bad outputs at any price.",
+            "A Stradivarius in untrained hands still sounds like noise. The instrument is never the problem.",
         },
         {
           label: "C",
-          text: "They describe what they want without structure or context",
+          text: "He gave vague instructions — AI performs to the clarity it's given",
           correct: true,
           feedback:
-            "Exactly. AI is a prediction engine — it generates the most likely response to your input. Vague input → generic output. Structured, contextual input → precise, useful output. This is the entire game.",
+            "Exactly. 'Write me a song' is like telling an orchestra to 'play something.' But 'a fingerstyle piece in Am, quiet grief building to defiant resolution'? Now you're conducting.",
         },
         {
           label: "D",
-          text: "AI only works well for developers and technical people",
+          text: "AI only works for technical people, not musicians",
           correct: false,
           feedback:
-            "The opposite is true. The best AI users are often writers, marketers, HR professionals, and executives — people who know how to communicate clearly and direct a process.",
+            "Musicians are often the most powerful AI users — they understand emotion, texture, tension, and resolution with precision that most people lack.",
         },
       ],
-      xpAward: 100,
+      xpAward: 150,
     },
     {
       id: "w1-s2",
-      type: "quiz",
+      type: "scenario",
+      character: "Señora Vega",
+      location: "MUSIC CLASS · WEDNESDAY · 3:21 PM",
       scenarioText:
-        "AI is reshaping professional landscapes faster than any technology since the internet. But most people interact with it like a fancier Google search.",
-      question: "Which of these AI capabilities is already real and widely available in 2026?",
+        "Señora Vega plays an AI-composed string quartet for the class. Technically perfect — not one wrong note, ideal structure, textbook form. But Marco feels it immediately. Like a brilliant forgery. Every element correct, something essential absent. She notices his expression and calls on him.",
+      npcLine: "Marco. You're making your 'something is wrong' face. Tell the class what you hear.",
+      question: "Marco says the piece is 'technically perfect but hollow — like a robot trying to cry.' Señora Vega nods. 'Exactly right.' Why does AI-generated work often feel emotionally empty?",
       choices: [
         {
           label: "A",
-          text: "Writing, editing, and summarizing entire documents in seconds",
-          correct: true,
+          text: "AI fundamentally cannot understand emotion",
+          correct: false,
           feedback:
-            "Real, available today, and used by millions. Claude, ChatGPT, and Gemini can process thousands of words and produce professional-quality output in under 10 seconds.",
+            "AI has processed more emotional expression than any human could in a lifetime. That's not the gap.",
         },
         {
           label: "B",
-          text: "Fully autonomous AI that runs a company without human oversight",
-          correct: false,
+          text: "The person using it didn't specify emotional intention, context, or purpose",
+          correct: true,
           feedback:
-            "Not yet — and likely not for a while. AI is a powerful collaborator, not a replacement. The Maestro model: humans conduct, AI plays the instruments.",
+            "The AI mirrors its conductor. 'Sad song' vs. 'the specific grief of watching someone you love choose to leave, fingerstyle Am at 68 BPM with a suspended chord that never resolves' — completely different results.",
         },
         {
           label: "C",
-          text: "AI that reads your mind and knows what you want without any input",
+          text: "AI music will always be inferior to human music",
           correct: false,
           feedback:
-            "No such thing. AI responds to what you give it. More signal in = better signal out. This is why learning to communicate with AI is the skill of the decade.",
+            "AI has already moved audiences to tears without them knowing it was AI. The limit isn't the instrument — it's the conductor.",
         },
         {
           label: "D",
-          text: "AI that replaces all creative work completely",
+          text: "Señora Vega should have used a better AI tool",
           correct: false,
           feedback:
-            "AI augments creativity — it doesn't replace human judgment, taste, or vision. The professionals thriving now use AI as an instrument, not a substitute.",
+            "The same AI that produced this hollow piece can produce something devastating with different instructions. The tool isn't the bottleneck.",
         },
       ],
       xpAward: 150,
     },
     {
       id: "w1-s3",
-      type: "scenario",
+      type: "boss",
+      character: "Marco",
+      location: "PRACTICE ROOM · FRIDAY · 2:14 AM",
       scenarioText:
-        "Maria is an HR Manager at a 500-person company. Zero coding experience. She used to spend 4 hours every Monday building analytics reports. Now she does it in 11 minutes — and the reports are better. Her VP asked her to train the entire team.",
-      question: "What most likely changed for Maria?",
+        "Two weeks of experimenting. Three hours every night. Marco has filled a notebook with what works and what doesn't. Tonight, something shifts — the AI stops producing generic output and starts producing exactly what he hears in his head. Not because the AI changed. Because Marco did.",
+      npcLine: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor.",
+      question: "Marco realizes his years of musical training — rhythm, tension, release, dynamics, emotional arc — aren't obsolete in the AI age. They've become his superpower. What did he understand that most people never do?",
       choices: [
         {
           label: "A",
-          text: "She hired a data analyst to help her",
+          text: "That AI can now replace his need to practice guitar",
           correct: false,
           feedback:
-            "No extra headcount needed. The transformation was personal — she learned to direct AI with precision, not rely on someone else to do it.",
+            "His musical mastery became the vocabulary that lets him conduct AI with a precision no beginner can match. The instrument still matters — it becomes the language.",
         },
         {
           label: "B",
-          text: "She learned to give AI structured, context-rich instructions",
+          text: "That deep expertise makes you a dramatically more powerful AI conductor",
           correct: true,
           feedback:
-            "Yes. Maria didn't learn to code. She learned to communicate. She tells AI the WHAT (objective), WHAT NOT (constraints), HOW (format and tone), and WHY (purpose). That's the Maestro Method.",
+            "THIS IS THE ENTIRE GAME. A surgeon's clinical knowledge makes them a better medical AI user. A lawyer's case knowledge makes them better at legal AI. Marco's musical ear lets him conduct AI with extraordinary precision. Expertise × AI = force multiplication.",
         },
         {
           label: "C",
-          text: "She switched to a more expensive AI tool",
+          text: "That he needs to learn programming to use AI properly",
           correct: false,
           feedback:
-            "Tool choice is a minor variable. Instruction quality is the major variable. Maria would get similar results with any frontier AI model using the same method.",
+            "The most powerful AI users are domain experts — musicians, doctors, writers — who speak to AI in the precise language of their craft. Code is irrelevant.",
         },
         {
           label: "D",
-          text: "Her company bought an enterprise AI platform",
+          text: "That AI will make musicians obsolete within five years",
           correct: false,
           feedback:
-            "Enterprise tools help at scale, but the skill comes first. Maria's breakthrough happened with a standard Claude subscription and a new mental model.",
+            "Musicians who conduct AI become 10× more capable. But the conductor is still essential. The baton doesn't conduct itself.",
         },
       ],
       xpAward: 150,
@@ -128,7 +137,7 @@ export const week1: Game = {
       id: "w1-s4",
       type: "revelation",
       revealText:
-        "You don't need to code. You need to conduct. An orchestra conductor doesn't play every instrument — they direct the ensemble with clarity and vision. That's exactly what the best AI users do. They conduct. Week 2 awaits: Discover how AI actually works under the hood.",
+        "You were never just a guitarist. You were always a conductor waiting for an orchestra to arrive. The AI is your ensemble — a hundred instruments, ready to play exactly what you hear in your head. All you needed was to learn how to raise the baton. Marco sets down his guitar. Opens the AI interface. And for the first time, types with the precision of a conductor who knows exactly what he wants. The composition he's been hearing in his dreams for three years? It's finally time. The Maestro has arrived.",
       xpAward: 200,
     },
   ],

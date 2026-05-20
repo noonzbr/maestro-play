@@ -140,6 +140,47 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
 
   return (
     <div>
+      {/* Character / location cinematic header */}
+      {(scene.character || scene.location) && (
+        <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+          {scene.character && (
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.45rem",
+              background: isBoss ? "rgba(224,64,251,0.08)" : "rgba(0,212,240,0.07)",
+              border: `1px solid ${isBoss ? "rgba(224,64,251,0.22)" : "rgba(0,212,240,0.2)"}`,
+              borderRadius: "100px",
+              padding: "0.28rem 0.75rem",
+            }}>
+              <span style={{ fontSize: "0.8rem" }}>{isBoss ? "⚡" : "🎸"}</span>
+              <span style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 700,
+                fontSize: "0.7rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: isBoss ? "var(--pink)" : "var(--cyan)",
+              }}>
+                {scene.character}
+              </span>
+            </div>
+          )}
+          {scene.location && (
+            <span style={{
+              fontFamily: "Inter, sans-serif",
+              fontSize: "0.66rem",
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "var(--muted)",
+              fontWeight: 500,
+            }}>
+              {scene.location}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Scenario card */}
       {(scene.scenarioText || scene.npcLine) && (
         <div style={{

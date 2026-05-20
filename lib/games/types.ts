@@ -8,6 +8,8 @@ export type Choice = {
 export type Scene = {
   id: string
   type: "scenario" | "quiz" | "revelation" | "boss"
+  character?: string
+  location?: string
   scenarioText?: string
   npcLine?: string
   question?: string
