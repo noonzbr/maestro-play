@@ -247,21 +247,9 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
             ))}
           </div>
 
-          {/* Final panel: all 9 icons + begin button */}
+          {/* Final panel: begin button */}
           {current.isFinal && allRevealed ? (
             <>
-              <div style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "0.5rem",
-                marginBottom: "1.5rem",
-                flexWrap: "wrap",
-                animation: "si-fade-in 0.6s 0.3s ease both",
-              }}>
-                {(["guitar","baton","musicNotes","tuningFork","gramophone","harp","metronome","headphones","volume"] as const).map(icon => (
-                  <GameIcon key={icon} name={icon} size={38} />
-                ))}
-              </div>
               <button
                 onClick={handleBegin}
                 style={{
