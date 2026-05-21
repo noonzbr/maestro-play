@@ -10,6 +10,10 @@ export const game1: Game = {
   duration: "8 min",
   description: "Follow Jake, a passionate 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.",
   tagline: "Every maestro was once just a kid with a guitar.",
+  characterImage: "/images/guitarplayer1.png",
+  maestroImage:   "/images/maestroplayer1.png",
+  maestroLine:    "The last time he was just a guitarist...",
+  maestroSubline: "Jake's story is just beginning. The orchestra awaits.",
   scenes: [
 
     // ── SCENE 1 ──────────────────────────────────────────────────────────────

@@ -41,7 +41,11 @@ export type Game = {
   title: string
   emoji: string
   icon?: "guitar" | "baton" | "musicNotes" | "tuningFork" | "gramophone" | "harp" | "metronome" | "headphones" | "volume"
-  accentColor?: string   // hex — overrides var(--cyan) for per-game theming
+  accentColor?: string      // hex — overrides var(--cyan) for per-game theming
+  characterImage?: string   // "/images/zoe.png"   — shown in transformation phase 0
+  maestroImage?: string     // "/images/maestro-zoe.png" — shown in transformation phase 1+
+  maestroLine?: string      // "The last time she was just a drummer..."
+  maestroSubline?: string   // shown on EndScreen below the maestro image
   duration: string
   description: string
   tagline: string

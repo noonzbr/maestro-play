@@ -11,6 +11,10 @@ export const game3: Game = {
   duration: "8 min",
   description: "Apply AI to your actual work. Master prioritization, email, and the Maestro Method prompt framework.",
   tagline: "Your inbox. Your meetings. Your backlog. Conducted.",
+  characterImage: "/images/carlos.png",
+  maestroImage:   "/images/maestro-carlos.png",
+  maestroLine:    "The last time he was just a saxophonist...",
+  maestroSubline: "Carlos plays every note with intention. Now you will too.",
   scenes: [
     {
       id: "w3-s1",

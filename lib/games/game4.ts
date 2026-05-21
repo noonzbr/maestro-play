@@ -11,6 +11,10 @@ export const game4: Game = {
   duration: "10 min",
   description: "The final test. Diagnose broken AI interactions, build perfect prompts, earn your Conductor status.",
   tagline: "This is where everything comes together.",
+  characterImage: "/images/aria.png",
+  maestroImage:   "/images/maestro-aria.png",
+  maestroLine:    "The last time she was just a violinist...",
+  maestroSubline: "Aria leads the section. The stage is yours.",
   scenes: [
     {
       id: "w4-s1",

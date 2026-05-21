@@ -12,8 +12,20 @@ type Props = {
   streak: number
 }
 
-// ── Week 1: 3-phase cinematic transformation ──────────────────────────────────
-function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
+// ── Character → Maestro cinematic transformation (works for any game with images)
+function MaestroTransformation({
+  characterImage,
+  maestroImage,
+  maestroLine,
+  accentColor = "var(--cyan)",
+  onComplete,
+}: {
+  characterImage: string
+  maestroImage: string
+  maestroLine?: string
+  accentColor?: string
+  onComplete: () => void
+}) {
   const [phase, setPhase] = useState(0)
 
   useEffect(() => {
@@ -63,6 +75,7 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
       position: "relative",
       overflow: "hidden",
     }}>
+      {/* Expanding rings */}
       {phase >= 1 && (
         <>
           <div style={{ position: "absolute", top: "50%", left: "50%", width: "200px", height: "200px", borderRadius: "50%", border: "2px solid rgba(0,212,240,0.4)", transform: "translate(-50%,-50%)", animation: "ring-expand 2s ease-out forwards" }} />
@@ -71,33 +84,37 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
       )}
 
       <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
+
+        {/* Phase 0 — character before */}
         {phase === 0 && (
           <div style={{ textAlign: "center", animation: "scene-fade-in 0.7s ease both" }}>
             <div style={{ width: "180px", margin: "0 auto 1.25rem" }}>
-              <img src="/images/guitarplayer1.png" alt="Jake" style={{ width: "100%", display: "block", animation: "maestro-pulse 2.5s ease-in-out infinite" }} />
+              <img src={characterImage} alt="Character" style={{ width: "100%", display: "block", animation: "maestro-pulse 2.5s ease-in-out infinite" }} />
             </div>
             <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.35rem", color: "rgba(240,238,255,0.5)" }}>
-              The last time he was just a guitarist...
+              {maestroLine ?? "The last time they were just a musician..."}
             </p>
           </div>
         )}
 
+        {/* Phase 1 — crossfade to maestro */}
         {phase === 1 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ position: "relative", width: "200px", margin: "0 auto 1.25rem", height: "280px" }}>
-              <img src="/images/guitarplayer1.png" alt="Jake" style={{ position: "absolute", inset: 0, width: "100%", animation: "guitar-fade 0.8s ease forwards" }} />
-              <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ position: "absolute", inset: 0, width: "100%", objectFit: "cover", objectPosition: "top", animation: "baton-arrive 1s 0.3s cubic-bezier(0.16,1,0.3,1) both" }} />
+              <img src={characterImage} alt="Before" style={{ position: "absolute", inset: 0, width: "100%", animation: "guitar-fade 0.8s ease forwards" }} />
+              <img src={maestroImage} alt="The Maestro" style={{ position: "absolute", inset: 0, width: "100%", objectFit: "cover", objectPosition: "top", animation: "baton-arrive 1s 0.3s cubic-bezier(0.16,1,0.3,1) both" }} />
             </div>
-            <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.5rem", color: "var(--cyan)", animation: "scene-fade-in 0.6s 0.5s ease both" }}>
+            <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.5rem", color: accentColor, animation: "scene-fade-in 0.6s 0.5s ease both" }}>
               The Maestro has arrived.
             </p>
           </div>
         )}
 
+        {/* Phase 2 — maestro revealed */}
         {phase >= 2 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ width: "200px", margin: "0 auto 1.25rem" }}>
-              <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
+              <img src={maestroImage} alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
             </div>
             <p style={{
               fontFamily: "Inter, sans-serif",
@@ -119,9 +136,11 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
 
 // ── Main EndScreen ────────────────────────────────────────────────────────────
 export default function EndScreen({ game, totalXp, streak }: Props) {
-  const [showTransform, setShowTransform] = useState(game.week === 1)
+  const hasMaestro = !!game.maestroImage
+  const [showTransform, setShowTransform] = useState(hasMaestro)
   const nextGame = allGames.find((g) => g.week === game.week + 1)
   const isFinalGame = !nextGame
+  const accent = game.accentColor ?? "var(--cyan)"
 
   const shareText = isFinalGame
     ? `I just earned Maestro Conductor status on @MaestroPlay! 🎼 ${allGames.length} games. No code required. ${totalXp} XP earned. Try it free: maestroplay.app`
@@ -129,11 +148,20 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
     ? `Jake's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: maestroplay.app`
     : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: maestroplay.app`
 
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+  const twitterUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
   const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent("https://maestroplay.app")}&title=${encodeURIComponent("MaestroPlay — AI Literacy Game")}&summary=${encodeURIComponent(shareText)}&source=maestroplay.app`
 
-  if (showTransform) {
-    return <MaestroTransformation onComplete={() => setShowTransform(false)} />
+  // ── Cinematic transformation for any game with character images ───────────
+  if (showTransform && game.characterImage && game.maestroImage) {
+    return (
+      <MaestroTransformation
+        characterImage={game.characterImage}
+        maestroImage={game.maestroImage}
+        maestroLine={game.maestroLine}
+        accentColor={accent}
+        onComplete={() => setShowTransform(false)}
+      />
+    )
   }
 
   return (
@@ -147,12 +175,12 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Ambient glow */}
+      {/* Ambient glow — uses game accent colour */}
       <div style={{
         position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
         width: "600px", height: "600px",
-        background: game.week === 1
-          ? "radial-gradient(circle, rgba(0,212,240,0.09) 0%, rgba(123,47,190,0.07) 45%, transparent 70%)"
+        background: hasMaestro
+          ? `radial-gradient(circle, ${accent}18 0%, ${accent}0e 45%, transparent 70%)`
           : "radial-gradient(circle, rgba(0,212,240,0.07) 0%, rgba(123,47,190,0.05) 50%, transparent 70%)",
         pointerEvents: "none",
         animation: "revelation-glow 5s ease-in-out infinite",
@@ -160,33 +188,34 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
 
       <div style={{ maxWidth: "480px", width: "100%", textAlign: "center", position: "relative", animation: "scene-fade-in 0.7s ease both" }}>
 
-        {/* ── Game 1 ending ── */}
-        {game.week === 1 ? (
+        {/* ── Maestro ending — any game with character images ── */}
+        {hasMaestro ? (
           <>
             <img
-              src="/images/maestroplayer1.png"
+              src={game.maestroImage}
               alt="The Maestro"
               style={{ height: "clamp(140px, 28vh, 210px)", objectFit: "contain", display: "block", margin: "0 auto 0.75rem", animation: "maestro-pulse 3s ease-in-out infinite" }}
             />
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.25)",
+              background: `${accent}14`, border: `1px solid ${accent}40`,
               borderRadius: "100px", padding: "0.3rem 0.7rem", marginBottom: "0.75rem",
             }}>
-              <GameIcon name="guitar" size={18} />
-              <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--cyan)" }}>Conductor Awakened</span>
+              <GameIcon name={game.icon ?? "musicNotes"} size={18} />
+              <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.28em", textTransform: "uppercase", color: accent }}>Conductor Awakened</span>
               <GameIcon name="baton" size={18} />
             </div>
             <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(1.8rem, 5vw, 2.6rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.5rem" }}>
               You were always<br />
-              <em style={{ background: "linear-gradient(90deg,#00d4f0,#e040fb)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              <em style={{ background: `linear-gradient(90deg,${accent},#e040fb)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 a conductor.
               </em>
             </h1>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-              Jake&apos;s story is just beginning. The orchestra awaits.
+              {game.maestroSubline ?? "The orchestra awaits."}
             </p>
           </>
+
         ) : isFinalGame ? (
           <>
             <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}><GameIcon name="baton" size={60} /></div>
@@ -201,10 +230,13 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
               You&apos;ve mastered the Maestro Method. The What, the What Not, the How, the Why — yours forever.
             </p>
           </>
+
         ) : (
           <>
-            <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}><GameIcon name="musicNotes" size={60} /></div>
-            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Scene Complete</div>
+            <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}>
+              <span style={{ fontSize: "3rem" }}>{game.emoji}</span>
+            </div>
+            <div className="label-caps" style={{ color: accent, marginBottom: "0.75rem" }}>Scene Complete</div>
             <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(1.8rem, 4vw, 2.6rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.75rem" }}>
               {game.title}
             </h1>
@@ -220,7 +252,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
           display: "flex", justifyContent: "center", gap: "2.5rem",
         }}>
           <div>
-            <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.7rem", color: "var(--cyan)" }}>{totalXp}</div>
+            <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.7rem", color: accent }}>{totalXp}</div>
             <div className="label-caps" style={{ marginTop: "0.2rem" }}>XP Earned</div>
           </div>
           {streak > 0 && (
@@ -231,15 +263,13 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
           )}
         </div>
 
-        {/* CTAs */}
+        {/* Share + Next */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-
-          {/* Share row — X + LinkedIn side by side */}
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{
               flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
               fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
-              color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+              color: "#08060f", background: `linear-gradient(90deg,${accent},#e040fb)`,
               padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.848L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>

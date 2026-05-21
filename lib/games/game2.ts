@@ -10,6 +10,10 @@ export const game2: Game = {
   duration: "7 min",
   description: "Understand what's actually happening inside AI — why your inputs produce the outputs they do.",
   tagline: "Same tool. Wildly different results. Here's why.",
+  characterImage: "/images/zoe.png",
+  maestroImage:   "/images/maestro-zoe.png",
+  maestroLine:    "The last time she was just a drummer...",
+  maestroSubline: "Zoe's rhythm just found its conductor. Keep the beat.",
   scenes: [
     {
       id: "w2-s1",
