@@ -44,7 +44,7 @@ function LiveDemo() {
 
   return (
     <div className="glass-card" style={{ borderRadius: "20px", padding: "2rem", height: "100%" }}>
-      <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Live Preview · Week 1</div>
+      <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Live Preview · Game 1</div>
       <div style={{ background: "rgba(0,212,240,0.05)", border: "1px solid rgba(0,212,240,0.15)", borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem" }}>
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "rgba(240,238,255,0.85)", lineHeight: 1.7 }}>
           Your colleague automated her report in <strong style={{ color: "#fff" }}>4 minutes</strong>. You spent <strong style={{ color: "#fff" }}>3 hours</strong>. Same tool. What does she know?
@@ -194,7 +194,7 @@ export default function HomePage() {
             </p>
             <div className="reveal">
               <Link href="/games/welcome-to-ai" style={{ display: "inline-flex", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.75rem 1.8rem", borderRadius: "100px", textDecoration: "none" }}>
-                Start Week 1 Free →
+                Start Game 1 Free →
               </Link>
             </div>
           </div>

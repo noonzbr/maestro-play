@@ -318,7 +318,7 @@ export default function GameEngine({ game }: Props) {
               <GameIcon name="guitar" size={88} />
             </div>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>
-              Week {game.week} · {game.duration}
+              Game {game.week} · {game.duration}
             </div>
             <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 6vw, 3rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1rem" }}>
               {game.title}

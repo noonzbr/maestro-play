@@ -1,6 +1,6 @@
 import { Game } from "./types"
 
-export const week4: Game = {
+export const game4: Game = {
   slug: "the-conductor-test",
   week: 4,
   free: false,
@@ -62,7 +62,7 @@ export const week4: Game = {
           text: "'Write an email about our return to office policy.'",
           correct: false,
           feedback:
-            "This is Week 1 territory. No audience, no stakes, no constraints, no format. You'll get a template you'll spend an hour editing into something usable.",
+            "This is Game 1 territory. No audience, no stakes, no constraints, no format. You'll get a template you'll spend an hour editing into something usable.",
         },
         {
           label: "B",

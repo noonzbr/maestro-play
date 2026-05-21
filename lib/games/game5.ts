@@ -1,6 +1,6 @@
 import { Game } from "./types"
 
-export const week5: Game = {
+export const game5: Game = {
   slug: "claude-chat-unlocked",
   week: 5,
   free: true,

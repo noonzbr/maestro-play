@@ -95,7 +95,7 @@ export default function CheckoutPage() {
             </div>
 
             <ul style={{ textAlign: "left", marginBottom: "2rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-              {["Instant permanent access", "4 interactive scenarios", "XP system + streak rewards", "Conductor certificate (Week 4)", "Works on any device"].map((item) => (
+              {["Instant permanent access", "4 interactive scenarios", "XP system + streak rewards", "Conductor certificate (Game 4)", "Works on any device"].map((item) => (
                 <li key={item} style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "rgba(240,238,255,0.8)" }}>
                   <span style={{ color: "var(--cyan)", fontSize: "0.9rem" }}>✓</span>
                   {item}

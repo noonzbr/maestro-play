@@ -121,10 +121,10 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
 export default function EndScreen({ game, totalXp, streak }: Props) {
   const [showTransform, setShowTransform] = useState(game.week === 1)
   const nextGame = allGames.find((g) => g.week === game.week + 1)
-  const isFinalGame = game.week === 4
+  const isFinalGame = !nextGame
 
   const shareText = isFinalGame
-    ? `I just earned Maestro Conductor status on @MaestroPlay! 🎼 AI literacy in 4 weeks. No code required. ${totalXp} XP earned. Try it free: maestroplay.app`
+    ? `I just earned Maestro Conductor status on @MaestroPlay! 🎼 ${allGames.length} games. No code required. ${totalXp} XP earned. Try it free: maestroplay.app`
     : game.week === 1
     ? `Jake's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: maestroplay.app`
     : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: maestroplay.app`
@@ -160,7 +160,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
 
       <div style={{ maxWidth: "480px", width: "100%", textAlign: "center", position: "relative", animation: "scene-fade-in 0.7s ease both" }}>
 
-        {/* ── Week 1 ending ── */}
+        {/* ── Game 1 ending ── */}
         {game.week === 1 ? (
           <>
             <img

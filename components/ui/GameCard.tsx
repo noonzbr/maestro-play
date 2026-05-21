@@ -32,7 +32,7 @@ export default function GameCard({ game, purchased }: Props) {
         onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-6px)")}
         onMouseLeave={e => (e.currentTarget.style.transform = "translateY(0)")}
       >
-        {/* Week badge */}
+        {/* Game number badge */}
         <div style={{
           position: "absolute",
           top: "1.5rem",
@@ -44,7 +44,7 @@ export default function GameCard({ game, purchased }: Props) {
           textTransform: "uppercase",
           color: "var(--muted)",
         }}>
-          Week {game.week}
+          Game {game.week}
         </div>
 
         {/* Lock overlay */}

@@ -53,7 +53,7 @@ export default function PostGenerator() {
         <textarea
           value={concept}
           onChange={(e) => setConcept(e.target.value)}
-          placeholder="e.g. Why most people get poor AI results (Week 1 launch), The Maestro Method 4 pillars, AI for HR professionals..."
+          placeholder="e.g. Why most people get poor AI results (Game 1 launch), The Maestro Method 4 pillars, AI for HR professionals..."
           rows={3}
           style={{
             width: "100%",

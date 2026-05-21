@@ -1,6 +1,6 @@
 import { Game } from "./types"
 
-export const week1: Game = {
+export const game1: Game = {
   slug: "welcome-to-ai",
   week: 1,
   free: true,
