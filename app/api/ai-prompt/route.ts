@@ -25,16 +25,16 @@ export async function POST(req: NextRequest) {
 
     const client = new Anthropic({ apiKey })
 
-    const systemPrompt = `You are the AI inside MaestroPlay, an AI literacy game. A player is helping Jake, a 17-year-old guitarist, write his first real AI prompt.
+    const systemPrompt = `You are the AI inside MaestroPlay, an AI literacy game. A player is learning to write effective prompts by helping a character in a story.
 
 Challenge context: ${context}
-What Jake wants: ${goal}
+What the character needs: ${goal}
 
-The player wrote this prompt for Jake: "${userPrompt}"
+The player wrote this prompt: "${userPrompt}"
 
 Respond ONLY with valid JSON, no markdown, no explanation:
 {
-  "aiResponse": "How you (the AI assistant) would actually respond to Jake's prompt — 2-3 sentences, natural and helpful, as if you're really the AI Jake is talking to",
+  "aiResponse": "How you (the AI assistant) would actually respond to this prompt — 2-3 sentences, natural and genuinely helpful, as if you are really the AI being asked",
   "scores": { "clarity": <1-5>, "context": <1-5>, "goal": <1-5> },
   "feedback": "One coaching sentence (max 18 words) about what would improve this prompt",
   "xp": <20-100 integer based on overall quality>
