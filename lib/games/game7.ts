@@ -28,18 +28,18 @@ export const game7: Game = {
         {
           speaker: "Priya",
           avatar: "jake",
-          text: "Wait — Marcus also used Claude for the Harlow brief this morning. Let me pull both up.",
+          text: "Wait — Tom also used Claude for the Harlow brief this morning. Let me pull both up.",
         },
         {
           speaker: "Priya",
           avatar: "jake",
-          text: "Dev, yours sounds like us. Marcus's reads like a generic template from 2019. Same tool, same task, completely different output.",
+          text: "Dev, yours sounds like us. Tom's reads like a generic template from 2019. Same tool, same task, completely different output.",
         },
         {
           speaker: "Dev",
           avatar: "npc",
           npcKey: "tyler",
-          text: "I gave Claude our brand guide, three past briefs, and explained who Harlow's audience is. Marcus probably just typed 'write a client brief.'",
+          text: "I gave Claude our brand guide, three past briefs, and explained who Harlow's audience is. Tom probably just typed 'write a client brief.'",
         },
         {
           speaker: "Priya",

@@ -12,15 +12,15 @@ export const game6: Game = {
     "Learn how Claude Code turns your terminal into an agentic coding partner — reading files, writing code, running tests, and shipping features without copy-pasting.",
   tagline: "Stop copy-pasting. Start collaborating.",
   scenes: [
-    // ── Scene 1 ── Meet Marcus ────────────────────────────────────────────────
+    // ── Scene 1 ── Meet Kai ────────────────────────────────────────────────
     {
       id: "w6-s1",
       type: "scenario",
-      character: "Marcus, Junior Developer, 24",
+      character: "Kai, Junior Developer, 24",
       location: "STARTUP OFFICE · TUESDAY · 3:12 PM",
       dialogue: [
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text:
             "Two hours. Two hours on this React rendering bug. I've console-logged everything. I've Googled everything. I'm going in circles.",
@@ -32,7 +32,7 @@ export const game6: Game = {
           text: "Did you try Claude Code?",
         },
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text: "I've used Claude. It's just a chat window. I paste my code in, it gives me a suggestion, I paste it back. Takes forever.",
         },
@@ -43,7 +43,7 @@ export const game6: Game = {
           text: "That's not Claude Code. Claude Code runs in your terminal. It reads your actual files. It edits them directly. It can run your tests. You don't paste anything.",
         },
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text: "Wait — it reads my files? Like, the whole project?",
         },
@@ -54,7 +54,7 @@ export const game6: Game = {
           text: "Your whole codebase. It understands the structure before it touches a single line. It's not a chat window. It's a coding agent.",
         },
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text: "…Okay. How do I install it?",
         },
@@ -109,7 +109,7 @@ export const game6: Game = {
       id: "w6-s2",
       type: "quiz",
       scenarioText:
-        "Marcus installs Claude Code and runs claude in his project root for the first time. Within seconds, Claude Code reads through his entire src/ folder — 34 files — and reports back a summary of the component hierarchy, the state management pattern, and which files are likely related to the rendering bug. Marcus hasn't typed a single line of code. He's typed one sentence describing his bug.",
+        "Kai installs Claude Code and runs claude in his project root for the first time. Within seconds, Claude Code reads through his entire src/ folder — 34 files — and reports back a summary of the component hierarchy, the state management pattern, and which files are likely related to the rendering bug. Kai hasn't typed a single line of code. He's typed one sentence describing his bug.",
       question: "When Claude Code edits a file, what actually happens?",
       choices: [
         {
@@ -148,17 +148,17 @@ export const game6: Game = {
     {
       id: "w6-s3",
       type: "scenario",
-      character: "Marcus",
+      character: "Kai",
       location: "STARTUP OFFICE · TUESDAY · 4:05 PM",
       dialogue: [
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text:
             "Okay, the bug is fixed. Now I want to try something bigger. The auth flow is a mess — prop drilling four levels deep. I've been putting off this refactor for weeks.",
         },
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text:
             "[types]: Refactor the auth flow to use React context instead of prop drilling. The user object is currently passed through App → Layout → Sidebar → UserMenu.",
@@ -171,7 +171,7 @@ export const game6: Game = {
             "Reading auth-related files… I can see App.tsx, Layout.tsx, Sidebar.tsx, UserMenu.tsx, AuthProvider.tsx, useAuth.ts, and types/auth.ts. Here's my plan before I touch anything: 1) Create an AuthContext in AuthProvider.tsx, 2) Wrap App with the provider, 3) Replace prop chains in Layout, Sidebar, and UserMenu with useContext. Should I proceed?",
         },
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text: "It read seven files and made a plan before doing anything?",
         },
@@ -189,7 +189,7 @@ export const game6: Game = {
             "Applying changes… Done. Here are the diffs for all 4 files. AuthProvider.tsx gained the context export. App.tsx now wraps with AuthProvider. Layout, Sidebar, and UserMenu no longer accept user as a prop — they call useAuth() directly instead.",
         },
         {
-          speaker: "Marcus",
+          speaker: "Kai",
           avatar: "jake",
           text: "That would have taken me a full afternoon.",
         },
@@ -238,9 +238,9 @@ export const game6: Game = {
       id: "w6-s4",
       type: "quiz",
       scenarioText:
-        "Marcus has been working with Claude Code for 90 minutes on a complex feature. The conversation is long — dozens of back-and-forth turns covering the bug fix, the auth refactor, and now a new API integration. He notices Claude Code's suggestions are getting slightly less focused, occasionally referencing earlier parts of the session that aren't relevant anymore. Elena tells him about slash commands: /compact summarises the conversation so Claude Code keeps its focus without losing the thread. /clear starts a completely fresh session. /memory lets him set persistent facts — like which files to always consider or which patterns to follow — that survive across sessions.",
+        "Kai has been working with Claude Code for 90 minutes on a complex feature. The conversation is long — dozens of back-and-forth turns covering the bug fix, the auth refactor, and now a new API integration. He notices Claude Code's suggestions are getting slightly less focused, occasionally referencing earlier parts of the session that aren't relevant anymore. Elena tells him about slash commands: /compact summarises the conversation so Claude Code keeps its focus without losing the thread. /clear starts a completely fresh session. /memory lets him set persistent facts — like which files to always consider or which patterns to follow — that survive across sessions.",
       question:
-        "Marcus is 90 minutes into a session and Claude Code starts giving less focused responses. What's the most likely fix?",
+        "Kai is 90 minutes into a session and Claude Code starts giving less focused responses. What's the most likely fix?",
       choices: [
         {
           label: "A",
@@ -278,14 +278,14 @@ export const game6: Game = {
     {
       id: "w6-s5b",
       type: "prompt",
-      character: "Marcus",
+      character: "Kai",
       location: "STARTUP OFFICE · WEDNESDAY · 10:30 AM",
       promptChallenge: {
         context:
-          "Marcus needs to add input validation to a signup form. The form has three fields: email, password (minimum 8 characters, must contain at least one number), and username (alphanumeric only, between 3 and 20 characters). He's using React with TypeScript. He wants Claude Code to write the validation logic and show him exactly what changes were made — so he can review every line before it goes into the PR.",
+          "Kai needs to add input validation to a signup form. The form has three fields: email, password (minimum 8 characters, must contain at least one number), and username (alphanumeric only, between 3 and 20 characters). He's using React with TypeScript. He wants Claude Code to write the validation logic and show him exactly what changes were made — so he can review every line before it goes into the PR.",
         goal:
-          "Write a prompt for Claude Code that gives it enough context to produce validation code Marcus can trust — specific about the requirements, the stack, and what output he needs.",
-        placeholder: "Write Marcus's Claude Code prompt...",
+          "Write a prompt for Claude Code that gives it enough context to produce validation code Kai can trust — specific about the requirements, the stack, and what output he needs.",
+        placeholder: "Write Kai's Claude Code prompt...",
       },
       xpAward: 150,
     },
@@ -295,7 +295,7 @@ export const game6: Game = {
       id: "w6-s6",
       type: "boss",
       scenarioText:
-        "CONDUCTOR TEST — Marcus has debugged a rendering bug, refactored an auth flow, managed session context, and written a precise validation prompt. One question stands between him and the revelation.",
+        "CONDUCTOR TEST — Kai has debugged a rendering bug, refactored an auth flow, managed session context, and written a precise validation prompt. One question stands between him and the revelation.",
       question:
         "Which practice makes Claude Code MOST effective for a complex multi-file refactor?",
       choices: [
@@ -336,7 +336,7 @@ export const game6: Game = {
       id: "w6-s7",
       type: "revelation",
       revealText:
-        "Marcus shipped the feature in 40 minutes.\n\nNot because he got faster at typing.\n\nBecause he stopped treating his terminal like a typewriter and started using it like a conversation.\n\nClaude Code didn't write his software. Marcus wrote his software — with a partner who never gets tired of reading the whole codebase before touching a single line.\n\nThe bug that took two hours? Fixed in eight minutes.\n\nThe auth refactor he'd been avoiding for weeks? Done before lunch.\n\nThe difference wasn't intelligence. It was interface.\n\nYour terminal is no longer just where you run commands.\n\nIt's where you think out loud with something that can actually build what you're thinking.",
+        "Kai shipped the feature in 40 minutes.\n\nNot because he got faster at typing.\n\nBecause he stopped treating his terminal like a typewriter and started using it like a conversation.\n\nClaude Code didn't write his software. Kai wrote his software — with a partner who never gets tired of reading the whole codebase before touching a single line.\n\nThe bug that took two hours? Fixed in eight minutes.\n\nThe auth refactor he'd been avoiding for weeks? Done before lunch.\n\nThe difference wasn't intelligence. It was interface.\n\nYour terminal is no longer just where you run commands.\n\nIt's where you think out loud with something that can actually build what you're thinking.",
       xpAward: 200,
     },
   ],
