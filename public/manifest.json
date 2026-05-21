@@ -1,0 +1,57 @@
+{
+  "name": "MaestroPlay — AI Literacy Games",
+  "short_name": "MaestroPlay",
+  "description": "Master AI through 10 interactive story-driven games. No code required.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08060f",
+  "theme_color": "#00d4f0",
+  "lang": "en-US",
+  "categories": ["education", "games", "entertainment"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/maestroplayer1.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Game 1",
+      "short_name": "Game 1",
+      "description": "Start the first free game",
+      "url": "/games/welcome-to-ai",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "All Games",
+      "short_name": "Games",
+      "description": "Browse all 10 games",
+      "url": "/games",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}
