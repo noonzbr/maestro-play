@@ -14,6 +14,8 @@ export const game2: Game = {
     {
       id: "w2-s1",
       type: "scenario",
+      character: "Zoe, Drummer, 19",
+      location: "REHEARSAL STUDIO · AFTER PRACTICE",
       scenarioText:
         "You and your colleague both use ChatGPT Plus. She produces crisp, client-ready strategy memos. You get 600 words of fluffy generic text that doesn't reflect your company, your tone, or your actual ask. Same subscription. Same model. What's different?",
       question: "Why does AI produce such different results for different people using the same tool?",

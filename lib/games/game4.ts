@@ -15,6 +15,8 @@ export const game4: Game = {
     {
       id: "w4-s1",
       type: "scenario",
+      character: "Aria, Violinist, 26",
+      location: "CONCERT HALL · ONE HOUR TO CURTAIN",
       scenarioText:
         "A marketing manager asked AI: 'Write something about our product launch.' The output was two paragraphs of generic tech-company language about 'innovative solutions' and 'industry-leading performance.' She was frustrated and gave up on AI entirely. Let's diagnose what went wrong.",
       question: "Which Maestro pillars were missing from her prompt?",

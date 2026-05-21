@@ -15,6 +15,8 @@ export const game3: Game = {
     {
       id: "w3-s1",
       type: "scenario",
+      character: "Carlos, Jazz Saxophonist, 38",
+      location: "BACKSTAGE · BEFORE THE GIG",
       scenarioText:
         "It's Monday morning. Your inbox has 47 unread emails. You have 3 hours before a board presentation. You have access to Claude. The emails include: a crisis from a key client, 12 meeting requests, status updates from 5 teams, a vendor contract for review, and a VP asking for a summary of last quarter.",
       question: "What do you tackle first with AI?",
