@@ -46,8 +46,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Grain overlay */
-body::before {
+/* ── Game page: hide cursor fx + grain ─────────────────────── */
+body.in-game .cursor-dot,
+body.in-game .cursor-ring {
+  display: none !important;
+}
+
+/* Grain overlay — hidden on game pages */
+body:not(.in-game)::before {
   content: "";
   position: fixed;
   inset: 0;

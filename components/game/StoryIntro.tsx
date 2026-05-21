@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import GameIcon from "./GameIcon"
 
 type Props = {
@@ -8,9 +8,16 @@ type Props = {
   startMusic: () => void
 }
 
-const PANELS = [
+type Panel = {
+  icon: "guitar" | "gramophone" | "baton" | "musicNotes"
+  label: string | null
+  lines: string[]
+  isFinal?: boolean
+}
+
+const PANELS: Panel[] = [
   {
-    icon: "guitar" as const,
+    icon: "guitar",
     label: "THE GUITARIST",
     lines: [
       "Meet Jake.",
@@ -19,7 +26,7 @@ const PANELS = [
     ],
   },
   {
-    icon: "gramophone" as const,
+    icon: "gramophone",
     label: null,
     lines: [
       "His bandmates just released a full EP.",
@@ -30,7 +37,7 @@ const PANELS = [
     ],
   },
   {
-    icon: "baton" as const,
+    icon: "baton",
     label: "THE DISCOVERY",
     lines: [
       "What if AI doesn't replace musicians —",
@@ -40,7 +47,7 @@ const PANELS = [
     ],
   },
   {
-    icon: "musicNotes" as const,
+    icon: "musicNotes",
     label: "THIS IS JAKE'S STORY.",
     lines: [
       "A guitarist who became a conductor.",
@@ -48,25 +55,26 @@ const PANELS = [
     ],
     isFinal: true,
   },
-] as const
+]
 
 export default function StoryIntro({ onComplete, startMusic }: Props) {
   const [panel, setPanel] = useState(0)
-  const [visibleLines, setVisibleLines] = useState(0)
+  const [displayed, setDisplayed] = useState(0)
+  const [done, setDone] = useState(false)
   const [started, setStarted] = useState(false)
   const [exiting, setExiting] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const initRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Inject keyframes once
+  const current = PANELS[panel]
+  const fullText = current.lines.join("\n")
+
   useEffect(() => {
     const id = "story-intro-kf"
     if (document.getElementById(id)) return
     const s = document.createElement("style")
     s.id = id
     s.textContent = `
-      @keyframes si-line-in {
-        from { opacity: 0; transform: translateY(12px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
       @keyframes si-fade-in {
         from { opacity: 0; }
         to   { opacity: 1; }
@@ -87,42 +95,55 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
         0%,100% { opacity: 0.55; }
         50%     { opacity: 0.75; }
       }
+      @keyframes cursor-blink {
+        0%,49% { opacity: 1; }
+        50%,100% { opacity: 0; }
+      }
     `
     document.head.appendChild(s)
   }, [])
 
-  // Auto-reveal lines one by one
+  // Start typewriter when panel changes
   useEffect(() => {
-    setVisibleLines(0)
-    const current = PANELS[panel]
-    let i = 0
-    const reveal = () => {
-      i++
-      setVisibleLines(i)
-      if (i < current.lines.length) {
-        const delay = current.lines[i - 1].length > 30 ? 900 : 700
-        setTimeout(reveal, delay)
-      }
+    setDisplayed(0)
+    setDone(false)
+    if (timerRef.current) clearInterval(timerRef.current)
+    if (initRef.current) clearTimeout(initRef.current)
+
+    initRef.current = setTimeout(() => {
+      let i = 0
+      timerRef.current = setInterval(() => {
+        i++
+        setDisplayed(i)
+        if (i >= fullText.length) {
+          clearInterval(timerRef.current!)
+          timerRef.current = null
+          setDone(true)
+        }
+      }, 38)
+    }, 350)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+      if (initRef.current) clearTimeout(initRef.current)
     }
-    const t = setTimeout(reveal, 400)
-    return () => clearTimeout(t)
-  }, [panel])
+  }, [panel]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const advance = useCallback(() => {
     if (!started) {
       setStarted(true)
       startMusic()
     }
-    const allRevealed = visibleLines >= PANELS[panel].lines.length
-    if (!allRevealed) {
-      // Skip to full reveal instantly
-      setVisibleLines(PANELS[panel].lines.length)
+    if (!done) {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+      if (initRef.current) { clearTimeout(initRef.current); initRef.current = null }
+      setDisplayed(fullText.length)
+      setDone(true)
       return
     }
-    if (panel < PANELS.length - 1) {
-      setPanel(p => p + 1)
-    }
-  }, [panel, visibleLines, started, startMusic])
+    if (current.isFinal) return
+    if (panel < PANELS.length - 1) setPanel(p => p + 1)
+  }, [panel, done, started, startMusic, fullText, current])
 
   const handleBegin = useCallback(() => {
     if (!started) startMusic()
@@ -130,7 +151,6 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
     setTimeout(onComplete, 600)
   }, [started, startMusic, onComplete])
 
-  // Keyboard support
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (["Space", "ArrowRight", "Enter"].includes(e.code)) advance()
@@ -139,8 +159,8 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
     return () => window.removeEventListener("keydown", handler)
   }, [advance])
 
-  const current = PANELS[panel]
-  const allRevealed = visibleLines >= current.lines.length
+  const typedText = fullText.slice(0, displayed)
+  const typedLines = typedText.split("\n")
 
   return (
     <div
@@ -159,13 +179,11 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
         userSelect: "none",
       }}
     >
-      {/* Ambient dark gradient */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
         background: "radial-gradient(ellipse at 50% 0%, rgba(0,212,240,0.06) 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, rgba(123,47,190,0.08) 0%, transparent 50%)",
       }} />
 
-      {/* Spotlight from above */}
       <div style={{
         position: "absolute",
         top: 0, left: "50%",
@@ -177,7 +195,6 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
         animation: "spotlight-pulse 4s ease-in-out infinite",
       }} />
 
-      {/* Character image */}
       <div style={{
         position: "absolute",
         bottom: "200px",
@@ -187,14 +204,9 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
         animation: "si-char-glow 4s ease-in-out infinite, si-fade-in 1s ease both",
         zIndex: 5,
       }}>
-        <img
-            src="/images/guitarplayer1.png"
-            alt="Jake"
-            style={{ width: "100%", display: "block" }}
-          />
+        <img src="/images/guitarplayer1.png" alt="Jake" style={{ width: "100%", display: "block" }} />
       </div>
 
-      {/* Story card — bottom panel */}
       <div style={{
         position: "relative",
         zIndex: 10,
@@ -206,12 +218,14 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
         <div style={{
           background: "rgba(8,6,15,0.9)",
           backdropFilter: "blur(20px)",
-          border: "1px solid rgba(0,212,240,0.15)",
+          borderTop: "1px solid rgba(0,212,240,0.15)",
+          borderRight: "1px solid rgba(0,212,240,0.15)",
+          borderBottom: "1px solid rgba(0,212,240,0.15)",
+          borderLeft: "1px solid rgba(0,212,240,0.15)",
           borderRadius: "20px",
           padding: "1.5rem 1.75rem",
           boxShadow: "0 -8px 40px rgba(0,0,0,0.6)",
         }}>
-          {/* Icon + label */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
             <GameIcon name={current.icon} size={40} style={{ animation: "si-icon-spin 0.5s cubic-bezier(0.16,1,0.3,1) both" }} />
             {current.label && (
@@ -228,58 +242,61 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
             )}
           </div>
 
-          {/* Story lines */}
           <div style={{ minHeight: "6rem", marginBottom: "1.25rem" }}>
-            {current.lines.slice(0, visibleLines).map((line, i) => (
-              <p key={`${panel}-${i}`} style={{
-                fontFamily: "Cormorant Garamond, serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                fontSize: "clamp(1rem, 4vw, 1.25rem)",
-                color: i === 0 ? "#fff" : "rgba(240,238,255,0.75)",
-                lineHeight: 1.5,
-                margin: "0 0 0.35rem",
-                animation: "si-line-in 0.45s cubic-bezier(0.16,1,0.3,1) both",
-                whiteSpace: "pre-line",
-              }}>
-                {line}
-              </p>
-            ))}
+            {typedLines.map((line, i) => {
+              const isCurrentLine = i === typedLines.length - 1
+              return (
+                <p key={`${panel}-${i}`} style={{
+                  fontFamily: "Cormorant Garamond, serif",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                  fontSize: "clamp(1rem, 4vw, 1.25rem)",
+                  color: i === 0 ? "#fff" : "rgba(240,238,255,0.75)",
+                  lineHeight: 1.5,
+                  margin: "0 0 0.35rem",
+                  whiteSpace: "pre-line",
+                }}>
+                  {line}
+                  {isCurrentLine && !done && (
+                    <span style={{
+                      display: "inline-block",
+                      width: "2px",
+                      height: "1em",
+                      background: "var(--cyan)",
+                      marginLeft: "2px",
+                      verticalAlign: "middle",
+                      animation: "cursor-blink 0.9s step-end infinite",
+                    }} />
+                  )}
+                </p>
+              )
+            })}
           </div>
 
-          {/* Final panel: begin button */}
-          {current.isFinal && allRevealed ? (
-            <>
-              <button
-                onClick={handleBegin}
-                style={{
-                  width: "100%",
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                  color: "#08060f",
-                  background: "linear-gradient(90deg,#00d4f0,#e040fb)",
-                  padding: "0.9rem",
-                  borderRadius: "100px",
-                  border: "none",
-                  cursor: "pointer",
-                  animation: "si-fade-in 0.6s 0.5s ease both",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.35)" }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "" }}
-              >
-                Begin Jake&apos;s Journey →
-              </button>
-            </>
+          {current.isFinal && done ? (
+            <button
+              onClick={handleBegin}
+              style={{
+                width: "100%",
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 700,
+                fontSize: "1rem",
+                color: "#08060f",
+                background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+                padding: "0.9rem",
+                borderRadius: "100px",
+                border: "none",
+                cursor: "pointer",
+                animation: "si-fade-in 0.6s 0.3s ease both",
+                transition: "transform 0.2s, box-shadow 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.35)" }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "" }}
+            >
+              Begin Jake&apos;s Journey →
+            </button>
           ) : !current.isFinal ? (
-            /* Tap-to-continue footer */
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}>
-              {/* Panel dots */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", gap: "6px" }}>
                 {PANELS.map((_, i) => (
                   <div key={i} style={{
@@ -296,10 +313,10 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
                 fontSize: "0.7rem",
                 letterSpacing: "0.15em",
                 textTransform: "uppercase",
-                color: allRevealed ? "rgba(0,212,240,0.7)" : "rgba(255,255,255,0.3)",
+                color: done ? "rgba(0,212,240,0.7)" : "rgba(255,255,255,0.25)",
                 transition: "color 0.4s ease",
               }}>
-                {allRevealed ? "tap to continue →" : "..."}
+                {done ? "tap to continue →" : "..."}
               </span>
             </div>
           ) : null}

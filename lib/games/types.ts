@@ -1,7 +1,7 @@
 export type DialogueLine = {
   speaker: string
   avatar: "jake" | "npc"
-  npcKey?: "default" | "senora_vega" | "marcus" | "ai"
+  npcKey?: "default" | "senora_vega" | "tyler" | "ai"
   text: string
 }
 
@@ -12,9 +12,15 @@ export type Choice = {
   feedback: string
 }
 
+export type PromptChallengeData = {
+  context:     string
+  goal:        string
+  placeholder?: string
+}
+
 export type Scene = {
   id: string
-  type: "scenario" | "quiz" | "revelation" | "boss"
+  type: "scenario" | "quiz" | "revelation" | "boss" | "prompt"
   character?: string
   location?: string
   scenarioText?: string
@@ -25,6 +31,7 @@ export type Scene = {
   choices?: Choice[]
   xpAward: number
   revealText?: string
+  promptChallenge?: PromptChallengeData
 }
 
 export type Game = {

@@ -12,7 +12,7 @@ type Props = {
   streak: number
 }
 
-// Week 1 only: 3-phase cinematic transformation sequence
+// ── Week 1: 3-phase cinematic transformation ──────────────────────────────────
 function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState(0)
 
@@ -63,7 +63,6 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
       position: "relative",
       overflow: "hidden",
     }}>
-      {/* Radial pulse rings */}
       {phase >= 1 && (
         <>
           <div style={{ position: "absolute", top: "50%", left: "50%", width: "200px", height: "200px", borderRadius: "50%", border: "2px solid rgba(0,212,240,0.4)", transform: "translate(-50%,-50%)", animation: "ring-expand 2s ease-out forwards" }} />
@@ -72,7 +71,6 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
       )}
 
       <div style={{ textAlign: "center", position: "relative", zIndex: 10 }}>
-        {/* Phase 0: The Guitarist — last time he was just Jake */}
         {phase === 0 && (
           <div style={{ textAlign: "center", animation: "scene-fade-in 0.7s ease both" }}>
             <div style={{ width: "180px", margin: "0 auto 1.25rem" }}>
@@ -84,20 +82,11 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
           </div>
         )}
 
-        {/* Phase 1: The transformation crossfade */}
         {phase === 1 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ position: "relative", width: "200px", margin: "0 auto 1.25rem", height: "280px" }}>
-              <img
-                src="/images/guitarplayer1.png"
-                alt="Jake"
-                style={{ position: "absolute", inset: 0, width: "100%", animation: "guitar-fade 0.8s ease forwards" }}
-              />
-              <img
-                src="/images/maestroplayer1.png"
-                alt="The Maestro"
-                style={{ position: "absolute", inset: 0, width: "100%", objectFit: "cover", objectPosition: "top", animation: "baton-arrive 1s 0.3s cubic-bezier(0.16,1,0.3,1) both" }}
-              />
+              <img src="/images/guitarplayer1.png" alt="Jake" style={{ position: "absolute", inset: 0, width: "100%", animation: "guitar-fade 0.8s ease forwards" }} />
+              <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ position: "absolute", inset: 0, width: "100%", objectFit: "cover", objectPosition: "top", animation: "baton-arrive 1s 0.3s cubic-bezier(0.16,1,0.3,1) both" }} />
             </div>
             <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.5rem", color: "var(--cyan)", animation: "scene-fade-in 0.6s 0.5s ease both" }}>
               The Maestro has arrived.
@@ -105,7 +94,6 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
           </div>
         )}
 
-        {/* Phase 2: Full title */}
         {phase >= 2 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ width: "200px", margin: "0 auto 1.25rem" }}>
@@ -129,6 +117,7 @@ function MaestroTransformation({ onComplete }: { onComplete: () => void }) {
   )
 }
 
+// ── Main EndScreen ────────────────────────────────────────────────────────────
 export default function EndScreen({ game, totalXp, streak }: Props) {
   const [showTransform, setShowTransform] = useState(game.week === 1)
   const nextGame = allGames.find((g) => g.week === game.week + 1)
@@ -141,6 +130,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
     : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: maestroplay.app`
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+  const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent("https://maestroplay.app")}&title=${encodeURIComponent("MaestroPlay — AI Literacy Game")}&summary=${encodeURIComponent(shareText)}&source=maestroplay.app`
 
   if (showTransform) {
     return <MaestroTransformation onComplete={() => setShowTransform(false)} />
@@ -153,18 +143,14 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "2rem",
+      padding: "2rem 1.5rem",
       position: "relative",
       overflow: "hidden",
     }}>
       {/* Ambient glow */}
       <div style={{
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%,-50%)",
-        width: "700px",
-        height: "700px",
+        position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+        width: "600px", height: "600px",
         background: game.week === 1
           ? "radial-gradient(circle, rgba(0,212,240,0.09) 0%, rgba(123,47,190,0.07) 45%, transparent 70%)"
           : "radial-gradient(circle, rgba(0,212,240,0.07) 0%, rgba(123,47,190,0.05) 50%, transparent 70%)",
@@ -172,143 +158,121 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
         animation: "revelation-glow 5s ease-in-out infinite",
       }} />
 
-      <div style={{ maxWidth: "560px", width: "100%", textAlign: "center", position: "relative", animation: "scene-fade-in 0.7s ease both" }}>
+      <div style={{ maxWidth: "480px", width: "100%", textAlign: "center", position: "relative", animation: "scene-fade-in 0.7s ease both" }}>
 
-        {/* Week 1 special ending */}
+        {/* ── Week 1 ending ── */}
         {game.week === 1 ? (
           <>
-            <div style={{ width: "180px", margin: "0 auto 1rem" }}>
-              <img src="/images/maestroplayer1.png" alt="The Maestro" style={{ width: "100%", display: "block", animation: "maestro-pulse 3s ease-in-out infinite" }} />
-            </div>
+            <img
+              src="/images/maestroplayer1.png"
+              alt="The Maestro"
+              style={{ height: "clamp(140px, 28vh, 210px)", objectFit: "contain", display: "block", margin: "0 auto 0.75rem", animation: "maestro-pulse 3s ease-in-out infinite" }}
+            />
             <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              background: "rgba(0,212,240,0.08)",
-              border: "1px solid rgba(0,212,240,0.25)",
-              borderRadius: "100px",
-              padding: "0.35rem 0.75rem",
-              marginBottom: "1.25rem",
+              display: "inline-flex", alignItems: "center", gap: "0.5rem",
+              background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.25)",
+              borderRadius: "100px", padding: "0.3rem 0.7rem", marginBottom: "0.75rem",
             }}>
-              <GameIcon name="guitar" size={22} />
-              <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--cyan)" }}>Conductor Awakened</span>
-              <GameIcon name="baton" size={22} />
+              <GameIcon name="guitar" size={18} />
+              <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--cyan)" }}>Conductor Awakened</span>
+              <GameIcon name="baton" size={18} />
             </div>
-            <h1 style={{
-              fontFamily: "Cormorant Garamond, serif",
-              fontWeight: 700,
-              fontSize: "clamp(2.2rem, 6vw, 3.2rem)",
-              color: "#fff",
-              lineHeight: 1.1,
-              marginBottom: "0.75rem",
-            }}>
+            <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(1.8rem, 5vw, 2.6rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.5rem" }}>
               You were always<br />
               <em style={{ background: "linear-gradient(90deg,#00d4f0,#e040fb)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 a conductor.
               </em>
             </h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "var(--muted)", lineHeight: 1.7, marginBottom: "2rem" }}>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.25rem" }}>
               Jake&apos;s story is just beginning. The orchestra awaits.
             </p>
           </>
         ) : isFinalGame ? (
           <>
-            <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}><GameIcon name="baton" size={72} /></div>
-            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Conductor Certified</div>
-            <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2.5rem, 6vw, 3.5rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1rem" }}>
+            <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}><GameIcon name="baton" size={60} /></div>
+            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Conductor Certified</div>
+            <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.75rem" }}>
               You are now a<br />
               <em style={{ background: "linear-gradient(90deg,#00d4f0,#e040fb)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 Maestro Conductor
               </em>
             </h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1.05rem", color: "var(--muted)", lineHeight: 1.7, marginBottom: "2.5rem" }}>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
               You&apos;ve mastered the Maestro Method. The What, the What Not, the How, the Why — yours forever.
             </p>
           </>
         ) : (
           <>
-            <div style={{ marginBottom: "1.5rem", display: "flex", justifyContent: "center" }}><GameIcon name="musicNotes" size={72} /></div>
-            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Scene Complete</div>
-            <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1rem" }}>
+            <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}><GameIcon name="musicNotes" size={60} /></div>
+            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Scene Complete</div>
+            <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(1.8rem, 4vw, 2.6rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.75rem" }}>
               {game.title}
             </h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "var(--muted)", marginBottom: "2.5rem" }}>
-              Week {game.week} complete. Keep conducting.
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "var(--muted)", marginBottom: "1.5rem" }}>
+              Game {game.week} complete. Keep conducting.
             </p>
           </>
         )}
 
-        {/* XP / Streak stats */}
+        {/* XP / Streak */}
         <div className="glass-card" style={{
-          borderRadius: "16px",
-          padding: "1.5rem",
-          marginBottom: "2rem",
-          display: "flex",
-          justifyContent: "center",
-          gap: "3rem",
+          borderRadius: "14px", padding: "1rem 1.5rem", marginBottom: "1.25rem",
+          display: "flex", justifyContent: "center", gap: "2.5rem",
         }}>
           <div>
-            <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "2rem", color: "var(--cyan)" }}>{totalXp}</div>
-            <div className="label-caps" style={{ marginTop: "0.25rem" }}>XP Earned</div>
+            <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.7rem", color: "var(--cyan)" }}>{totalXp}</div>
+            <div className="label-caps" style={{ marginTop: "0.2rem" }}>XP Earned</div>
           </div>
           {streak > 0 && (
             <div>
-              <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "2rem", color: "var(--pink)" }}>{streak}🔥</div>
-              <div className="label-caps" style={{ marginTop: "0.25rem" }}>Streak</div>
+              <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.7rem", color: "var(--pink)" }}>{streak}🔥</div>
+              <div className="label-caps" style={{ marginTop: "0.2rem" }}>Streak</div>
             </div>
           )}
         </div>
 
         {/* CTAs */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.5rem",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 700,
-            fontSize: "0.875rem",
-            color: "#08060f",
-            background: "linear-gradient(90deg,#00d4f0,#e040fb)",
-            padding: "0.85rem 2rem",
-            borderRadius: "100px",
-            textDecoration: "none",
-          }}>
-            Share on X/Twitter ↗
-          </a>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+
+          {/* Share row — X + LinkedIn side by side */}
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
+              color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+              padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.848L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Share ↗
+            </a>
+            <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" style={{
+              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
+              color: "#fff", background: "#0A66C2",
+              padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn ↗
+            </a>
+          </div>
 
           {nextGame ? (
             <Link href={`/games/${nextGame.slug}`} style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              color: "rgba(240,238,255,0.7)",
-              background: "rgba(255,255,255,0.05)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.875rem",
+              color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.1)",
-              padding: "0.75rem 2rem",
-              borderRadius: "100px",
-              textDecoration: "none",
+              padding: "0.7rem 2rem", borderRadius: "100px", textDecoration: "none",
             }}>
-              {nextGame.free ? `Play Week ${nextGame.week} Free →` : `Unlock Week ${nextGame.week} — $${nextGame.price?.toFixed(2)} →`}
+              {nextGame.free ? `Play Game ${nextGame.week} Free →` : `Unlock Game ${nextGame.week} — $${nextGame.price?.toFixed(2)} →`}
             </Link>
           ) : (
             <Link href="/games" style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              color: "rgba(240,238,255,0.7)",
-              background: "rgba(255,255,255,0.05)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.875rem",
+              color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.1)",
-              padding: "0.75rem 2rem",
-              borderRadius: "100px",
-              textDecoration: "none",
+              padding: "0.7rem 2rem", borderRadius: "100px", textDecoration: "none",
             }}>
               View All Games
             </Link>

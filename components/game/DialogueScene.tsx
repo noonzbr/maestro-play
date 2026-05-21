@@ -9,13 +9,15 @@ type NpcConfig = {
   icon: IconName
   color: string
   bg: string
+  image?: string
+  glowAnim: string
 }
 
 const NPC_CONFIGS: Record<string, NpcConfig> = {
-  default:     { icon: "headphones", color: "rgba(224,64,251,0.9)", bg: "rgba(224,64,251,0.06)" },
-  senora_vega: { icon: "harp",       color: "rgba(255,180,80,0.9)", bg: "rgba(255,180,80,0.06)" },
-  marcus:      { icon: "headphones", color: "rgba(80,160,255,0.9)", bg: "rgba(80,160,255,0.06)" },
-  ai:          { icon: "musicNotes", color: "rgba(0,212,240,0.9)",  bg: "rgba(0,212,240,0.06)"  },
+  default:     { icon: "headphones", color: "rgba(224,64,251,0.9)", bg: "rgba(224,64,251,0.06)", glowAnim: "char-glow-purple" },
+  senora_vega: { icon: "harp",       color: "rgba(255,180,80,0.9)", bg: "rgba(255,180,80,0.06)", image: "/images/senoravega.png", glowAnim: "char-glow-orange" },
+  tyler:       { icon: "headphones", color: "rgba(80,160,255,0.9)", bg: "rgba(80,160,255,0.06)", image: "/images/tyler.png",      glowAnim: "char-glow-blue"   },
+  ai:          { icon: "musicNotes", color: "rgba(0,212,240,0.9)",  bg: "rgba(0,212,240,0.06)",  glowAnim: "char-glow-cyan"  },
 }
 
 function useTypewriter(text: string, speed: number) {
@@ -47,6 +49,45 @@ export default function DialogueScene({ scene, onComplete }: Props) {
   const [lineIndex, setLineIndex] = useState(0)
   const [skip, setSkip] = useState(false)
 
+  useEffect(() => {
+    const id = "dialogue-kf"
+    if (document.getElementById(id)) return
+    const s = document.createElement("style")
+    s.id = id
+    s.textContent = `
+      @keyframes char-glow-cyan {
+        0%,100% { filter: drop-shadow(0 0 14px rgba(0,212,240,0.2)); }
+        50%      { filter: drop-shadow(0 0 48px rgba(0,212,240,0.65)); }
+      }
+      @keyframes char-glow-blue {
+        0%,100% { filter: drop-shadow(0 0 14px rgba(80,160,255,0.2)); }
+        50%      { filter: drop-shadow(0 0 48px rgba(80,160,255,0.65)); }
+      }
+      @keyframes char-glow-orange {
+        0%,100% { filter: drop-shadow(0 0 14px rgba(255,180,80,0.2)); }
+        50%      { filter: drop-shadow(0 0 48px rgba(255,180,80,0.65)); }
+      }
+      @keyframes char-glow-purple {
+        0%,100% { filter: drop-shadow(0 0 14px rgba(224,64,251,0.2)); }
+        50%      { filter: drop-shadow(0 0 48px rgba(224,64,251,0.65)); }
+      }
+      @keyframes char-talk {
+        0%,100% { transform: translateY(0) scaleY(1); }
+        25%     { transform: translateY(-10px) scaleY(1.02); }
+        60%     { transform: translateY(-5px) scaleY(1.01); }
+      }
+      @keyframes char-enter {
+        from { opacity:0; transform:translateY(24px) scale(0.93); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
+      }
+      @keyframes dialogue-box-in {
+        from { opacity:0; transform:translateY(20px); }
+        to   { opacity:1; transform:translateY(0); }
+      }
+    `
+    document.head.appendChild(s)
+  }, [])
+
   const lines = scene.dialogue!
   const line = lines[lineIndex]
   const isLast = lineIndex >= lines.length - 1
@@ -72,7 +113,6 @@ export default function DialogueScene({ scene, onComplete }: Props) {
 
   useEffect(() => { advanceRef.current = advance }, [advance])
 
-  // Keyboard support — stable handler via ref
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (["Space", "Enter", "ArrowRight"].includes(e.code)) {
@@ -86,9 +126,12 @@ export default function DialogueScene({ scene, onComplete }: Props) {
 
   useEffect(() => { setSkip(false) }, [lineIndex])
 
+  // Derive scene-level NPC from the first non-Jake line — stays fixed for the whole scene
+  const hasNpc = lines.some(l => l.avatar !== "jake")
+  const sceneNpcKey = lines.find(l => l.avatar !== "jake")?.npcKey || "default"
+  const npc = NPC_CONFIGS[sceneNpcKey] || NPC_CONFIGS.default
+
   const isJake = line.avatar === "jake"
-  const npcKey = line.npcKey || "default"
-  const npc = NPC_CONFIGS[npcKey] || NPC_CONFIGS.default
   const jakeActive = isJake
   const npcActive = !isJake
 
@@ -96,6 +139,21 @@ export default function DialogueScene({ scene, onComplete }: Props) {
   const speakerBorder = isJake ? "rgba(0,212,240,0.25)" : npc.color.replace("0.9", "0.25")
   const speakerBg = isJake ? "rgba(0,212,240,0.07)" : npc.color.replace("0.9", "0.07")
   const boxBorder = isJake ? "rgba(0,212,240,0.35)" : npc.color
+
+  const charTransition = "opacity 0.38s ease, transform 0.52s cubic-bezier(0.34,1.4,0.64,1)"
+
+  // Build animation strings for each character
+  const jakeAnim = jakeActive
+    ? textDone
+      ? "char-glow-cyan 3.5s ease-in-out infinite"
+      : "char-glow-cyan 3.5s ease-in-out infinite, char-talk 0.7s ease-in-out infinite"
+    : "none"
+
+  const npcGlowAnim = npcActive
+    ? textDone
+      ? `${npc.glowAnim} 3.5s ease-in-out infinite`
+      : `${npc.glowAnim} 3.5s ease-in-out infinite, char-talk 0.7s ease-in-out infinite`
+    : "none"
 
   return (
     <div
@@ -111,14 +169,14 @@ export default function DialogueScene({ scene, onComplete }: Props) {
         userSelect: "none",
       }}
     >
-      {/* Stage — characters */}
+      {/* Stage */}
       <div style={{
         flex: 1,
         display: "flex",
         alignItems: "flex-end",
         overflow: "hidden",
-        paddingTop: "60px",  // clear top bar
-        paddingBottom: "185px", // clear dialogue box
+        paddingTop: "60px",
+        paddingBottom: "185px",
         position: "relative",
       }}>
 
@@ -148,8 +206,8 @@ export default function DialogueScene({ scene, onComplete }: Props) {
           paddingLeft: "clamp(0.5rem, 3vw, 2rem)",
           opacity: jakeActive ? 1 : 0.3,
           transform: jakeActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
-          filter: jakeActive ? "drop-shadow(0 0 28px rgba(0,212,240,0.3))" : "none",
-          transition: "all 0.42s cubic-bezier(0.16,1,0.3,1)",
+          transition: charTransition,
+          animation: jakeAnim,
         }}>
           <img
             src="/images/guitarplayer1.png"
@@ -161,52 +219,73 @@ export default function DialogueScene({ scene, onComplete }: Props) {
 
         <div style={{ flex: 1 }} />
 
-        {/* NPC — right */}
-        <div style={{
-          flex: "0 0 36%",
-          maxWidth: "260px",
-          paddingRight: "clamp(0.5rem, 3vw, 2rem)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          opacity: npcActive ? 1 : 0.3,
-          transform: npcActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
-          filter: npcActive ? `drop-shadow(0 0 24px ${npc.color.replace("0.9", "0.3")})` : "none",
-          transition: "all 0.42s cubic-bezier(0.16,1,0.3,1)",
-        }}>
+        {/* NPC — right (only rendered when scene has an NPC; always present, dimmed when Jake is speaking) */}
+        {hasNpc && (npc.image ? (
           <div style={{
-            width: "clamp(120px, 18vw, 170px)",
-            background: npc.bg,
-            borderTop: `2px solid ${npc.color}`,
-            borderLeft: `2px solid ${npc.color}`,
-            borderRight: `2px solid ${npc.color}`,
-            borderBottom: "none",
-            borderRadius: "18px 18px 0 0",
-            padding: "1.75rem 1rem 1.25rem",
+            flex: "0 0 40%",
+            paddingRight: "clamp(0.5rem, 3vw, 2rem)",
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.6rem",
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+            opacity: npcActive ? 1 : 0.3,
+            transform: npcActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
+            transition: charTransition,
+            animation: npcGlowAnim,
+          }}>
+            <img
+              src={npc.image}
+              alt={npc.image}
+              draggable={false}
+              style={{
+                maxHeight: "52vh",
+                objectFit: "contain",
+                display: "block",
+                transform: "scaleX(-1)",
+              }}
+            />
+          </div>
+        ) : (
+          <div style={{
+            flex: "0 0 36%",
+            maxWidth: "260px",
+            paddingRight: "clamp(0.5rem, 3vw, 2rem)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            opacity: npcActive ? 1 : 0.3,
+            transform: npcActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
+            transition: charTransition,
+            animation: npcGlowAnim,
           }}>
             <div style={{
-              filter: npcActive ? `drop-shadow(0 0 16px ${npc.color})` : "none",
-              transition: "filter 0.42s ease",
+              width: "clamp(120px, 18vw, 170px)",
+              background: npc.bg,
+              borderTop: `2px solid ${npc.color}`,
+              borderLeft: `2px solid ${npc.color}`,
+              borderRight: `2px solid ${npc.color}`,
+              borderBottom: "none",
+              borderRadius: "18px 18px 0 0",
+              padding: "1.75rem 1rem 1.25rem",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "0.6rem",
             }}>
               <GameIcon name={npc.icon} size={72} />
+              <span style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 700,
+                fontSize: "0.7rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: npc.color,
+                textAlign: "center",
+              }}>
+                {sceneNpcKey.replace(/_/g, " ").toUpperCase()}
+              </span>
             </div>
-            <span style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 700,
-              fontSize: "0.7rem",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: npc.color,
-              textAlign: "center",
-            }}>
-              {line.speaker}
-            </span>
           </div>
-        </div>
+        ))}
       </div>
 
       {/* Dialogue box */}
@@ -221,6 +300,7 @@ export default function DialogueScene({ scene, onComplete }: Props) {
         padding: "1.2rem 2rem 1.6rem",
         zIndex: 30,
         minHeight: "170px",
+        animation: "dialogue-box-in 0.42s cubic-bezier(0.34,1.2,0.64,1) both",
       }}>
         <div style={{ maxWidth: "740px", margin: "0 auto" }}>
           {/* Speaker chip */}

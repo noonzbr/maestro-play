@@ -2,7 +2,7 @@
 
 import { useRef, useCallback, useEffect } from "react"
 
-export type SoundMood = "normal" | "boss" | "revelation"
+export type SoundMood = "normal" | "boss" | "revelation" | "cinematic"
 
 export function useSoundEngine() {
   const ctxRef = useRef<AudioContext | null>(null)
@@ -10,6 +10,17 @@ export function useSoundEngine() {
   const schedulerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const runningRef = useRef(false)
   const moodRef = useRef<SoundMood>("normal")
+
+  // MP3 track refs
+  const trackRef = useRef<HTMLAudioElement | null>(null)
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const TRACK: Record<SoundMood, string> = {
+    normal:      "/audio/concrete-riot.mp3",
+    boss:        "/audio/concrete-riot.mp3",
+    cinematic:   "/audio/sparks-of-vienna.mp3",
+    revelation:  "/audio/sparks-of-vienna.mp3",
+  }
 
   function getCtx(): AudioContext {
     if (!ctxRef.current) ctxRef.current = new AudioContext()
@@ -83,6 +94,38 @@ export function useSoundEngine() {
       // Sparkly high arpeggio
       ;[523.25, 659.25, 783.99, 1046.5].forEach((f, i) =>
         tone(ctx, ctx.destination, f, t + i * 0.065, 0.3, 0.1)
+      )
+    } catch { /* no AudioContext */ }
+  }, [])
+
+  const playFireworks = useCallback(() => {
+    try {
+      const ctx = getCtx()
+      const t = ctx.currentTime
+      // Percussive pop bursts at staggered times
+      ;[0, 0.18, 0.42, 0.72, 1.05].forEach(delay => {
+        const bufLen = Math.floor(ctx.sampleRate * 0.09)
+        const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate)
+        const d = buf.getChannelData(0)
+        for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufLen)
+        const src = ctx.createBufferSource()
+        src.buffer = buf
+        const hpf = ctx.createBiquadFilter()
+        hpf.type = "highpass"
+        hpf.frequency.setValueAtTime(900, t + delay)
+        const g = ctx.createGain()
+        g.gain.setValueAtTime(0.28, t + delay)
+        g.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.09)
+        src.connect(hpf); hpf.connect(g); g.connect(ctx.destination)
+        src.start(t + delay)
+      })
+      // Triumphant ascending arpeggio
+      ;[523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) =>
+        tone(ctx, ctx.destination, f, t + i * 0.075, 0.45, 0.13, "triangle")
+      )
+      // Final sustain chord
+      ;[523.25, 659.25, 783.99, 1046.5].forEach(f =>
+        tone(ctx, ctx.destination, f, t + 0.55, 1.8, 0.07)
       )
     } catch { /* no AudioContext */ }
   }, [])
@@ -167,104 +210,119 @@ export function useSoundEngine() {
 
   const stopAmbient = useCallback(() => {
     runningRef.current = false
-    if (schedulerRef.current) {
-      clearTimeout(schedulerRef.current)
-      schedulerRef.current = null
-    }
-    if (masterRef.current && ctxRef.current) {
-      const now = ctxRef.current.currentTime
-      try {
-        masterRef.current.gain.setValueAtTime(masterRef.current.gain.value, now)
-        masterRef.current.gain.linearRampToValueAtTime(0, now + 1.5)
-      } catch { /* node already disconnected */ }
-    }
+    if (schedulerRef.current) { clearTimeout(schedulerRef.current); schedulerRef.current = null }
+    if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
+    const track = trackRef.current
+    if (!track) return
+    // Fade out over 1.5s
+    const step = track.volume / 30
+    fadeTimerRef.current = setInterval(() => {
+      if (track.volume > step) {
+        track.volume = Math.max(0, track.volume - step)
+      } else {
+        track.volume = 0
+        track.pause()
+        if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
+      }
+    }, 50)
   }, [])
 
-  const startAmbient = useCallback((mood: SoundMood = "normal") => {
+  const startAmbient = useCallback((mood: SoundMood = "normal", startAt = 0) => {
     try {
-      stopAmbient()
-      const ctx = getCtx()
       moodRef.current = mood
+      const src = TRACK[mood]
+      const current = trackRef.current
 
-      const master = ctx.createGain()
-      master.gain.setValueAtTime(0, ctx.currentTime)
-      master.gain.linearRampToValueAtTime(mood === "boss" ? 0.09 : 0.055, ctx.currentTime + 2.5)
-      masterRef.current = master
+      // If same file is already playing, don't restart
+      if (current && !current.paused && current.src.endsWith(src.replace("/audio/", ""))) return
 
-      const lpf = ctx.createBiquadFilter()
-      lpf.type = "lowpass"
-      lpf.frequency.setValueAtTime(
-        mood === "revelation" ? 1600 : mood === "boss" ? 700 : 1900,
-        ctx.currentTime
-      )
-      lpf.connect(master)
-      master.connect(ctx.destination)
-
-      // Scale selection — each tells a different emotional story
-      // E major pentatonic: E4 G#4 B4 E5 — bright, upbeat rock feel
-      const normalNotes  = [329.63, 415.30, 493.88, 659.25, 493.88, 415.30, 329.63, 493.88]
-      const bossNotes    = [146.83, 174.61, 220.0, 261.63, 311.13] // Dm minor — tension
-      const revealNotes  = [110, 164.81, 246.94, 329.63]           // Am suspended — transcendence
-      const notes = mood === "boss" ? bossNotes : mood === "revelation" ? revealNotes : normalNotes
-      const tempo = mood === "boss" ? 0.4 : mood === "revelation" ? 1.1 : 0.26
-      const oscType: OscillatorType = mood === "normal" ? "triangle" : "sine"
-
-      let step = 0
-      let nextTime = ctx.currentTime + 0.1
-      runningRef.current = true
-
-      function schedule() {
-        if (!runningRef.current) return
-        const now = ctx.currentTime
-        while (nextTime < now + 0.6) {
-          const freq = notes[step % notes.length]
-          const osc = ctx.createOscillator()
-          const g = ctx.createGain()
-          osc.type = oscType
-          osc.frequency.setValueAtTime(freq, nextTime)
-          g.gain.setValueAtTime(0, nextTime)
-          g.gain.linearRampToValueAtTime(0.65, nextTime + 0.04)
-          g.gain.exponentialRampToValueAtTime(0.0001, nextTime + tempo * 1.7)
-          osc.connect(g)
-          g.connect(lpf)
-          osc.start(nextTime)
-          osc.stop(nextTime + tempo * 2)
-
-          // Bass note every 4 steps — E2/A2 rock pulse
-          if (mood === "normal" && step % 4 === 0) {
-            const bassSeq = [82.41, 82.41, 110.0, 82.41]
-            const bFreq = bassSeq[Math.floor(step / 4) % bassSeq.length]
-            const bOsc = ctx.createOscillator()
-            const bG = ctx.createGain()
-            bOsc.type = "sawtooth"
-            bOsc.frequency.setValueAtTime(bFreq, nextTime)
-            bG.gain.setValueAtTime(0, nextTime)
-            bG.gain.linearRampToValueAtTime(0.45, nextTime + 0.03)
-            bG.gain.exponentialRampToValueAtTime(0.0001, nextTime + tempo * 3.5)
-            bOsc.connect(bG)
-            bG.connect(lpf)
-            bOsc.start(nextTime)
-            bOsc.stop(nextTime + tempo * 4)
-          }
-
-          step++
-          nextTime += tempo
-        }
-        schedulerRef.current = setTimeout(schedule, 30)
+      // Fade out old track
+      if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
+      if (current && !current.paused) {
+        const fadeOut = setInterval(() => {
+          if (current.volume > 0.04) { current.volume -= 0.04 }
+          else { current.pause(); current.volume = 0; clearInterval(fadeOut) }
+        }, 50)
       }
-      schedule()
-    } catch { /* no AudioContext */ }
-  }, [stopAmbient])
+
+      // Start new track
+      const audio = new Audio(src)
+      audio.loop = true
+      audio.volume = 0
+      trackRef.current = audio
+
+      // Seek to startAt position once metadata is available
+      if (startAt > 0) {
+        audio.addEventListener("loadedmetadata", () => {
+          audio.currentTime = startAt
+        }, { once: true })
+      }
+
+      const targetVol = mood === "cinematic" ? 0.55 : mood === "revelation" ? 0.6 : 0.75
+      const fadeInDuration = mood === "cinematic" ? 4000 : 2500
+      const steps = fadeInDuration / 50
+
+      audio.play().catch(() => {/* autoplay blocked */})
+      fadeTimerRef.current = setInterval(() => {
+        if (audio.volume < targetVol - targetVol / steps) {
+          audio.volume = Math.min(targetVol, audio.volume + targetVol / steps)
+        } else {
+          audio.volume = targetVol
+          if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
+        }
+      }, 50)
+    } catch { /* no audio */ }
+  }, [])
 
   const setMood = useCallback((mood: SoundMood) => {
-    if (moodRef.current !== mood && runningRef.current) {
+    if (moodRef.current !== mood) {
       startAmbient(mood)
     }
   }, [startAmbient])
 
+  /** Smoothly scale the current track volume by `factor` (e.g. 0.5 = halve it) */
+  const setGameVolume = useCallback((factor: number) => {
+    const track = trackRef.current
+    if (!track || track.paused) return
+    const target = Math.max(0, track.volume * factor)
+    const steps = 25
+    const step = (track.volume - target) / steps
+    let count = 0
+    const timer = setInterval(() => {
+      count++
+      if (count < steps) {
+        track.volume = Math.max(target, track.volume - step)
+      } else {
+        track.volume = target
+        clearInterval(timer)
+      }
+    }, 50)
+  }, [])
+
+  /** Smoothly fade the current track to an absolute volume level (0–1) */
+  const fadeVolumeTo = useCallback((target: number, durationMs = 2000) => {
+    const track = trackRef.current
+    if (!track || track.paused) return
+    const clampedTarget = Math.min(1, Math.max(0, target))
+    const steps = Math.round(durationMs / 50)
+    const from = track.volume
+    const step = (clampedTarget - from) / steps
+    let count = 0
+    const timer = setInterval(() => {
+      count++
+      if (count < steps) {
+        track.volume = Math.min(1, Math.max(0, from + step * count))
+      } else {
+        track.volume = clampedTarget
+        clearInterval(timer)
+      }
+    }, 50)
+  }, [])
+
   useEffect(() => {
     return () => {
       stopAmbient()
+      if (trackRef.current) { trackRef.current.pause(); trackRef.current = null }
       ctxRef.current?.close()
     }
   }, [stopAmbient])
@@ -276,9 +334,12 @@ export function useSoundEngine() {
     playClick,
     playTransition,
     playRevelation,
+    playFireworks,
     playStreak,
     startAmbient,
     stopAmbient,
     setMood,
+    setGameVolume,
+    fadeVolumeTo,
   }
 }

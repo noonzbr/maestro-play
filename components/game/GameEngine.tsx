@@ -6,13 +6,15 @@ import SceneRenderer from "./SceneRenderer"
 import EndScreen from "./EndScreen"
 import XPCounter from "./XPCounter"
 import FloatingNotes from "./FloatingNotes"
-import StoryIntro from "./StoryIntro"
+import CinematicIntro from "./CinematicIntro"
 import GameIcon from "./GameIcon"
 import DialogueScene from "./DialogueScene"
+import PromptChallenge from "./PromptChallenge"
+import VideoIntro from "./VideoIntro"
 import { useSoundEngine, SoundMood } from "./SoundEngine"
 
 type Props = { game: Game }
-type GameState = "story" | "intro" | "transitioning" | "playing" | "answered" | "complete"
+type GameState = "video" | "story" | "intro" | "transitioning" | "playing" | "answered" | "complete"
 
 function XPBurst({ xp }: { xp: number }) {
   return (
@@ -64,7 +66,7 @@ function CorrectBurst() {
 
 export default function GameEngine({ game }: Props) {
   const [sceneIndex, setSceneIndex] = useState(0)
-  const [state, setState] = useState<GameState>("story")
+  const [state, setState] = useState<GameState>("video")
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
   const [totalXp, setTotalXp] = useState(0)
   const [lastXp, setLastXp] = useState(0)
@@ -148,7 +150,7 @@ export default function GameEngine({ game }: Props) {
   useEffect(() => {
     if (state !== "playing") return
     if (currentScene?.type === "revelation") {
-      sound.setMood("revelation")
+      sound.startAmbient("revelation", 60)  // Sparks of Vienna from 1-min mark
       sound.playRevelation()
     } else if (currentScene?.type === "boss") {
       sound.setMood("boss")
@@ -158,9 +160,9 @@ export default function GameEngine({ game }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sceneIndex, state])
 
-  // Stop music when game ends
+  // Swell music back up on EndScreen to match the opening cinematic feel
   useEffect(() => {
-    if (state === "complete") sound.stopAmbient()
+    if (state === "complete") sound.fadeVolumeTo(0.55, 2500)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
@@ -205,8 +207,7 @@ export default function GameEngine({ game }: Props) {
     }
 
     if (sceneIndex + 1 >= totalScenes) {
-      sound.stopAmbient()
-      setState("complete")
+      setState("complete")  // volume handled by useEffect
       return
     }
 
@@ -224,6 +225,7 @@ export default function GameEngine({ game }: Props) {
 
   const handleStart = () => {
     sound.playClick()
+    // Switch to normal (Concrete Riot) — already at 50% from video exit
     sound.startAmbient("normal")
     setState("transitioning")
     setTimeout(() => {
@@ -232,11 +234,23 @@ export default function GameEngine({ game }: Props) {
     }, 400)
   }
 
+  if (state === "video") {
+    return (
+      <VideoIntro
+        onComplete={() => {
+          sound.setGameVolume(0.5)
+          setState("story")
+        }}
+        startMusic={() => sound.startAmbient("cinematic")}
+      />
+    )
+  }
+
   if (state === "story") {
     return (
-      <StoryIntro
+      <CinematicIntro
         onComplete={() => setState("intro")}
-        startMusic={() => sound.startAmbient("normal")}
+        startMusic={() => sound.startAmbient("cinematic")}
       />
     )
   }
@@ -249,7 +263,7 @@ export default function GameEngine({ game }: Props) {
   const isBoss = currentScene?.type === "boss"
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
+    <div style={{ height: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
 
       {/* Floating musical notes — always present */}
       <FloatingNotes mood={currentMood} />
@@ -340,21 +354,53 @@ export default function GameEngine({ game }: Props) {
       )}
 
       {/* ——— DIALOGUE OVERLAY ——— */}
-      {state === "playing" && currentScene?.dialogue?.length && !dialogueDone && (
+      {state === "playing" && currentScene?.dialogue?.length && !dialogueDone && currentScene.type !== "prompt" && (
         <DialogueScene
           scene={currentScene}
           onComplete={() => setDialogueDone(true)}
         />
       )}
 
+      {/* ——— PROMPT CHALLENGE OVERLAY ——— */}
+      {state === "playing" && currentScene?.type === "prompt" && (
+        <PromptChallenge
+          scene={currentScene}
+          onComplete={(xp) => {
+            setTotalXp(prev => prev + xp)
+            setShowXpBurst(true)
+            setBurstKey(k => k + 1)
+            setTimeout(() => setShowXpBurst(false), 1500)
+            sound.playFireworks()
+            if (sceneIndex + 1 >= totalScenes) {
+              setState("complete")
+            } else {
+              sound.playTransition()
+              setState("transitioning")
+              setFadeIn(false)
+              setTimeout(() => {
+                setSceneIndex(i => i + 1)
+                setSelectedLabel(null)
+                setLastXp(0)
+                setState("playing")
+                setFadeIn(true)
+              }, 320)
+            }
+          }}
+        />
+      )}
+
       {/* ——— GAME CONTENT ——— */}
-      {state !== "intro" && (
+      {state !== "intro" && currentScene?.type !== "prompt" && (
+        <div style={{
+          height: "100vh",
+          overflow: "hidden",
+          position: "relative",
+          zIndex: 10,
+        }}>
         <div style={{
           maxWidth: "680px",
           margin: "0 auto",
-          padding: "6rem 1.5rem 4rem",
-          position: "relative",
-          zIndex: 10,
+          padding: "4.2rem 1.5rem 0",
           opacity: state === "transitioning" ? 0 : 1,
           transform: state === "transitioning" ? "translateY(12px)" : "translateY(0)",
           transition: "opacity 0.32s ease, transform 0.32s ease",
@@ -362,7 +408,7 @@ export default function GameEngine({ game }: Props) {
         }}>
 
           {/* Scene label */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.6rem" }}>
             {isBoss ? (
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(224,64,251,0.1)", border: "1px solid rgba(224,64,251,0.25)", borderRadius: "100px", padding: "0.3rem 0.9rem 0.3rem 0.5rem" }}>
                 <GameIcon name="baton" size={22} />
@@ -394,7 +440,9 @@ export default function GameEngine({ game }: Props) {
             onAnswer={handleAnswer}
             onNext={handleNext}
             streakCount={streakCount}
+            playFireworks={sound.playFireworks}
           />
+        </div>
         </div>
       )}
     </div>
