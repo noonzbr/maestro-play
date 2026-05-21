@@ -12,6 +12,7 @@ type Props = {
 export default function GameCard({ game, purchased }: Props) {
   const isLocked = !game.free && !purchased
   const href = isLocked ? `/checkout/${game.slug}` : `/games/${game.slug}`
+  const accent = game.accentColor ?? "var(--cyan)"
 
   return (
     <Link
@@ -28,10 +29,22 @@ export default function GameCard({ game, purchased }: Props) {
           transition: "transform 0.3s cubic-bezier(0.16,1,0.3,1)",
           cursor: "pointer",
           height: "100%",
+          borderColor: `${accent}33`,
         }}
         onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-6px)")}
         onMouseLeave={e => (e.currentTarget.style.transform = "translateY(0)")}
       >
+        {/* Accent glow strip */}
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "2px",
+          background: `linear-gradient(90deg, ${accent}00, ${accent}, ${accent}00)`,
+          opacity: 0.7,
+        }} />
+
         {/* Game number badge */}
         <div style={{
           position: "absolute",
@@ -42,7 +55,8 @@ export default function GameCard({ game, purchased }: Props) {
           fontSize: "0.65rem",
           letterSpacing: "0.3em",
           textTransform: "uppercase",
-          color: "var(--muted)",
+          color: accent,
+          opacity: 0.85,
         }}>
           Game {game.week}
         </div>
@@ -82,7 +96,7 @@ export default function GameCard({ game, purchased }: Props) {
           }
         </div>
 
-        <div className="label-caps" style={{ marginBottom: "0.75rem" }}>
+        <div className="label-caps" style={{ marginBottom: "0.75rem", color: accent, opacity: 0.75 }}>
           {game.free ? "Free" : `$${game.price?.toFixed(2)}`} · {game.duration}
         </div>
 
@@ -117,7 +131,7 @@ export default function GameCard({ game, purchased }: Props) {
           color: "#08060f",
           background: isLocked
             ? "linear-gradient(90deg,#e040fb,#7b2fbe)"
-            : "linear-gradient(90deg,#00d4f0,#7b2fbe)",
+            : `linear-gradient(90deg,${accent},${accent}bb)`,
           padding: "0.5rem 1.2rem",
           borderRadius: "100px",
         }}>

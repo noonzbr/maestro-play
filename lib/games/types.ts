@@ -41,6 +41,7 @@ export type Game = {
   title: string
   emoji: string
   icon?: "guitar" | "baton" | "musicNotes" | "tuningFork" | "gramophone" | "harp" | "metronome" | "headphones" | "volume"
+  accentColor?: string   // hex — overrides var(--cyan) for per-game theming
   duration: string
   description: string
   tagline: string
