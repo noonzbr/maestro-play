@@ -6,7 +6,7 @@
     "dev": "next dev",
     "preview": "next dev -p 3002",
     "build": "next build",
-    "start": "next start -p ${PORT:-3000}"
+    "start": "next start"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.1",
