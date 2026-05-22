@@ -31,6 +31,21 @@ export const game5: Game = {
     ],
   },
   scenes: [
+
+    // ── LEARN 1: Claude vs. ChatGPT — Actually Different Tools ───────────────
+    {
+      id: "w5-learn-1",
+      type: "learn",
+      location: "COFFEE SHOP · MONDAY · 9:40 AM",
+      concept: {
+        title: "CLAUDE VS. CHATGPT — ACTUALLY DIFFERENT",
+        body: "Claude and ChatGPT are both large language models, but they have genuinely different personalities, strengths, and design philosophies. Knowing the difference stops you from using the wrong tool for the job — or expecting the same experience from both.",
+      },
+      scenarioText: "Jordan had tried ChatGPT first — most people do. It was fast, broad, great for quick lookups and short tasks. It felt like a very capable assistant who could do almost anything adequately. Then Sam made Jordan open Claude for a complex strategy problem. The shift was immediate. Claude felt slower to respond but more careful — like it was actually thinking rather than completing. It pushed back on one of Jordan's assumptions. It asked a clarifying question. It gave a longer, more structured answer with real trade-offs instead of the polished-but-shallow bullet list Jordan was used to. The research backs this up: ChatGPT is the jack-of-all-trades — image generation, voice, browser search, broad reach. Claude is the depth specialist — nuanced writing, long-document analysis, complex reasoning, and a willingness to disagree that most AI tools sand off. Professionals who use both route tasks differently: quick lookups and image generation go to ChatGPT. Deep analysis, long-form writing, strategic thinking, and anything where you need to actually trust the reasoning — Claude.",
+      learnHighlight: "ChatGPT is broad. Claude is deep. The best professionals use both — and know which task to route where.",
+      xpAward: 25,
+    },
+
     // ── Scene 1 ── Meet Jordan ────────────────────────────────────────────────
     {
       id: "w5-s1",
@@ -106,6 +121,20 @@ export const game5: Game = {
       xpAward: 100,
     },
 
+    // ── LEARN 2: Projects and Custom Instructions ─────────────────────────────
+    {
+      id: "w5-learn-2",
+      type: "learn",
+      location: "COFFEE SHOP · MONDAY · 10:15 AM",
+      concept: {
+        title: "PROJECTS — STOP STARTING OVER EVERY SESSION",
+        body: "Every standard Claude conversation starts completely blank. No memory of what you told it last week. No knowledge of your company, your clients, your voice, or your preferences. Claude Projects fix this by giving you a persistent workspace where your context never disappears.",
+      },
+      scenarioText: "Jordan was doing something Sam immediately spotted as a massive time sink: every single morning, Jordan would open a new Claude conversation and type a block of context — 'I'm a freelance brand strategist, my clients are mid-size B2B companies, I write in a direct but warm tone, I never use corporate buzzwords, I always end with one clear call to action.' Every morning. Same block. Copy-paste from a notes file. It was taking four minutes each session, sometimes more. Sam showed Jordan Claude Projects. You create a named Project, write your custom instructions once — who you are, how you write, what you never say, what your clients care about — and that context persists forever inside every conversation in that Project. Jordan set one up in ten minutes. Six months of repeated context, gone. The blank-slate problem, solved. Custom instructions are how professionals make Claude feel less like a generic AI and more like a collaborator who actually knows their world.",
+      learnHighlight: "Stop re-explaining yourself every session. Custom instructions in a Project make Claude remember who you are from conversation one.",
+      xpAward: 25,
+    },
+
     // ── Scene 2 ── What IS Claude Chat? ───────────────────────────────────────
     {
       id: "w5-s2",
@@ -144,6 +173,20 @@ export const game5: Game = {
         },
       ],
       xpAward: 100,
+    },
+
+    // ── LEARN 3: How to Get Claude to Actually Push Back ─────────────────────
+    {
+      id: "w5-learn-3",
+      type: "learn",
+      location: "HOME OFFICE · TUESDAY · 1:45 PM",
+      concept: {
+        title: "HOW TO GET CLAUDE TO DISAGREE WITH YOU",
+        body: "Most people treat AI like a yes-machine — and Claude obliges. But one of Claude's most valuable capabilities, used by almost no one, is getting it to genuinely disagree with you, pressure-test your assumptions, and tell you what you're missing. You have to ask for it explicitly.",
+      },
+      scenarioText: "Jordan had been using Claude as a glorified drafting assistant for two weeks when Sam asked a question that reframed everything: 'Have you ever asked Claude to disagree with you?' Jordan had not. The idea hadn't occurred. Sam showed a conversation where they'd written: 'Here is my plan for raising my rates. Please argue against it as hard as you can. Find every weak assumption, every risk I'm underestimating, every objection a client would have. Don't soften it.' The response was genuinely uncomfortable to read. It found three assumptions Jordan would never have questioned. It named the exact objection two clients had already made. It reframed the whole strategy in a way that actually made the plan stronger. This is the aha moment almost every power user describes: the shift from using Claude as a yes-machine to using it as a thinking partner that will actually push back. But you have to give it explicit permission — 'disagree with me,' 'argue against this,' 'play devil's advocate,' 'tell me what I'm missing.' Without that instruction, Claude defaults to being helpful and agreeable. With it, Claude becomes the most useful colleague you have.",
+      learnHighlight: "Claude defaults to agreeable. Tell it explicitly to push back — 'argue against this,' 'what am I missing' — and it becomes a completely different tool.",
+      xpAward: 25,
     },
 
     // ── Scene 3 ── The Writing Power ──────────────────────────────────────────

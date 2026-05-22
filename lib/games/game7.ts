@@ -31,6 +31,21 @@ export const game7: Game = {
     ],
   },
   scenes: [
+
+    // ── LEARN 1: Claude Projects — Persistent Context for Teams ──────────────
+    {
+      id: "w7-learn-1",
+      type: "learn",
+      location: "GLASS CONFERENCE ROOM · THURSDAY · 6:45 PM",
+      concept: {
+        title: "CLAUDE PROJECTS — PERSISTENT CONTEXT FOR TEAMS",
+        body: "Standard Claude conversations have no memory. Every session starts blank. For individuals, this is manageable. For teams, it means every person gets different outputs based on what they remembered to paste in that day. Claude Projects solve this by creating a shared workspace where context — your tone, your constraints, your company knowledge — persists automatically for everyone.",
+      },
+      scenarioText: "Priya has seen this pattern in every ops role she's held: a new tool rolls out, the power users figure out the advanced features, and everyone else uses it at 10% of its capability. With Claude, the gap is especially stark. Dev pastes in the brand guide, explains the client's history, and specifies the tone on every session. Tom types 'write a client brief' and wonders why it sounds nothing like the company. Same subscription. Wildly different outputs. The gap isn't skill — it's systems. Dev has a system; Tom doesn't. Claude Projects are the system. A Project is a named workspace where you write your instructions once, upload your documents once, and every conversation inside that Project starts with Claude already knowing your company, your clients, and your standards. No copy-paste. No 'here's what you need to know about us.' Just open a conversation and work. The power isn't in the AI model — it's in the infrastructure you build around it.",
+      learnHighlight: "Claude Projects make institutional knowledge automatic. Set the context once. Every conversation, every teammate, every week benefits from it.",
+      xpAward: 25,
+    },
+
     // ── Scene 1 ── The Consistency Problem ───────────────────────────────────
     {
       id: "w7-s1",
@@ -111,6 +126,20 @@ export const game7: Game = {
       xpAward: 100,
     },
 
+    // ── LEARN 2: Custom Instructions That Make Claude Sound Like Your Company ──
+    {
+      id: "w7-learn-2",
+      type: "learn",
+      location: "PRIYA'S DESK · THURSDAY · 1:55 PM",
+      concept: {
+        title: "CUSTOM INSTRUCTIONS THAT SOUND LIKE YOUR COMPANY",
+        body: "Custom instructions are the most underused feature in Claude for teams. They're a persistent prompt that runs before every conversation — telling Claude who you are, how you write, what you never say, and who your audience is. Done right, they're the difference between AI that sounds generic and AI that sounds like a 10-year team member.",
+      },
+      scenarioText: "Priya spent forty-five minutes writing the custom instructions for the Client Comms Project. Not because it was hard, but because she wanted to get it right. She started with tone: 'professional and warm — never stiff, never casual, never corporate-speak.' Then constraints: 'never make commitments about pricing or timelines without looping in the sales team.' Then audience: 'our clients are mid-market operations leaders — they're busy, skeptical, and allergic to fluff.' Then format: 'lead with the point, support with one or two specifics, close with one clear next step.' She uploaded the brand voice guide, three examples of the best client emails they'd ever sent, and the FAQ they'd built for client objections. When Dev ran the first test — a tricky follow-up to a client who'd gone quiet — the output was so on-brand she had to read it twice to confirm Claude had written it. That's what happens when you treat custom instructions like an onboarding document for a brilliant new colleague. You're not constraining Claude. You're giving it everything it needs to sound like you.",
+      learnHighlight: "Custom instructions are an onboarding document for Claude. Write them like you're briefing a brilliant new hire who knows nothing about your company yet.",
+      xpAward: 25,
+    },
+
     // ── Scene 2 ── What Claude Projects Actually Do ───────────────────────────
     {
       id: "w7-s2",
@@ -150,6 +179,20 @@ export const game7: Game = {
         },
       ],
       xpAward: 100,
+    },
+
+    // ── LEARN 3: Privacy and Work AI ─────────────────────────────────────────
+    {
+      id: "w7-learn-3",
+      type: "learn",
+      location: "GLASS CONFERENCE ROOM · THURSDAY · 4:30 PM",
+      concept: {
+        title: "PRIVACY AND WORK AI — WHAT ACTUALLY GOES TO ANTHROPIC",
+        body: "The question every team asks before adopting AI: 'Is our data safe?' It's the right question. And the answer for Claude for Work is different from the consumer app. Understanding the boundary between what's private and what's not is essential before any sensitive business information goes into any AI tool.",
+      },
+      scenarioText: "Priya had to answer this question for the CEO before the AI rollout could proceed: 'If our team pastes a client contract into Claude, does Anthropic train on it?' She'd done her research. For standard Claude.ai (the free consumer app), Anthropic's default terms allowed using conversations to improve models — though users could opt out. For Claude for Work (the Teams and Enterprise plans), the answer is different: Anthropic does not use business conversations to train models, full stop. That's a contractual commitment, not a policy preference. She built a simple rule for the team: anything you'd put in an email to a client or discuss in a recorded meeting can go in Claude. Anything that would require an NDA to share externally — unreleased financials, personal employee data, M&A discussions — stays out until the company has governance in place. The rule isn't 'never use AI for sensitive work.' It's 'understand your plan's terms and build the right guardrails.' Every professional using AI at work owes their team that five minutes of research.",
+      learnHighlight: "Know your plan's privacy terms before you paste anything sensitive. Claude for Work has contractual data protections. The free tier has different rules.",
+      xpAward: 25,
     },
 
     // ── Scene 3 ── Building the Project ──────────────────────────────────────
