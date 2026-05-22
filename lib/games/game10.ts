@@ -11,6 +11,23 @@ export const game10: Game = {
   description:
     "Google's free, open-source terminal AI agent. Reads your files, runs code, writes scripts, and automates workflows — powered by Gemini 2.5 Pro, right in your shell.",
   tagline: "The terminal just got a brain.",
+  characterName:  "Sam",
+  characterRole:  "29-year-old DevOps engineer",
+  characterBlurb: "A terminal wizard who adds Gemini CLI to his command-line arsenal",
+  characterImage: "/images/sam.png",
+  maestroImage:   "/images/maestro-sam.png",
+  audioTrack:     "/audio/concrete-riot.mp3",
+  intro: {
+    sceneImage: "/images/scene-sam.png",
+    sceneColor: "#060a06",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "HOME LAB · MONDAY · 1:17 AM" },
+      { type: "narration", text: "Forty-seven config files and a Friday deadline — Sam had mapped the problem perfectly and still hadn't moved a single line." },
+      { type: "dialogue",  speaker: "Riya", text: "I finished the whole migration in eleven minutes. Gemini CLI read every file, caught three pattern variants I hadn't noticed, and asked before it touched anything. Sam, when did you last ship something this week?" },
+      { type: "final",     text: "The engineer who automates the mechanical frees the human to do the irreplaceable." },
+    ],
+  },
   scenes: [
     // ── Scene 1 ── Meet Sam ───────────────────────────────────────────────────
     {

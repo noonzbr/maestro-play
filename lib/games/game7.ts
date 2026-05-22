@@ -11,6 +11,25 @@ export const game7: Game = {
   description:
     "Discover Claude Projects, custom instructions, and team workflows that make Claude feel less like a chatbot and more like a colleague who actually knows your company.",
   tagline: "The difference between a generic AI and your AI.",
+  characterName:  "Priya",
+  characterRole:  "33-year-old operations manager",
+  characterBlurb: "A business ops pro who makes Claude feel less like a chatbot and more like a colleague",
+  characterImage: "/images/priya.png",
+  maestroImage:   "/images/maestro-priya.png",
+  maestroLine:    "The last time she was just managing the chaos...",
+  maestroSubline: "Priya runs the show. Now the AI runs with her.",
+  audioTrack:     "/audio/priya-desk-light-drift.mp3",
+  intro: {
+    sceneImage: "/images/scene-priya.png",
+    sceneColor: "#080608",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "GLASS CONFERENCE ROOM · THURSDAY · 6:55 PM" },
+      { type: "narration", text: "Every system she had built held the company together — and only she knew exactly how fragile the whole thing was." },
+      { type: "dialogue",  speaker: "CEO", text: "I watched our competitor's ops team demo their AI workflow today. Six people doing what we have sixteen doing. Priya, I need to understand why we're not there." },
+      { type: "final",     text: "Efficiency is not the enemy of craft. It is the space craft needs to grow." },
+    ],
+  },
   scenes: [
     // ── Scene 1 ── The Consistency Problem ───────────────────────────────────
     {

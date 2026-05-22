@@ -11,6 +11,25 @@ export const game5: Game = {
   description:
     "Discover what Claude Chat can really do — writing, coding, strategy, research — and why most people only ever see 10% of its power.",
   tagline: "It's not a chatbot. It's not a search engine. It's something entirely new.",
+  characterName:  "Jordan",
+  characterRole:  "28-year-old freelance consultant",
+  characterBlurb: "A stretched-thin freelancer who learns Claude does the work of five people",
+  characterImage: "/images/jordan.png",
+  maestroImage:   "/images/maestro-jordan.png",
+  maestroLine:    "The last time they were just a freelancer...",
+  maestroSubline: "Jordan's thinking just found its conductor.",
+  audioTrack:     "/audio/jordan-blue-cup-variations.mp3",
+  intro: {
+    sceneImage: "/images/scene-jordan.png",
+    sceneColor: "#080608",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "COFFEE SHOP · MONDAY · 11:14 PM" },
+      { type: "narration", text: "Three open proposals, one overdue invoice, and a creative brief they'd been staring at long enough to memorise every word." },
+      { type: "dialogue",  speaker: "Client", text: "We actually went with a different agency. They turned around a full strategy deck overnight — said AI did most of the heavy lifting. We need that speed now, Jordan." },
+      { type: "final",     text: "The solo artist and the orchestra are not enemies. They were always waiting to meet." },
+    ],
+  },
   scenes: [
     // ── Scene 1 ── Meet Jordan ────────────────────────────────────────────────
     {

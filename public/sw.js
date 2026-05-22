@@ -1,5 +1,5 @@
 // MaestroPlay Service Worker
-const CACHE_NAME = "maestroplay-v1"
+const CACHE_NAME = "maestroplay-v2"
 
 // Pre-cache these on install
 const PRECACHE = [

@@ -146,6 +146,12 @@ export default function GameEngine({ game }: Props) {
     document.head.appendChild(style)
   }, [])
 
+  // Set per-game audio track once on mount
+  useEffect(() => {
+    if (game.audioTrack) sound.setNormalTrack(game.audioTrack)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Mood & revelation sound when scene starts
   useEffect(() => {
     if (state !== "playing") return
@@ -241,7 +247,10 @@ export default function GameEngine({ game }: Props) {
           sound.setGameVolume(0.5)
           setState("story")
         }}
-        startMusic={() => sound.startAmbient("cinematic")}
+        startMusic={() => sound.startAmbient("cinematic", 52)}
+        gameTitle={game.title}
+        gameEmoji={game.emoji}
+        accentColor={game.accentColor}
       />
     )
   }
@@ -251,6 +260,7 @@ export default function GameEngine({ game }: Props) {
       <CinematicIntro
         onComplete={() => setState("intro")}
         startMusic={() => sound.startAmbient("cinematic")}
+        intro={game.intro}
       />
     )
   }

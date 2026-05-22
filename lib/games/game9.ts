@@ -11,6 +11,23 @@ export const game9: Game = {
   description:
     "Learn how Gemini integrates with your entire Google life — Gmail, Docs, Sheets, Drive — and why its massive context window changes everything for deep research.",
   tagline: "If you live in Google, Gemini lives there too.",
+  characterName:  "Luna",
+  characterRole:  "21-year-old grad student",
+  characterBlurb: "A researcher who uses Gemini to work at the speed of thought",
+  characterImage: "/images/luna.png",
+  maestroImage:   "/images/maestro-luna.png",
+  audioTrack:     "/audio/concrete-riot.mp3",
+  intro: {
+    sceneImage: "/images/scene-luna.png",
+    sceneColor: "#060808",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "UNIVERSITY LIBRARY · THURSDAY · 12:53 AM" },
+      { type: "narration", text: "Fifteen browser tabs, three contradicting papers, and a chapter due in two weeks — Luna's research felt like trying to drink from a river." },
+      { type: "dialogue",  speaker: "Prof. Chen", text: "Your classmate submitted her literature review yesterday. Forty sources, cross-referenced, argument gaps flagged. She used Gemini. Luna, how long have you been on your first draft?" },
+      { type: "final",     text: "Intelligence was never the bottleneck. Knowing where to look always was." },
+    ],
+  },
   scenes: [
     // ── Scene 1 ── Meet Luna ──────────────────────────────────────────────────
     {

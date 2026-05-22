@@ -1,19 +1,19 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { GameIntro, IntroBeat } from "@/lib/games/types"
 
-type Beat = {
-  type: "location" | "narration" | "dialogue" | "final"
-  speaker?: string
-  text: string
+// ── Default (Jake game 1) ──────────────────────────────────────────────────
+const DEFAULT_INTRO: GameIntro = {
+  sceneImage: "/images/jakebedroom.png",
+  noteOrigin: { bottom: "38%", left: "54%" },
+  beats: [
+    { type: "location",  text: "BEDROOM · TUESDAY · 11:47 PM" },
+    { type: "narration", text: "Three hours a day. Every single day. Jake lived inside the notes." },
+    { type: "dialogue",  speaker: "Tyler", text: "I made an entire EP this weekend with AI. While you were tabbing that one riff. For the third week." },
+    { type: "final",     text: "The world changed while he was perfecting the riff. But perfection has its own kind of power." },
+  ],
 }
-
-const BEATS: Beat[] = [
-  { type: "location",  text: "BEDROOM · TUESDAY · 11:47 PM" },
-  { type: "narration", text: "Three hours a day. Every single day. Jake lived inside the notes." },
-  { type: "dialogue",  speaker: "Tyler", text: "I made an entire EP this weekend with AI. While you were tabbing that one riff. For the third week." },
-  { type: "final",     text: "The world changed while he was perfecting the riff. But perfection has its own kind of power." },
-]
 
 const FLOAT_NOTES = ["♪", "♫", "♩", "♬", "♪", "♩"]
 
@@ -38,14 +38,19 @@ function useTypewriter(text: string, speed: number) {
 type Props = {
   onComplete: () => void
   startMusic: () => void
+  intro?: GameIntro
 }
 
-export default function CinematicIntro({ onComplete, startMusic }: Props) {
+export default function CinematicIntro({ onComplete, startMusic, intro }: Props) {
+  const data   = intro ?? DEFAULT_INTRO
+  const beats  = data.beats
+  const origin = data.noteOrigin ?? { bottom: "38%", left: "50%" }
+
   const [beatIndex, setBeatIndex] = useState(0)
-  const [skip, setSkip] = useState(false)
-  const [started, setStarted] = useState(false)
-  const [exiting, setExiting] = useState(false)
-  const advanceRef = useRef<() => void>(() => {})
+  const [skip, setSkip]           = useState(false)
+  const [started, setStarted]     = useState(false)
+  const [exiting, setExiting]     = useState(false)
+  const advanceRef                = useRef<() => void>(() => {})
 
   useEffect(() => {
     const id = "cinematic-kf"
@@ -65,16 +70,15 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
     document.head.appendChild(s)
   }, [])
 
-  const beat = BEATS[beatIndex]
-  const isLast = beatIndex >= BEATS.length - 1
-  const speed = beat.type === "location" ? 0 : 30
+  const beat   = beats[beatIndex]
+  const isLast = beatIndex >= beats.length - 1
+  const speed  = beat.type === "location" ? 0 : 30
 
   const { displayed, done } = useTypewriter(skip ? "" : beat.text, speed)
   const visibleText = skip ? beat.text : displayed
-  const textDone = skip || done
+  const textDone    = skip || done
 
   const advance = useCallback(() => {
-    // Start music on first tap — no-op if VideoIntro already started it
     if (!started) { setStarted(true); startMusic() }
     if (!textDone) { setSkip(true); return }
     if (isLast) { setExiting(true); setTimeout(onComplete, 700); return }
@@ -112,50 +116,48 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
         animation: exiting ? "cin-exit 0.7s ease forwards" : "cin-fade-in 1.4s ease both",
       }}
     >
-      {/* Background — full scene, height-filled, centered */}
+      {/* Background scene */}
       <div style={{
         position: "absolute",
         inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#050810",
+        background: data.sceneColor ?? "#050810",
       }}>
-        <img
-          src="/images/jakebedroom.png"
-          alt=""
-          draggable={false}
-          style={{
-            height: "100%",
-            width: "auto",
-            display: "block",
-            animation: "cin-ken-burns 30s ease-in-out forwards",
-          }}
-        />
+        {data.sceneImage && (
+          <img
+            src={data.sceneImage}
+            alt=""
+            draggable={false}
+            style={{
+              height: "100%",
+              width: "auto",
+              display: "block",
+              animation: "cin-ken-burns 30s ease-in-out forwards",
+            }}
+          />
+        )}
       </div>
 
-      {/* Left + right edge fades — blends into dark bg */}
+      {/* Edge fades */}
       <div style={{
-        position: "absolute",
-        inset: 0,
+        position: "absolute", inset: 0,
         background: "linear-gradient(to right, #050810 0%, transparent 20%, transparent 80%, #050810 100%)",
         pointerEvents: "none",
       }} />
-
-      {/* Bottom fade for dialogue readability */}
       <div style={{
-        position: "absolute",
-        inset: 0,
+        position: "absolute", inset: 0,
         background: "linear-gradient(to bottom, transparent 45%, rgba(5,8,16,0.65) 70%, rgba(5,8,16,0.97) 100%)",
         pointerEvents: "none",
       }} />
 
-      {/* Floating golden notes rising from laptop glow area */}
+      {/* Floating notes */}
       {FLOAT_NOTES.map((note, i) => (
         <div key={i} style={{
           position: "absolute",
-          bottom: "38%",
-          left: `${54 + (i % 4) * 5}%`,
+          bottom: origin.bottom,
+          left: `calc(${origin.left} + ${(i % 4) * 5}%)`,
           fontSize: `${1.1 + (i % 3) * 0.35}rem`,
           color: "#f5c518",
           pointerEvents: "none",
@@ -170,16 +172,13 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
       {/* Dialogue / narrative panel */}
       <div style={{
         position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
+        bottom: 0, left: 0, right: 0,
         padding: "0 2rem 2.5rem",
         zIndex: 10,
         animation: "cin-fade-in 0.8s 0.8s ease both",
       }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
 
-          {/* Location stamp */}
           {beat.type === "location" && (
             <p style={{
               fontFamily: "Inter, sans-serif",
@@ -195,7 +194,6 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
             </p>
           )}
 
-          {/* Speaker chip for dialogue */}
           {isDialogue && beat.speaker && (
             <div style={{
               display: "inline-block",
@@ -206,10 +204,7 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
               textTransform: "uppercase",
               color: "rgba(80,160,255,0.95)",
               background: "rgba(80,160,255,0.08)",
-              borderTop: "1px solid rgba(80,160,255,0.25)",
-              borderRight: "1px solid rgba(80,160,255,0.25)",
-              borderBottom: "1px solid rgba(80,160,255,0.25)",
-              borderLeft: "1px solid rgba(80,160,255,0.25)",
+              border: "1px solid rgba(80,160,255,0.25)",
               borderRadius: "100px",
               padding: "0.18rem 0.7rem",
               marginBottom: "0.55rem",
@@ -218,7 +213,6 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
             </div>
           )}
 
-          {/* Main text */}
           {beat.type !== "location" && (
             <p style={{
               fontFamily: "Cormorant Garamond, serif",
@@ -233,8 +227,7 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
               {!textDone && (
                 <span style={{
                   display: "inline-block",
-                  width: "2px",
-                  height: "1em",
+                  width: "2px", height: "1em",
                   background: "var(--cyan)",
                   marginLeft: "2px",
                   verticalAlign: "middle",
@@ -244,10 +237,9 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
             </p>
           )}
 
-          {/* Progress dots + hint */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", gap: "5px" }}>
-              {BEATS.map((_, i) => (
+              {beats.map((_, i) => (
                 <div key={i} style={{
                   height: "3px",
                   width: i === beatIndex ? "18px" : "5px",
@@ -269,7 +261,6 @@ export default function CinematicIntro({ onComplete, startMusic }: Props) {
               </span>
             )}
           </div>
-
         </div>
       </div>
     </div>

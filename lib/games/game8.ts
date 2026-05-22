@@ -11,6 +11,25 @@ export const game8: Game = {
   description:
     "Move past the basics of ChatGPT. Learn GPT-4o's real capabilities, how Custom GPTs work, what the Canvas editor unlocks, and when ChatGPT beats every other AI tool.",
   tagline: "Everyone's using it. Almost nobody's using it right.",
+  characterName:  "Alex",
+  characterRole:  "26-year-old content creator",
+  characterBlurb: "A creator who moves past the hype to unlock ChatGPT's real capabilities",
+  characterImage: "/images/alex.png",
+  maestroImage:   "/images/maestro-alex.png",
+  maestroLine:    "The last time he was just chasing the algorithm...",
+  maestroSubline: "Alex creates on his terms now. The feed follows the conductor.",
+  audioTrack:     "/audio/alex-sunlit-drafts.mp3",
+  intro: {
+    sceneImage: "/images/scene-alex.png",
+    sceneColor: "#0a0806",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "HOME STUDIO · SATURDAY · 1:48 AM" },
+      { type: "narration", text: "The ring light was still on, the caption was still blank, and Alex had already missed the window where the algorithm rewards you." },
+      { type: "dialogue",  speaker: "Brand Manager", text: "We're pausing the partnership, Alex. We found a creator who delivers a full content calendar in two days using AI. Same quality. We need that pace now." },
+      { type: "final",     text: "The algorithm rewards output. The audience rewards truth. The conductor delivers both." },
+    ],
+  },
   scenes: [
 
     // ── SCENE 1 ──────────────────────────────────────────────────────────────

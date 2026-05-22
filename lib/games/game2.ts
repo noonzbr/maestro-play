@@ -10,10 +10,25 @@ export const game2: Game = {
   duration: "7 min",
   description: "Understand what's actually happening inside AI — why your inputs produce the outputs they do.",
   tagline: "Same tool. Wildly different results. Here's why.",
+  characterName:  "Zoe",
+  characterRole:  "19-year-old drummer",
+  characterBlurb: "A rhythm-driven drummer uncovering how AI actually thinks — and why it's not magic",
   characterImage: "/images/zoe.png",
   maestroImage:   "/images/maestro-zoe.png",
   maestroLine:    "The last time she was just a drummer...",
   maestroSubline: "Zoe's rhythm just found its conductor. Keep the beat.",
+  audioTrack:     "/audio/zoe-glass-circuit.mp3",
+  intro: {
+    sceneImage: "/images/scene-zoe.png",
+    sceneColor: "#0a0608",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "REHEARSAL STUDIO · FRIDAY · 9:22 PM" },
+      { type: "narration", text: "She kept time for everyone else — and somehow never had any left for herself." },
+      { type: "dialogue",  speaker: "Marcus", text: "My producer used AI to map the entire album arrangement in one afternoon. Said he doesn't need a session drummer anymore. Just samples and stems." },
+      { type: "final",     text: "The beat goes on — but the question is who's keeping it now." },
+    ],
+  },
   scenes: [
     {
       id: "w2-s1",

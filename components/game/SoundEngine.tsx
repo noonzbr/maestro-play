@@ -14,13 +14,17 @@ export function useSoundEngine() {
   // MP3 track refs
   const trackRef = useRef<HTMLAudioElement | null>(null)
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const normalTrackRef = useRef<string>("/audio/concrete-riot.mp3")
 
-  const TRACK: Record<SoundMood, string> = {
-    normal:      "/audio/concrete-riot.mp3",
-    boss:        "/audio/concrete-riot.mp3",
-    cinematic:   "/audio/sparks-of-vienna.mp3",
-    revelation:  "/audio/sparks-of-vienna.mp3",
+  const getTrack = (mood: SoundMood): string => {
+    if (mood === "normal" || mood === "boss") return normalTrackRef.current
+    if (mood === "cinematic" || mood === "revelation") return "/audio/sparks-of-vienna.mp3"
+    return "/audio/concrete-riot.mp3"
   }
+
+  const setNormalTrack = useCallback((url: string) => {
+    normalTrackRef.current = url
+  }, [])
 
   function getCtx(): AudioContext {
     if (!ctxRef.current) ctxRef.current = new AudioContext()
@@ -230,7 +234,7 @@ export function useSoundEngine() {
   const startAmbient = useCallback((mood: SoundMood = "normal", startAt = 0) => {
     try {
       moodRef.current = mood
-      const src = TRACK[mood]
+      const src = getTrack(mood)
       const current = trackRef.current
 
       // If same file is already playing, don't restart
@@ -339,6 +343,7 @@ export function useSoundEngine() {
     startAmbient,
     stopAmbient,
     setMood,
+    setNormalTrack,
     setGameVolume,
     fadeVolumeTo,
   }

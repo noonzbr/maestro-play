@@ -10,10 +10,23 @@ export const game1: Game = {
   duration: "8 min",
   description: "Follow Jake, a passionate 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.",
   tagline: "Every maestro was once just a kid with a guitar.",
+  characterName:  "Jake",
+  characterRole:  "17-year-old guitarist",
+  characterBlurb: "A teenage guitarist who discovers AI is his greatest instrument yet",
   characterImage: "/images/guitarplayer1.png",
   maestroImage:   "/images/maestroplayer1.png",
   maestroLine:    "The last time he was just a guitarist...",
   maestroSubline: "Jake's story is just beginning. The orchestra awaits.",
+  intro: {
+    sceneImage: "/images/jakebedroom.png",
+    noteOrigin: { bottom: "38%", left: "54%" },
+    beats: [
+      { type: "location",  text: "BEDROOM · TUESDAY · 11:47 PM" },
+      { type: "narration", text: "Three hours a day. Every single day. Jake lived inside the notes." },
+      { type: "dialogue",  speaker: "Tyler", text: "I made an entire EP this weekend with AI. While you were tabbing that one riff. For the third week." },
+      { type: "final",     text: "The world changed while he was perfecting the riff. But perfection has its own kind of power." },
+    ],
+  },
   scenes: [
 
     // ── SCENE 1 ──────────────────────────────────────────────────────────────

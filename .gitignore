@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# dev logs
+dev.log
+dev-err.log
+dev-server.log
+
+# root-level source asset copies (real files live in public/)
+/*.png
+/*.mp3
+/*.mp4

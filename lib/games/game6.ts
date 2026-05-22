@@ -11,6 +11,25 @@ export const game6: Game = {
   description:
     "Learn how Claude Code turns your terminal into an agentic coding partner — reading files, writing code, running tests, and shipping features without copy-pasting.",
   tagline: "Stop copy-pasting. Start collaborating.",
+  characterName:  "Kai",
+  characterRole:  "24-year-old junior developer",
+  characterBlurb: "A junior dev who stops copy-pasting and starts shipping with Claude Code",
+  characterImage: "/images/kai.png",
+  maestroImage:   "/images/maestro-kai.png",
+  maestroLine:    "The last time he was just a junior dev staring at a terminal...",
+  maestroSubline: "Kai ships faster now. The codebase bends to the conductor.",
+  audioTrack:     "/audio/kai-emerald-debug-loop.mp3",
+  intro: {
+    sceneImage: "/images/scene-kai.png",
+    sceneColor: "#060a08",
+    noteOrigin: { bottom: "42%", left: "48%" },
+    beats: [
+      { type: "location",  text: "STARTUP OFFICE · TUESDAY · 2:07 AM" },
+      { type: "narration", text: "The terminal blinked and blinked, indifferent, as Kai searched the same Stack Overflow thread for the fourth time." },
+      { type: "dialogue",  speaker: "Elena", text: "I shipped the whole auth refactor before lunch. Claude Code read the codebase, wrote the plan, and I just reviewed the diffs. When did you last ship something, Kai?" },
+      { type: "final",     text: "The bug was never the code. It was always working alone." },
+    ],
+  },
   scenes: [
     // ── Scene 1 ── Meet Kai ────────────────────────────────────────────────
     {
