@@ -1,658 +1,446 @@
 "use client"
 
-import { useRef, useCallback } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Game } from "@/lib/games/types"
 
-// ─── Track definitions ───────────────────────────────────────────────────────
+// ─── Problem hooks — what each character faces BEFORE they learn ──────────────
+
+const HOOKS: Record<number, string> = {
+  1:  "While Jake perfected one riff for weeks, his rival dropped an AI-assisted EP. Same talent. One method makes the difference.",
+  2:  "Zoe spends three hours on AI sessions that should take twenty minutes. She understands music — not how the model actually thinks.",
+  3:  "47 unread emails. Board meeting in 3 hours. Carlos is drowning while his AI-fluent colleagues run circles around him.",
+  4:  "Aria trained 20 years to master the violin. AI now composes symphonies in minutes. She must find what the machine can never replicate.",
+  5:  "Jordan asked Claude for strategic help and got generic blog-post advice. She didn't know how to unlock what it's actually capable of.",
+  6:  "Kai writes clean code. His colleague ships the same features 4× faster using Claude Code. Same salary. Radically different trajectory.",
+  7:  "Priya handles 12 workflows manually that AI could run in twenty minutes — if she knew how to build the pipeline.",
+  8:  "Alex uses ChatGPT like a search engine and gets search engine results. The version of him who treats it as a thought partner books 40% more clients.",
+  9:  "Luna's ear is better than any algorithm. But algorithms are booking gigs and scoring films. Instinct plus AI beats instinct alone.",
+  10: "Sam built complex systems by hand for 15 years. AI prototypes them in hours now. The builder who becomes the architect is the one who survives.",
+  11: "Copilot appeared in Jake's Office 365 toolbar. His manager now expects an AI productivity report. He has 48 hours to figure out what it actually does.",
+  12: "Jake wants to build AI tools without writing code. Copilot Studio promises no-code agents. The gap between promise and reality is exactly where this game lives.",
+}
+
+// ─── Track definitions ────────────────────────────────────────────────────────
 
 const TRACKS = [
   {
-    id: "ai-fundamentals",
     number: "01",
     name: "AI Fundamentals",
     color: "#00d4f0",
-    description:
-      "Build your foundation. Understand how AI thinks, craft prompts that actually work, and apply AI to real professional tasks.",
-    certification: "AI Foundations",
     weeks: [1, 2, 3, 4],
+    tagline: "Before you can conduct, you have to hear the music.",
+    cert: "AI Foundations",
   },
   {
-    id: "claude-mastery",
     number: "02",
     name: "Claude & Prompt Mastery",
     color: "#e040fb",
-    description:
-      "Go deep with Claude. Code generation, creative writing, research workflows, and the prompt frameworks pros use every day.",
-    certification: "Claude Expert",
-    weeks: [5, 6, 7],
+    weeks: [5, 6, 7, 8],
+    tagline: "Stop describing. Start conducting.",
+    cert: "Claude Expert",
   },
   {
-    id: "ai-toolkit",
     number: "03",
     name: "The AI Toolkit",
     color: "#00e676",
-    description:
-      "Expand beyond Claude. Midjourney, Gemini, Perplexity, and every tool that separates AI-fluent professionals from the rest.",
-    certification: "AI Explorer",
-    weeks: [8, 9, 10],
+    weeks: [9, 10],
+    tagline: "Every instrument matters. Know which one to pick.",
+    cert: "AI Explorer",
   },
   {
-    id: "microsoft-ai",
     number: "04",
     name: "Microsoft AI",
-    color: "#0078d4",
-    description:
-      "Own the AI already inside Microsoft 365. Copilot, Copilot Studio, and your first no-code AI agent — deployed.",
-    certification: "Microsoft AI",
+    color: "#4488ff",
     weeks: [11, 12],
+    tagline: "The AI is already in your tools. Start using it.",
+    cert: "Microsoft AI",
   },
 ]
 
-// ─── Individual pathway card ─────────────────────────────────────────────────
+// ─── GameCard ─────────────────────────────────────────────────────────────────
 
-function PathwayCard({
-  game,
-  trackColor,
-  purchased,
-}: {
-  game: Game
-  trackColor: string
-  purchased?: boolean
-}) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const isLocked = !game.free && !purchased
-  const href = isLocked ? `/checkout/${game.slug}` : `/games/${game.slug}`
-  const accent = game.accentColor ?? trackColor
-
-  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const x = (e.clientX - r.left) / r.width - 0.5
-    const y = (e.clientY - r.top) / r.height - 0.5
-    el.style.transform = `perspective(900px) rotateX(${y * -10}deg) rotateY(${x * 10}deg) translateY(-8px) scale(1.02)`
-    el.style.boxShadow = `0 24px 64px ${accent}30, 0 0 0 1px ${accent}45, inset 0 1px 0 rgba(255,255,255,0.08)`
-  }, [accent])
-
-  const onLeave = useCallback(() => {
-    const el = cardRef.current
-    if (!el) return
-    el.style.transform = ""
-    el.style.boxShadow = `0 4px 20px ${accent}12`
-  }, [accent])
+function GameCard({ game, hook, color }: { game: Game; hook: string; color: string }) {
+  const [hovered, setHovered] = useState(false)
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-      {/* Node on path line */}
-      <div style={{
-        position: "relative",
-        zIndex: 2,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}>
-        {/* The card itself */}
-        <Link href={href} style={{ textDecoration: "none", display: "block" }}>
-          <div
-            ref={cardRef}
-            onMouseMove={onMove}
-            onMouseLeave={onLeave}
-            style={{
-              background: "rgba(12, 8, 22, 0.92)",
-              border: `1px solid ${accent}30`,
-              borderRadius: "20px",
-              padding: "1.5rem",
-              position: "relative",
-              overflow: "hidden",
-              cursor: "pointer",
-              transition: "transform 0.1s ease, box-shadow 0.3s ease",
-              boxShadow: `0 4px 20px ${accent}12`,
-              width: "230px",
-              minHeight: "290px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            {/* Top accent bar */}
+    <Link
+      href={`/games/${game.slug}`}
+      style={{ textDecoration: "none", flexShrink: 0, scrollSnapAlign: "start", display: "block" }}
+    >
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          width: "272px",
+          height: "436px",
+          borderRadius: "18px",
+          overflow: "hidden",
+          position: "relative",
+          background: "#0c0a14",
+          border: `1px solid ${hovered ? color + "88" : "rgba(255,255,255,0.07)"}`,
+          boxShadow: hovered ? `0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px ${color}22` : "0 4px 24px rgba(0,0,0,0.3)",
+          transition: "border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease",
+          transform: hovered ? "translateY(-6px)" : "translateY(0)",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* ── Character photo ──────────────────────────────────────── */}
+        <div style={{ height: "58%", position: "relative", flexShrink: 0, background: "#0c0a14" }}>
+          {game.characterImage ? (
+            <img
+              src={game.characterImage}
+              alt={game.characterName || game.title}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+            />
+          ) : (
             <div style={{
-              position: "absolute",
-              top: 0, left: 0, right: 0, height: "2px",
-              background: `linear-gradient(90deg, transparent, ${accent}cc, transparent)`,
-            }} />
-
-            {/* Glow orb behind character */}
-            <div style={{
-              position: "absolute",
-              bottom: "-30px", right: "-30px",
-              width: "140px", height: "140px",
-              borderRadius: "50%",
-              background: `radial-gradient(circle, ${accent}18 0%, transparent 70%)`,
-              pointerEvents: "none",
-            }} />
-
-            {/* Faded character image */}
-            {game.characterImage && (
-              <div style={{
-                position: "absolute",
-                bottom: 0, right: "-8px",
-                width: "110px", height: "150px",
-                opacity: 0.14,
-                maskImage: "linear-gradient(135deg, transparent 20%, black 80%)",
-                WebkitMaskImage: "linear-gradient(135deg, transparent 20%, black 80%)",
-                pointerEvents: "none",
-              }}>
-                <Image
-                  src={game.characterImage}
-                  alt=""
-                  fill
-                  style={{ objectFit: "cover", objectPosition: "top center" }}
-                />
-              </div>
-            )}
-
-            {/* Week badge */}
-            <div style={{
-              position: "absolute",
-              top: "1.1rem", right: "1.1rem",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 700, fontSize: "0.55rem",
-              letterSpacing: "0.3em", textTransform: "uppercase",
-              color: accent, opacity: 0.8,
-              background: `${accent}18`,
-              padding: "0.15rem 0.5rem",
-              borderRadius: "100px",
-              border: `1px solid ${accent}28`,
+              width: "100%", height: "100%",
+              background: `linear-gradient(160deg, ${color}14, #0c0a14)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              #{game.week}
+              <span style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "4rem", color: `${color}44`, userSelect: "none" }}>
+                {game.characterName?.[0] ?? "?"}
+              </span>
             </div>
+          )}
 
-            {/* Lock overlay */}
-            {isLocked && (
-              <div style={{
-                position: "absolute", inset: 0, borderRadius: "20px",
-                background: "rgba(8,6,15,0.75)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                backdropFilter: "blur(4px)", zIndex: 3,
-              }}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: "1.4rem", marginBottom: "0.35rem" }}>🔒</div>
-                  <div style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 700, fontSize: "0.8rem", color: accent,
-                  }}>
-                    ${game.price?.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Gradient — image fades into content area */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to bottom, transparent 25%, rgba(12,10,20,0.35) 60%, rgba(12,10,20,0.97) 100%)",
+            pointerEvents: "none",
+          }} />
 
-            {/* Emoji */}
-            <div style={{ fontSize: "1.8rem", marginBottom: "0.65rem" }}>{game.emoji}</div>
+          {/* Game number badge — top left */}
+          <div style={{
+            position: "absolute", top: "0.65rem", left: "0.65rem",
+            background: `${color}18`, border: `1px solid ${color}44`,
+            borderRadius: "100px", padding: "0.18rem 0.55rem",
+          }}>
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color }}>
+              Game {game.week}
+            </span>
+          </div>
 
-            {/* Title */}
-            <h3 style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 700, fontSize: "0.9rem",
-              color: "#fff", lineHeight: 1.35,
-              marginBottom: "0.6rem",
-              paddingRight: "2rem",
+          {/* Free badge — top right */}
+          {game.free && (
+            <div style={{
+              position: "absolute", top: "0.65rem", right: "0.65rem",
+              background: "rgba(0,255,128,0.1)", border: "1px solid rgba(0,255,128,0.28)",
+              borderRadius: "100px", padding: "0.18rem 0.55rem",
             }}>
-              {game.title}
-            </h3>
+              <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#00ff80" }}>
+                Free
+              </span>
+            </div>
+          )}
 
-            {/* Character name */}
-            {game.characterName && (
-              <div style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 700, fontSize: "0.75rem",
-                color: accent, marginBottom: "0.2rem",
-              }}>
-                {game.characterName}
-              </div>
-            )}
-
-            {/* Role */}
+          {/* Character name overlay — bottom of photo */}
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 0.9rem 0.7rem" }}>
+            <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.2rem", color: "#fff", margin: 0, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+              {game.characterName || game.title}
+            </p>
             {game.characterRole && (
-              <div style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "0.67rem",
-                color: "rgba(240,238,255,0.35)",
-                marginBottom: "0.5rem",
-                letterSpacing: "0.02em",
-              }}>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.65rem", color: "rgba(240,238,255,0.45)", margin: "0.15rem 0 0", letterSpacing: "0.06em" }}>
                 {game.characterRole}
-              </div>
-            )}
-
-            {/* Blurb */}
-            {game.characterBlurb && (
-              <p style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "0.75rem",
-                color: "rgba(240,238,255,0.5)",
-                lineHeight: 1.55,
-                flex: 1,
-                maxHeight: "58px",
-                overflow: "hidden",
-              }}>
-                {game.characterBlurb}
               </p>
             )}
+          </div>
+        </div>
 
-            {/* Footer */}
+        {/* ── Content area ─────────────────────────────────────────── */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "0.65rem 0.9rem 0.85rem" }}>
+          {/* Game title */}
+          <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.78rem", color: "#fff", margin: "0 0 0.45rem", lineHeight: 1.3, letterSpacing: "-0.01em" }}>
+            {game.title}
+          </p>
+
+          {/* Hook — sells the problem */}
+          <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "0.83rem", color: "rgba(240,238,255,0.5)", lineHeight: 1.65, flex: 1, margin: "0 0 0.65rem" }}>
+            {hook || game.description}
+          </p>
+
+          {/* Bottom row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: "0.65rem", color: "rgba(240,238,255,0.3)", letterSpacing: "0.06em" }}>
+              {game.duration}
+            </span>
             <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: "1rem",
+              fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.75rem",
+              color: "#08060f", background: hovered ? color : `${color}cc`,
+              padding: "0.35rem 0.9rem", borderRadius: "100px",
+              transition: "background 0.2s ease",
+              letterSpacing: "0.04em",
             }}>
-              <span style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "0.63rem",
-                color: "rgba(240,238,255,0.28)",
-                letterSpacing: "0.08em",
-              }}>
-                {game.free ? "Free" : `$${game.price?.toFixed(2)}`} · {game.duration}
-              </span>
-              <div style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 700, fontSize: "0.7rem",
-                color: "#08060f",
-                background: `linear-gradient(90deg, ${accent}, ${accent}bb)`,
-                padding: "0.32rem 0.8rem",
-                borderRadius: "100px",
-              }}>
-                {isLocked ? "Unlock" : "Play →"}
-              </div>
+              Play →
             </div>
           </div>
-        </Link>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+// ─── Cert node (end of each track) ───────────────────────────────────────────
+
+function CertNode({ track }: { track: typeof TRACKS[0] }) {
+  return (
+    <div style={{
+      width: "140px", height: "436px", flexShrink: 0, scrollSnapAlign: "start",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      gap: "0.65rem", padding: "0 1rem",
+    }}>
+      {/* Connector line */}
+      <div style={{ width: "1px", height: "60px", background: `linear-gradient(180deg, transparent, ${track.color}55)` }} />
+      {/* Badge */}
+      <div style={{
+        width: "56px", height: "56px", borderRadius: "50%",
+        background: `${track.color}12`, border: `1.5px solid ${track.color}66`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        boxShadow: `0 0 24px ${track.color}22`,
+      }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+            stroke={track.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div style={{ textAlign: "center" }}>
+        <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.58rem", letterSpacing: "0.22em", textTransform: "uppercase", color: track.color, margin: "0 0 0.2rem" }}>
+          {track.cert}
+        </p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.55rem", color: "rgba(240,238,255,0.25)", margin: 0, letterSpacing: "0.05em" }}>
+          Certificate
+        </p>
       </div>
     </div>
   )
 }
 
-// ─── Main page component ─────────────────────────────────────────────────────
+// ─── Main component ───────────────────────────────────────────────────────────
 
-export default function PathwayPage({ games }: { games: Game[] }) {
+type Props = { games: Game[] }
+
+export default function PathwayPage({ games }: Props) {
+  const scrollRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  const scroll = (idx: number, dir: number) => {
+    const el = scrollRefs.current[idx]
+    if (!el) return
+    el.scrollBy({ left: dir * 300, behavior: "smooth" })
+  }
+
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingTop: "80px" }}>
+    <div style={{ background: "var(--bg-primary)", minHeight: "100vh", overflowX: "hidden" }}>
 
-      {/* ── HERO ── */}
-      <section style={{
-        padding: "5rem 2rem 4rem",
-        textAlign: "center",
-        maxWidth: "760px",
-        margin: "0 auto",
-      }}>
-        {/* Logo mark */}
+      {/* ── HERO — sells the problem ─────────────────────────────────────── */}
+      <section style={{ padding: "7rem 2rem 5rem", textAlign: "center", maxWidth: "860px", margin: "0 auto" }}>
         <div style={{
-          display: "flex",
-          justifyContent: "center",
-          marginBottom: "1.5rem",
-          animation: "mp-hero-rise 0.8s cubic-bezier(0.16,1,0.3,1) both",
+          fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem",
+          letterSpacing: "0.38em", textTransform: "uppercase",
+          color: "rgba(0,212,240,0.65)", marginBottom: "1.75rem",
         }}>
-          <Image src="/icons/icon.svg" alt="MaestroPlay" width={52} height={52} />
-        </div>
-
-        <div
-          className="label-caps"
-          style={{ color: "var(--cyan)", marginBottom: "1rem" }}
-        >
-          Learning Pathway
+          The Curriculum
         </div>
 
         <h1 style={{
-          fontFamily: "Cormorant Garamond, serif",
-          fontWeight: 700,
-          fontSize: "clamp(2.5rem, 7vw, 4.5rem)",
-          color: "#fff",
-          lineHeight: 1.08,
-          marginBottom: "1.5rem",
+          fontFamily: "Cormorant Garamond, serif", fontWeight: 700,
+          fontSize: "clamp(2.8rem, 7vw, 5rem)", color: "#fff",
+          lineHeight: 1.05, letterSpacing: "-0.02em", marginBottom: "1.5rem",
         }}>
-          Play Your Way to<br />
-          <em style={{
-            background: "linear-gradient(90deg, #00d4f0 0%, #e040fb 50%, #00e676 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}>
-            AI Mastery.
-          </em>
+          Everyone&apos;s using AI.
+          <br />
+          <em style={{ color: "rgba(240,238,255,0.55)" }}>Almost nobody&apos;s using it right.</em>
         </h1>
 
-        <p style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "1.05rem",
-          color: "var(--muted)",
-          lineHeight: 1.75,
-          maxWidth: "560px",
-          margin: "0 auto 2.5rem",
-        }}>
-          Four certification tracks. Twelve story-driven games. Each one 5–10 minutes of pure interactive learning.
-          No lectures. No videos. Just play.
-        </p>
-
-        {/* Track badges */}
+        {/* Problem narrative block */}
         <div style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "0.6rem",
-          justifyContent: "center",
+          maxWidth: "640px", margin: "0 auto 2.5rem",
+          background: "rgba(255,255,255,0.025)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: "16px", padding: "1.5rem 2rem",
+          textAlign: "left",
         }}>
-          {TRACKS.map(t => (
-            <div key={t.id} style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
-              fontSize: "0.65rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: t.color,
-              background: `${t.color}15`,
-              border: `1px solid ${t.color}30`,
-              padding: "0.3rem 0.8rem",
-              borderRadius: "100px",
-            }}>
-              {t.name}
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.55)", lineHeight: 1.85, margin: "0 0 1rem" }}>
+            Jake&apos;s rival released an AI-assisted EP while Jake spent three weeks on a single riff.
+            Carlos&apos;s colleague cleared her inbox in 20 minutes while Carlos drowned in 47 emails.
+            Priya&apos;s replacement will manage 200 workflows where Priya manages 12.
+          </p>
+          <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.1rem", color: "#fff", lineHeight: 1.6, margin: 0 }}>
+            The tool is the same. The method is everything.
+          </p>
+        </div>
+
+        {/* Stats row */}
+        <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "2.5rem" }}>
+          {[
+            { stat: "12", label: "Characters. 12 real situations." },
+            { stat: "4", label: "Tracks. One complete method." },
+            { stat: "0", label: "Code required. Ever." },
+          ].map(({ stat, label }) => (
+            <div key={stat} style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "2.5rem", color: "var(--cyan)", lineHeight: 1 }}>
+                {stat}
+              </div>
+              <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(240,238,255,0.4)", letterSpacing: "0.05em", marginTop: "0.2rem" }}>
+                {label}
+              </div>
             </div>
           ))}
         </div>
+
+        <Link
+          href="/games/welcome-to-ai"
+          style={{
+            display: "inline-block",
+            fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
+            color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+            padding: "0.9rem 2.5rem", borderRadius: "100px", textDecoration: "none",
+            boxShadow: "0 0 32px rgba(0,212,240,0.2)",
+          }}
+        >
+          Start the First Game Free →
+        </Link>
       </section>
 
-      {/* ── TRACKS ── */}
-      <div style={{ paddingBottom: "8rem" }}>
-        {TRACKS.map((track, ti) => {
-          const trackGames = games.filter(g => track.weeks.includes(g.week))
-          if (trackGames.length === 0) return null
+      {/* ── TRACKS ──────────────────────────────────────────────────────────── */}
+      {TRACKS.map((track, ti) => {
+        const trackGames = games.filter(g => track.weeks.includes(g.week))
+        if (trackGames.length === 0) return null
 
-          return (
-            <section
-              key={track.id}
-              style={{
-                borderTop: "1px solid rgba(255,255,255,0.06)",
-                padding: "3.5rem 0 3.5rem",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              {/* Track background glow */}
-              <div style={{
-                position: "absolute",
-                top: "50%", left: "0",
-                transform: "translateY(-50%)",
-                width: "600px", height: "600px",
-                borderRadius: "50%",
-                background: `radial-gradient(circle, ${track.color}09 0%, transparent 65%)`,
-                pointerEvents: "none",
-              }} />
-              <div style={{
-                position: "absolute",
-                top: "50%", right: "-100px",
-                transform: "translateY(-50%)",
-                width: "300px", height: "300px",
-                borderRadius: "50%",
-                background: `radial-gradient(circle, ${track.color}06 0%, transparent 70%)`,
-                pointerEvents: "none",
-              }} />
-
-              <div style={{
-                maxWidth: "1280px",
-                margin: "0 auto",
-                padding: "0 2rem",
-              }}>
-                {/* Track header row */}
-                <div style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  gap: "2rem",
-                  flexWrap: "wrap",
-                  marginBottom: "2.25rem",
+        return (
+          <section
+            key={track.number}
+            style={{ padding: "3.5rem 0 4rem", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            {/* Track header */}
+            <div style={{ padding: "0 2rem", maxWidth: "1400px", margin: "0 auto 1.75rem" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.35rem", flexWrap: "wrap" }}>
+                <span style={{
+                  fontFamily: "Cormorant Garamond, serif", fontWeight: 700,
+                  fontSize: "3.5rem", color: `${track.color}14`, lineHeight: 1,
+                  userSelect: "none",
                 }}>
-                  {/* Left: track info */}
-                  <div>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.65rem",
-                      marginBottom: "0.6rem",
-                    }}>
-                      <div style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontWeight: 900,
-                        fontSize: "0.58rem",
-                        letterSpacing: "0.4em",
-                        textTransform: "uppercase",
-                        color: track.color,
-                        background: `${track.color}18`,
-                        border: `1px solid ${track.color}35`,
-                        padding: "0.2rem 0.65rem",
-                        borderRadius: "100px",
-                      }}>
-                        Track {track.number}
-                      </div>
-                      <span style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontWeight: 600,
-                        fontSize: "0.6rem",
-                        letterSpacing: "0.18em",
-                        textTransform: "uppercase",
-                        color: "rgba(240,238,255,0.3)",
-                      }}>
-                        {trackGames.length} game{trackGames.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-
-                    <h2 style={{
-                      fontFamily: "Cormorant Garamond, serif",
-                      fontWeight: 700,
-                      fontSize: "clamp(1.5rem, 3.5vw, 2.1rem)",
-                      color: "#fff",
-                      lineHeight: 1.15,
-                      marginBottom: "0.5rem",
-                    }}>
-                      {track.name}
-                    </h2>
-
-                    <p style={{
-                      fontFamily: "Inter, sans-serif",
-                      fontSize: "0.875rem",
-                      color: "rgba(240,238,255,0.42)",
-                      lineHeight: 1.7,
-                      maxWidth: "440px",
-                    }}>
-                      {track.description}
-                    </p>
-                  </div>
-
-                  {/* Right: certification badge */}
-                  <div style={{
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.7rem",
-                    background: `${track.color}0e`,
-                    border: `1px solid ${track.color}28`,
-                    borderRadius: "14px",
-                    padding: "0.85rem 1.15rem",
-                    alignSelf: "flex-start",
+                  {track.number}
+                </span>
+                <div>
+                  <h2 style={{
+                    fontFamily: "Inter, sans-serif", fontWeight: 800,
+                    fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)", color: "#fff",
+                    margin: 0, letterSpacing: "-0.02em",
                   }}>
-                    <div style={{
-                      width: "36px", height: "36px",
-                      borderRadius: "50%",
-                      background: `${track.color}20`,
-                      border: `1px solid ${track.color}40`,
-                      display: "flex", alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "1rem",
-                    }}>
-                      🎓
-                    </div>
-                    <div>
-                      <div style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontWeight: 700,
-                        fontSize: "0.72rem",
-                        color: track.color,
-                        letterSpacing: "0.04em",
-                      }}>
-                        {track.certification}
-                      </div>
-                      <div style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: "0.6rem",
-                        color: "rgba(240,238,255,0.28)",
-                        marginTop: "0.15rem",
-                      }}>
-                        Complete all games to earn
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Card row with path line ── */}
-                <div style={{ position: "relative" }}>
-                  {/* Path connector line */}
-                  <div style={{
-                    position: "absolute",
-                    top: "64px",
-                    left: "12px",
-                    right: "12px",
-                    height: "1px",
-                    background: `linear-gradient(90deg, ${track.color}50, ${track.color}20, transparent)`,
-                    pointerEvents: "none",
-                    zIndex: 0,
-                  }} />
-
-                  {/* Scrollable cards */}
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "1.25rem",
-                      overflowX: "auto",
-                      paddingBottom: "1rem",
-                      paddingTop: "0.25rem",
-                      position: "relative",
-                      zIndex: 1,
-                    }}
-                    className="pathway-scroll"
-                  >
-                    {trackGames.map((game) => (
-                      <PathwayCard
-                        key={game.slug}
-                        game={game}
-                        trackColor={track.color}
-                      />
-                    ))}
-
-                    {/* Cert finish node */}
-                    <div style={{
-                      flexShrink: 0,
-                      width: "90px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.5rem",
-                      paddingTop: "0.25rem",
-                    }}>
-                      <div style={{
-                        width: "50px", height: "50px",
-                        borderRadius: "50%",
-                        border: `1.5px dashed ${track.color}50`,
-                        display: "flex", alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "1.25rem",
-                        opacity: 0.55,
-                        background: `${track.color}08`,
-                      }}>
-                        🎓
-                      </div>
-                      <div style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: "0.52rem",
-                        color: track.color,
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                        textAlign: "center",
-                        fontWeight: 700,
-                        lineHeight: 1.5,
-                        opacity: 0.6,
-                      }}>
-                        {track.certification}
-                      </div>
-                    </div>
-                  </div>
+                    {track.name}
+                  </h2>
+                  <p style={{
+                    fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                    fontSize: "1rem", color: `${track.color}99`,
+                    margin: "0.2rem 0 0",
+                  }}>
+                    {track.tagline}
+                  </p>
                 </div>
               </div>
-            </section>
-          )
-        })}
-      </div>
+            </div>
 
-      {/* ── FOOTER CTA ── */}
+            {/* Carousel wrapper */}
+            <div style={{ position: "relative" }}>
+              {/* Left arrow */}
+              <button
+                onClick={() => scroll(ti, -1)}
+                aria-label="Scroll left"
+                style={{
+                  position: "absolute", left: "0.5rem", top: "50%",
+                  transform: "translateY(-50%)", zIndex: 20,
+                  width: "36px", height: "36px", borderRadius: "50%",
+                  background: "rgba(12,10,20,0.85)", border: "1px solid rgba(255,255,255,0.12)",
+                  backdropFilter: "blur(10px)",
+                  color: "rgba(240,238,255,0.7)", cursor: "pointer",
+                  fontFamily: "Inter, sans-serif", fontSize: "1rem",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "border-color 0.2s, color 0.2s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = track.color; e.currentTarget.style.color = track.color }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "rgba(240,238,255,0.7)" }}
+              >
+                ←
+              </button>
+
+              {/* Scrollable row */}
+              <div
+                ref={el => { scrollRefs.current[ti] = el }}
+                style={{
+                  display: "flex",
+                  gap: "1rem",
+                  overflowX: "auto",
+                  scrollSnapType: "x mandatory",
+                  scrollbarWidth: "none",
+                  WebkitOverflowScrolling: "touch",
+                  padding: "0.5rem 3rem",
+                  // Edge fades
+                  maskImage: "linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)",
+                  WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)",
+                } as React.CSSProperties}
+              >
+                {trackGames.map(game => (
+                  <GameCard
+                    key={game.slug}
+                    game={game}
+                    hook={HOOKS[game.week] || game.description}
+                    color={track.color}
+                  />
+                ))}
+                <CertNode track={track} />
+              </div>
+
+              {/* Right arrow */}
+              <button
+                onClick={() => scroll(ti, 1)}
+                aria-label="Scroll right"
+                style={{
+                  position: "absolute", right: "0.5rem", top: "50%",
+                  transform: "translateY(-50%)", zIndex: 20,
+                  width: "36px", height: "36px", borderRadius: "50%",
+                  background: "rgba(12,10,20,0.85)", border: "1px solid rgba(255,255,255,0.12)",
+                  backdropFilter: "blur(10px)",
+                  color: "rgba(240,238,255,0.7)", cursor: "pointer",
+                  fontFamily: "Inter, sans-serif", fontSize: "1rem",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "border-color 0.2s, color 0.2s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = track.color; e.currentTarget.style.color = track.color }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "rgba(240,238,255,0.7)" }}
+              >
+                →
+              </button>
+            </div>
+          </section>
+        )
+      })}
+
+      {/* ── CLOSING CTA ─────────────────────────────────────────────────────── */}
       <section style={{
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-        padding: "5rem 2rem 7rem",
-        textAlign: "center",
+        textAlign: "center", padding: "5rem 2rem",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
       }}>
-        <Image
-          src="/icons/icon.svg"
-          alt="MaestroPlay"
-          width={40}
-          height={40}
-          style={{ marginBottom: "1.5rem", opacity: 0.7 }}
-        />
-        <h2 style={{
-          fontFamily: "Cormorant Garamond, serif",
-          fontWeight: 700,
-          fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-          color: "#fff",
-          lineHeight: 1.15,
-          marginBottom: "1rem",
-        }}>
-          Start free. Play one game.<br />
-          <em style={{ color: "var(--cyan)" }}>See what changes.</em>
-        </h2>
-        <p style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "0.95rem",
-          color: "var(--muted)",
-          marginBottom: "2.5rem",
-          maxWidth: "420px",
-          margin: "0 auto 2.5rem",
-          lineHeight: 1.7,
-        }}>
-          Every track starts with a free game. No account required. Pick a character and start playing.
+        <div style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 300, fontSize: "clamp(1.8rem, 5vw, 3rem)", color: "#fff", lineHeight: 1.2, marginBottom: "0.75rem" }}>
+          The orchestra is ready.
+        </div>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "rgba(240,238,255,0.4)", marginBottom: "2rem" }}>
+          Game 1 is free. No signup. Start in thirty seconds.
         </p>
         <Link
           href="/games/welcome-to-ai"
           style={{
-            display: "inline-flex",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 700,
-            fontSize: "0.95rem",
-            color: "#08060f",
-            background: "linear-gradient(90deg, #00d4f0, #e040fb)",
-            padding: "0.9rem 2.75rem",
-            borderRadius: "100px",
-            textDecoration: "none",
+            fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
+            color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+            padding: "0.9rem 2.5rem", borderRadius: "100px", textDecoration: "none",
           }}
         >
           Play Game 1 Free →
         </Link>
       </section>
-
-      <style>{`
-        .pathway-scroll::-webkit-scrollbar { display: none; }
-        .pathway-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes mp-hero-rise {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   )
 }

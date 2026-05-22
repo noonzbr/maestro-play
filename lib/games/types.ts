@@ -33,12 +33,13 @@ export type PromptChallengeData = {
 
 export type Scene = {
   id: string
-  type: "scenario" | "quiz" | "revelation" | "boss" | "prompt"
+  type: "scenario" | "quiz" | "revelation" | "boss" | "prompt" | "learn"
   character?: string
   location?: string
   scenarioText?: string
   npcLine?: string
   concept?: { title: string; body: string }
+  learnHighlight?: string     // pull-quote shown on "learn" scenes
   dialogue?: DialogueLine[]
   question?: string
   choices?: Choice[]

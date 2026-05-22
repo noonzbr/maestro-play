@@ -208,8 +208,15 @@ export default function GameEngine({ game }: Props) {
   const handleNext = useCallback(() => {
     sound.playClick()
 
-    if (currentScene.type === "revelation") {
-      setTotalXp(prev => prev + currentScene.xpAward)
+    // Award XP immediately for passive scenes (revelation, learn)
+    if (currentScene.type === "revelation" || currentScene.type === "learn") {
+      if (currentScene.xpAward > 0) {
+        setTotalXp(prev => prev + currentScene.xpAward)
+        setLastXp(currentScene.xpAward)
+        setShowXpBurst(true)
+        setBurstKey(k => k + 1)
+        setTimeout(() => setShowXpBurst(false), 1500)
+      }
     }
 
     if (sceneIndex + 1 >= totalScenes) {

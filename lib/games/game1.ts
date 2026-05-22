@@ -29,6 +29,20 @@ export const game1: Game = {
   },
   scenes: [
 
+    // ── LEARN 1: What AI Actually Is ─────────────────────────────────────────
+    {
+      id: "w1-learn-1",
+      type: "learn",
+      location: "BEDROOM · TUESDAY · 11:40 PM",
+      concept: {
+        title: "WHAT AI ACTUALLY IS",
+        body: "AI is not magic. It's not a search engine. It's not a brain. It's a prediction engine — trained on billions of examples of human writing, it learned to predict what words should come next given any starting point. That's it. Which means: what you give it determines everything it gives back.",
+      },
+      scenarioText: "Jake knows what a guitar amp does. You plug in, you turn up the gain, and it takes your signal — exactly your signal — and makes it bigger, richer, louder. A bad input gets a bigger, richer, louder bad output. A great input becomes something that fills a room. AI is an amplifier. Not a composer. Not a judge. Not a magic box that makes things good. It takes whatever you give it and produces the most probable, statistically likely continuation of that input. Which means: 'write me a song' gives you the average of every song it's ever seen. 'Write me a fingerstyle piece in Am, quiet grief building to defiant resolution at 68 BPM' gives you something specific, because you gave it something specific. The amp didn't change. Your signal did.",
+      learnHighlight: "AI amplifies your input. Garbage in, garbage out — but brilliance in, something remarkable out.",
+      xpAward: 25,
+    },
+
     // ── SCENE 1 ──────────────────────────────────────────────────────────────
     {
       id: "w1-s1",
@@ -82,6 +96,20 @@ export const game1: Game = {
       xpAward: 100,
     },
 
+    // ── LEARN 2: Why Most People Get Mediocre Results ────────────────────────
+    {
+      id: "w1-learn-2",
+      type: "learn",
+      location: "SCHOOL HALLWAY · WEDNESDAY · 8:10 AM",
+      concept: {
+        title: "WHY MOST PEOPLE GET MEDIOCRE RESULTS",
+        body: "The single biggest reason AI disappoints people isn't the AI — it's a prompting quality problem. Most people type what they want in the fewest words possible, get a generic result, and conclude the tool doesn't work. The professionals getting remarkable results are writing prompts with context, constraints, and purpose.",
+      },
+      scenarioText: "Here's a thing Tyler never told Jake: his first 50 AI songs were also terrible. He just didn't quit after the first one. He noticed that 'write me a beat' got him a generic four-bar loop. But 'write me a lo-fi hip-hop drum pattern at 85 BPM — laid-back swing, snare slightly behind the beat, no hi-hat on beat four, the feeling of studying at 2am when you should have slept two hours ago' — that got him something he could actually use. The difference was never the tool. It was how much he told it about what he actually needed. Most people try once with a vague prompt, get generic output, and say 'AI isn't that useful.' They're right — with that prompt, it isn't. The people who get remarkable results understand that prompting is a skill, and like every skill, it gets better with practice and specificity.",
+      learnHighlight: "Your prompting skill is the ceiling of your AI output. Raise the ceiling by raising the detail.",
+      xpAward: 25,
+    },
+
     // ── SCENE 2 (NEW) ────────────────────────────────────────────────────────
     {
       id: "w1-s2",
@@ -130,6 +158,20 @@ export const game1: Game = {
         },
       ],
       xpAward: 100,
+    },
+
+    // ── LEARN 3: The Garbage In Garbage Out Principle ───────────────────────
+    {
+      id: "w1-learn-3",
+      type: "learn",
+      location: "MUSIC CLASS · WEDNESDAY · 3:15 PM",
+      concept: {
+        title: "RICHNESS IN, RICHNESS OUT",
+        body: "Every AI output is downstream of your input. Not metaphorically — literally. The model predicts the most likely continuation of exactly what you gave it. Give it vague, get generic. Give it precise and emotional, get something that might actually move people.",
+      },
+      scenarioText: "Señora Vega has a term for it: prompt poverty. It's when someone gives AI as little as possible — 'write a sad song,' 'summarize this,' 'help me with emails' — and then wonders why the output is thin. She's seen it everywhere since AI became mainstream in schools. Students using AI the way they'd use a calculator: press the minimal button, get the output, move on. But AI isn't a calculator. A calculator doesn't need to know why you're adding these numbers. AI needs to know who you are, what the output is for, who will read it, what should and shouldn't be in it, and what tone fits the room. The students who produce genuinely remarkable AI-assisted work aren't the ones with the best ideas. They're the ones who describe their ideas most precisely. Your knowledge of music, your specificity about feeling, your ability to describe exactly what you hear — that's not wasted in the AI age. It's amplified by it.",
+      learnHighlight: "The richer your input, the richer your output. Your expertise is the raw material AI can't generate on its own.",
+      xpAward: 25,
     },
 
     // ── SCENE 3 ──────────────────────────────────────────────────────────────

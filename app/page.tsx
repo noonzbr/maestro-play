@@ -170,7 +170,7 @@ export default function HomePage() {
           <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>The Curriculum</div>
             <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#fff", lineHeight: 1.1 }}>
-              Four Games. One Transformation.
+              The Method Behind the Music.
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1.5rem" }}>

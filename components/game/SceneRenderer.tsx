@@ -243,6 +243,97 @@ function RevelationScene({ scene, onNext, playFireworks }: { scene:Scene; onNext
   )
 }
 
+/* ── Learn scene ──────────────────────────────────────────────────────── */
+function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
+  useEffect(() => { ensureSceneKeyframes() }, [])
+  return (
+    <div style={{ animation: "section-enter 0.5s ease both", paddingBottom: "2rem" }}>
+
+      {/* Concept badge + body */}
+      {scene.concept && (
+        <div style={{ marginBottom: "1.1rem", animation: "section-enter 0.4s 60ms ease both" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "0.55rem",
+            background: "rgba(0,212,240,0.07)", border: "1px solid rgba(0,212,240,0.22)",
+            borderRadius: "100px", padding: "0.3rem 0.9rem", marginBottom: "0.75rem",
+          }}>
+            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--cyan)", boxShadow: "0 0 8px var(--cyan)", flexShrink: 0 }} />
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--cyan)" }}>
+              {scene.concept.title}
+            </span>
+          </div>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "rgba(240,238,255,0.68)", lineHeight: 1.8, margin: 0 }}>
+            {scene.concept.body}
+          </p>
+        </div>
+      )}
+
+      {/* Main educational content */}
+      {scene.scenarioText && (
+        <div style={{
+          background: "rgba(255,255,255,0.025)",
+          borderTop:    "1px solid rgba(0,212,240,0.12)",
+          borderRight:  "1px solid rgba(0,212,240,0.12)",
+          borderBottom: "1px solid rgba(0,212,240,0.12)",
+          borderLeft:   "3px solid var(--cyan)",
+          borderRadius: "0 14px 14px 0",
+          padding: "1rem 1.25rem",
+          marginBottom: "1rem",
+          animation: "section-enter 0.42s 120ms ease both",
+        }}>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.925rem", color: "rgba(240,238,255,0.88)", lineHeight: 1.82, margin: 0 }}>
+            {scene.scenarioText}
+          </p>
+        </div>
+      )}
+
+      {/* Pull-quote highlight */}
+      {scene.learnHighlight && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: "0.85rem",
+          background: "rgba(0,212,240,0.04)", border: "1px solid rgba(0,212,240,0.18)",
+          borderRadius: "14px", padding: "0.9rem 1.1rem",
+          marginBottom: "1.5rem",
+          animation: "section-enter 0.42s 180ms ease both",
+        }}>
+          <div style={{ width: "3px", minHeight: "36px", background: "linear-gradient(180deg,#00d4f0,#e040fb)", borderRadius: "2px", flexShrink: 0 }} />
+          <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.08rem", color: "#fff", lineHeight: 1.5, margin: 0 }}>
+            {scene.learnHighlight}
+          </p>
+        </div>
+      )}
+
+      {/* XP badge + Got it button */}
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", animation: "section-enter 0.42s 240ms ease both" }}>
+        {scene.xpAward > 0 && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: "0.4rem",
+            background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.22)",
+            borderRadius: "100px", padding: "0.28rem 0.75rem",
+          }}>
+            <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "var(--cyan)" }} />
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem", color: "var(--cyan)" }}>+{scene.xpAward} XP</span>
+          </div>
+        )}
+        <button
+          onClick={onNext}
+          style={{
+            marginLeft: "auto",
+            fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
+            color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+            padding: "0.75rem 2.25rem", borderRadius: "100px", border: "none", cursor: "pointer",
+            transition: "transform 0.2s, box-shadow 0.2s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 28px rgba(0,212,240,0.35)" }}
+          onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "" }}
+        >
+          Got it →
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ── Main renderer ────────────────────────────────────────────────────── */
 type Props = {
   scene:         Scene
@@ -259,6 +350,10 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
 
   if (scene.type === "revelation") {
     return <RevelationScene scene={scene} onNext={onNext} playFireworks={playFireworks} />
+  }
+
+  if (scene.type === "learn") {
+    return <LearnScene scene={scene} onNext={onNext} />
   }
 
   const isBoss    = scene.type === "boss"
