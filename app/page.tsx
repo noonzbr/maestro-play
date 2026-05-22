@@ -2,8 +2,7 @@
 
 import dynamic from "next/dynamic"
 import Link from "next/link"
-import { useEffect } from "react"
-import { useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { allGames } from "@/lib/games"
 import GameCard from "@/components/ui/GameCard"
 import Nav from "@/components/ui/Nav"
@@ -85,6 +84,15 @@ function LiveDemo() {
 
 export default function HomePage() {
   useReveal()
+  const carouselRef = useRef<HTMLDivElement>(null)
+
+  const scrollCarousel = useCallback((dir: "left" | "right") => {
+    const el = carouselRef.current
+    if (!el) return
+    const card = el.querySelector<HTMLElement>("div[data-card]")
+    const step = (card?.offsetWidth ?? 320) + 20
+    el.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" })
+  }, [])
 
   return (
     <>
@@ -167,37 +175,87 @@ export default function HomePage() {
 
         {/* GAMES CATALOG */}
         <section style={{ padding: "5rem 0", overflow: "hidden" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: "3rem", padding: "0 2rem" }}>
-            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>The Curriculum</div>
-            <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#fff", lineHeight: 1.1 }}>
-              The Method Behind the Music.
-            </h2>
+          {/* Header row: title left, arrows right */}
+          <div className="reveal" style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            padding: "0 max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
+            marginBottom: "2.5rem",
+            flexWrap: "wrap",
+            gap: "1.5rem",
+          }}>
+            <div>
+              <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>The Curriculum</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                The Method Behind the Music.
+              </h2>
+            </div>
+
+            {/* Arrow buttons */}
+            <div style={{ display: "flex", gap: "0.75rem", paddingBottom: "0.25rem" }}>
+              {(["left", "right"] as const).map(dir => (
+                <button
+                  key={dir}
+                  onClick={() => scrollCarousel(dir)}
+                  style={{
+                    width: "48px", height: "48px",
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1.5px solid rgba(0,212,240,0.35)",
+                    color: "#00d4f0",
+                    fontSize: "1.4rem",
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    backdropFilter: "blur(8px)",
+                    transition: "all 0.2s ease",
+                    fontFamily: "Inter, sans-serif",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "rgba(0,212,240,0.15)"
+                    e.currentTarget.style.borderColor = "#00d4f0"
+                    e.currentTarget.style.boxShadow = "0 0 16px rgba(0,212,240,0.4)"
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.05)"
+                    e.currentTarget.style.borderColor = "rgba(0,212,240,0.35)"
+                    e.currentTarget.style.boxShadow = "none"
+                  }}
+                  aria-label={dir === "left" ? "Scroll left" : "Scroll right"}
+                >
+                  {dir === "left" ? "‹" : "›"}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Carousel wrapper with edge fades */}
+          {/* Carousel track */}
           <div style={{ position: "relative" }}>
-            <div style={{
-              display: "flex",
-              gap: "1.25rem",
-              overflowX: "auto",
-              scrollSnapType: "x mandatory",
-              scrollBehavior: "smooth",
-              WebkitOverflowScrolling: "touch",
-              paddingLeft: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
-              paddingRight: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
-              paddingBottom: "1.5rem",
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-            } as React.CSSProperties}>
+            <div
+              ref={carouselRef}
+              style={{
+                display: "flex",
+                gap: "1.25rem",
+                overflowX: "auto",
+                scrollSnapType: "x mandatory",
+                scrollBehavior: "smooth",
+                WebkitOverflowScrolling: "touch",
+                paddingLeft: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
+                paddingRight: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
+                paddingBottom: "2rem",
+                msOverflowStyle: "none",
+                scrollbarWidth: "none",
+              } as React.CSSProperties}
+            >
               {allGames.map((game) => (
                 <div
                   key={game.slug}
+                  data-card="true"
                   style={{
-                    flex: "0 0 clamp(280px, 28vw, 360px)",
+                    flex: "0 0 clamp(280px, 28vw, 355px)",
+                    height: "540px",
                     scrollSnapAlign: "start",
-                    minHeight: "520px",
-                    display: "flex",
-                    flexDirection: "column",
                   }}
                 >
                   <GameCard game={game} />
@@ -205,28 +263,9 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Left edge fade */}
-            <div style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              bottom: "1.5rem",
-              width: "6rem",
-              background: "linear-gradient(to right, var(--bg-primary) 0%, transparent 100%)",
-              pointerEvents: "none",
-              zIndex: 2,
-            }} />
-            {/* Right edge fade */}
-            <div style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              bottom: "1.5rem",
-              width: "6rem",
-              background: "linear-gradient(to left, var(--bg-primary) 0%, transparent 100%)",
-              pointerEvents: "none",
-              zIndex: 2,
-            }} />
+            {/* Edge fades */}
+            <div style={{ position: "absolute", top: 0, left: 0, bottom: "2rem", width: "5rem", background: "linear-gradient(to right, var(--bg-primary), transparent)", pointerEvents: "none", zIndex: 2 }} />
+            <div style={{ position: "absolute", top: 0, right: 0, bottom: "2rem", width: "5rem", background: "linear-gradient(to left, var(--bg-primary), transparent)", pointerEvents: "none", zIndex: 2 }} />
           </div>
         </section>
 
