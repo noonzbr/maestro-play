@@ -48,7 +48,7 @@ export default function GameCard({ game, purchased }: Props) {
         <div style={{
           position: "relative",
           width: "100%",
-          height: "210px",
+          height: "260px",
           overflow: "hidden",
           flexShrink: 0,
         }}>
@@ -60,7 +60,7 @@ export default function GameCard({ game, purchased }: Props) {
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                objectPosition: "center top",
+                objectPosition: "center 20%",
                 display: "block",
               }}
             />
@@ -87,46 +87,6 @@ export default function GameCard({ game, purchased }: Props) {
             inset: 0,
             background: "linear-gradient(to bottom, rgba(8,6,15,0.05) 0%, rgba(8,6,15,0.5) 65%, rgba(8,6,15,0.97) 100%)",
           }} />
-
-          {/* Week badge — top left */}
-          <div style={{
-            position: "absolute",
-            top: "0.75rem",
-            left: "0.75rem",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 700,
-            fontSize: "0.6rem",
-            letterSpacing: "0.25em",
-            textTransform: "uppercase",
-            color: "#08060f",
-            background: accent,
-            padding: "0.2rem 0.6rem",
-            borderRadius: "100px",
-            zIndex: 2,
-          }}>
-            Week {game.week}
-          </div>
-
-          {/* Free badge — top right */}
-          {game.free && (
-            <div style={{
-              position: "absolute",
-              top: "0.75rem",
-              right: "0.75rem",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 700,
-              fontSize: "0.6rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "#08060f",
-              background: "var(--cyan)",
-              padding: "0.2rem 0.6rem",
-              borderRadius: "100px",
-              zIndex: 2,
-            }}>
-              Free
-            </div>
-          )}
 
           {/* Character name + role — bottom of photo */}
           {game.characterName && (

@@ -44,7 +44,7 @@ function LiveDemo() {
 
   return (
     <div className="glass-card" style={{ borderRadius: "20px", padding: "2rem", height: "100%" }}>
-      <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Live Preview · Game 1</div>
+      <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Live Preview</div>
       <div style={{ background: "rgba(0,212,240,0.05)", border: "1px solid rgba(0,212,240,0.15)", borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem" }}>
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "rgba(240,238,255,0.85)", lineHeight: 1.7 }}>
           Your colleague automated her report in <strong style={{ color: "#fff" }}>4 minutes</strong>. You spent <strong style={{ color: "#fff" }}>3 hours</strong>. Same tool. What does she know?
@@ -166,19 +166,67 @@ export default function HomePage() {
         </section>
 
         {/* GAMES CATALOG */}
-        <section style={{ padding: "5rem 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+        <section style={{ padding: "5rem 0", overflow: "hidden" }}>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: "3rem", padding: "0 2rem" }}>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>The Curriculum</div>
             <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#fff", lineHeight: 1.1 }}>
               The Method Behind the Music.
             </h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1.5rem" }}>
-            {allGames.map((game, i) => (
-              <div key={game.slug} className="reveal" style={{ transitionDelay: `${i * 0.08}s` }}>
-                <GameCard game={game} />
-              </div>
-            ))}
+
+          {/* Carousel wrapper with edge fades */}
+          <div style={{ position: "relative" }}>
+            <div style={{
+              display: "flex",
+              gap: "1.25rem",
+              overflowX: "auto",
+              scrollSnapType: "x mandatory",
+              scrollBehavior: "smooth",
+              WebkitOverflowScrolling: "touch",
+              paddingLeft: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
+              paddingRight: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
+              paddingBottom: "1.5rem",
+              msOverflowStyle: "none",
+              scrollbarWidth: "none",
+            } as React.CSSProperties}>
+              {allGames.map((game) => (
+                <div
+                  key={game.slug}
+                  style={{
+                    flex: "0 0 clamp(280px, 28vw, 360px)",
+                    scrollSnapAlign: "start",
+                    minHeight: "520px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <GameCard game={game} />
+                </div>
+              ))}
+            </div>
+
+            {/* Left edge fade */}
+            <div style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              bottom: "1.5rem",
+              width: "6rem",
+              background: "linear-gradient(to right, var(--bg-primary) 0%, transparent 100%)",
+              pointerEvents: "none",
+              zIndex: 2,
+            }} />
+            {/* Right edge fade */}
+            <div style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: "1.5rem",
+              width: "6rem",
+              background: "linear-gradient(to left, var(--bg-primary) 0%, transparent 100%)",
+              pointerEvents: "none",
+              zIndex: 2,
+            }} />
           </div>
         </section>
 
@@ -194,7 +242,7 @@ export default function HomePage() {
             </p>
             <div className="reveal">
               <Link href="/games/welcome-to-ai" style={{ display: "inline-flex", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.75rem 1.8rem", borderRadius: "100px", textDecoration: "none" }}>
-                Start Game 1 Free →
+                Start Playing Free →
               </Link>
             </div>
           </div>
