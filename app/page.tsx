@@ -84,7 +84,8 @@ function LiveDemo() {
 
 export default function HomePage() {
   useReveal()
-  const carouselRef = useRef<HTMLDivElement>(null)
+  const carouselRef  = useRef<HTMLDivElement>(null)
+  const carouselPaused = useRef(false)
 
   const scrollCarousel = useCallback((dir: "left" | "right") => {
     const el = carouselRef.current
@@ -92,6 +93,20 @@ export default function HomePage() {
     const card = el.querySelector<HTMLElement>("div[data-card]")
     const step = (card?.offsetWidth ?? 320) + 20
     el.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" })
+  }, [])
+
+  // Auto-rotate every 3.5 s, pause on hover
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (carouselPaused.current) return
+      const el = carouselRef.current
+      if (!el) return
+      const card = el.querySelector<HTMLElement>("div[data-card]")
+      const step = (card?.offsetWidth ?? 320) + 20
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10
+      el.scrollBy({ left: atEnd ? -(el.scrollWidth) : step, behavior: "smooth" })
+    }, 3500)
+    return () => clearInterval(id)
   }, [])
 
   return (
@@ -234,6 +249,8 @@ export default function HomePage() {
           <div style={{ position: "relative" }}>
             <div
               ref={carouselRef}
+              onMouseEnter={() => { carouselPaused.current = true }}
+              onMouseLeave={() => { carouselPaused.current = false }}
               style={{
                 display: "flex",
                 gap: "1.25rem",

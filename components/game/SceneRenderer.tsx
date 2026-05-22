@@ -244,75 +244,116 @@ function RevelationScene({ scene, onNext, playFireworks }: { scene:Scene; onNext
 }
 
 /* ── Learn scene ──────────────────────────────────────────────────────── */
+
+// Extract the first crisp sentence to use as a story hook (max 130 chars)
+function storyHook(text?: string): string | null {
+  if (!text) return null
+  const match = text.match(/^.{30,}?[.!?—](?=\s|$)/)
+  const raw = match ? match[0] : text.slice(0, 130)
+  return raw.length > 130 ? raw.slice(0, 130) + "…" : raw
+}
+
 function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
   useEffect(() => { ensureSceneKeyframes() }, [])
-  return (
-    <div style={{ animation: "section-enter 0.5s ease both", paddingBottom: "2rem" }}>
+  const hook = storyHook(scene.scenarioText)
 
-      {/* Concept badge + body */}
+  return (
+    <div style={{ animation: "section-enter 0.45s ease both", paddingBottom: "2rem" }}>
+
+      {/* ── Concept badge ─────────────────────────────── */}
       {scene.concept && (
-        <div style={{ marginBottom: "1.1rem", animation: "section-enter 0.4s 60ms ease both" }}>
+        <div style={{ marginBottom: "1.25rem", animation: "section-enter 0.38s 0ms ease both" }}>
           <div style={{
-            display: "inline-flex", alignItems: "center", gap: "0.55rem",
-            background: "rgba(0,212,240,0.07)", border: "1px solid rgba(0,212,240,0.22)",
-            borderRadius: "100px", padding: "0.3rem 0.9rem", marginBottom: "0.75rem",
+            display: "inline-flex", alignItems: "center", gap: "0.5rem",
+            background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.28)",
+            borderRadius: "100px", padding: "0.28rem 0.9rem", marginBottom: "0.85rem",
           }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--cyan)", boxShadow: "0 0 8px var(--cyan)", flexShrink: 0 }} />
-            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--cyan)" }}>
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--cyan)" }}>
               {scene.concept.title}
             </span>
           </div>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "rgba(240,238,255,0.68)", lineHeight: 1.8, margin: 0 }}>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.92rem", color: "rgba(240,238,255,0.72)", lineHeight: 1.75, margin: 0 }}>
             {scene.concept.body}
           </p>
         </div>
       )}
 
-      {/* Main educational content */}
-      {scene.scenarioText && (
+      {/* ── Story hook — one punchy sentence ──────────── */}
+      {hook && (
         <div style={{
-          background: "rgba(255,255,255,0.025)",
-          borderTop:    "1px solid rgba(0,212,240,0.12)",
-          borderRight:  "1px solid rgba(0,212,240,0.12)",
-          borderBottom: "1px solid rgba(0,212,240,0.12)",
-          borderLeft:   "3px solid var(--cyan)",
-          borderRadius: "0 14px 14px 0",
-          padding: "1rem 1.25rem",
-          marginBottom: "1rem",
-          animation: "section-enter 0.42s 120ms ease both",
+          display: "flex", gap: "0.75rem", alignItems: "flex-start",
+          marginBottom: "1.1rem",
+          animation: "section-enter 0.38s 90ms ease both",
         }}>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.925rem", color: "rgba(240,238,255,0.88)", lineHeight: 1.82, margin: 0 }}>
-            {scene.scenarioText}
+          {/* Dialogue indicator bar */}
+          <div style={{
+            width: "3px", minHeight: "100%", flexShrink: 0, alignSelf: "stretch",
+            background: "linear-gradient(180deg, var(--cyan), #e040fb)",
+            borderRadius: "2px", marginTop: "2px",
+          }} />
+          <p style={{
+            fontFamily: "Cormorant Garamond, serif",
+            fontStyle: "italic",
+            fontSize: "1.05rem",
+            color: "rgba(240,238,255,0.9)",
+            lineHeight: 1.6,
+            margin: 0,
+          }}>
+            "{hook}"
           </p>
         </div>
       )}
 
-      {/* Pull-quote highlight */}
+      {/* ── Key insight — the headline takeaway ───────── */}
       {scene.learnHighlight && (
         <div style={{
-          display: "flex", alignItems: "center", gap: "0.85rem",
-          background: "rgba(0,212,240,0.04)", border: "1px solid rgba(0,212,240,0.18)",
-          borderRadius: "14px", padding: "0.9rem 1.1rem",
-          marginBottom: "1.5rem",
-          animation: "section-enter 0.42s 180ms ease both",
+          background: "linear-gradient(135deg, rgba(0,212,240,0.06) 0%, rgba(224,64,251,0.06) 100%)",
+          border: "1px solid rgba(0,212,240,0.22)",
+          borderRadius: "16px",
+          padding: "1.1rem 1.25rem",
+          marginBottom: "1.75rem",
+          animation: "section-enter 0.38s 170ms ease both",
+          position: "relative",
+          overflow: "hidden",
         }}>
-          <div style={{ width: "3px", minHeight: "36px", background: "linear-gradient(180deg,#00d4f0,#e040fb)", borderRadius: "2px", flexShrink: 0 }} />
-          <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.08rem", color: "#fff", lineHeight: 1.5, margin: 0 }}>
+          {/* Subtle glow corner */}
+          <div style={{
+            position: "absolute", top: 0, right: 0, width: "100px", height: "100px",
+            background: "radial-gradient(circle at top right, rgba(224,64,251,0.12), transparent 70%)",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.58rem",
+            letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--cyan)",
+            marginBottom: "0.5rem", opacity: 0.8,
+          }}>
+            Key Insight
+          </div>
+          <p style={{
+            fontFamily: "Cormorant Garamond, serif",
+            fontStyle: "italic",
+            fontWeight: 600,
+            fontSize: "1.18rem",
+            color: "#fff",
+            lineHeight: 1.45,
+            margin: 0,
+          }}>
             {scene.learnHighlight}
           </p>
         </div>
       )}
 
-      {/* XP badge + Got it button */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", animation: "section-enter 0.42s 240ms ease both" }}>
+      {/* ── XP + Got it ───────────────────────────────── */}
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", animation: "section-enter 0.38s 240ms ease both" }}>
         {scene.xpAward > 0 && (
           <div style={{
             display: "flex", alignItems: "center", gap: "0.4rem",
             background: "rgba(0,212,240,0.08)", border: "1px solid rgba(0,212,240,0.22)",
-            borderRadius: "100px", padding: "0.28rem 0.75rem",
+            borderRadius: "100px", padding: "0.28rem 0.8rem",
           }}>
-            <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "var(--cyan)" }} />
-            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem", color: "var(--cyan)" }}>+{scene.xpAward} XP</span>
+            <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "var(--cyan)", boxShadow: "0 0 6px var(--cyan)" }} />
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.8rem", color: "var(--cyan)" }}>+{scene.xpAward} XP</span>
           </div>
         )}
         <button
@@ -322,10 +363,11 @@ function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
             fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
             color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
             padding: "0.75rem 2.25rem", borderRadius: "100px", border: "none", cursor: "pointer",
+            boxShadow: "0 0 20px rgba(0,212,240,0.25)",
             transition: "transform 0.2s, box-shadow 0.2s",
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 28px rgba(0,212,240,0.35)" }}
-          onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "" }}
+          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.45)" }}
+          onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 0 20px rgba(0,212,240,0.25)" }}
         >
           Got it →
         </button>
