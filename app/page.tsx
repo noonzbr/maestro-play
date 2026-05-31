@@ -482,7 +482,7 @@ export default function HomePage() {
 
         {/* ── PRICING ─────────────────────────────────────────────────────────── */}
         <section style={{ padding: "6rem 2rem", background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+          <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
             <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
               <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Simple Pricing</div>
               <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3.2rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.75rem" }}>
@@ -493,7 +493,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem", alignItems: "stretch" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem", alignItems: "stretch" }}>
+
               {/* Free */}
               <div className="reveal glass-card" style={{ borderRadius: "20px", padding: "2rem", display: "flex", flexDirection: "column" }}>
                 <div style={{ marginBottom: "1.75rem" }}>
@@ -502,10 +503,16 @@ export default function HomePage() {
                     <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "3rem", color: "#fff", letterSpacing: "-0.03em" }}>$0</span>
                     <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.85rem", color: "var(--muted)" }}>forever</span>
                   </div>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "var(--muted)", marginTop: "0.5rem", lineHeight: 1.5 }}>No signup needed. Just play.</p>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "var(--muted)", marginTop: "0.5rem", lineHeight: 1.5 }}>2 games per track. No signup needed.</p>
                 </div>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "2rem" }}>
-                  {["8 free games, instantly", "XP + streak tracking", "AI Fluency Score", "No credit card required"].map((f) => (
+                  {[
+                    "8 free games (2 per track)",
+                    "XP + daily streak tracking",
+                    "AI Fluency Score",
+                    "Conductor Dashboard",
+                    "No credit card required",
+                  ].map((f) => (
                     <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                       <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="rgba(240,238,255,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -536,7 +543,16 @@ export default function HomePage() {
                     <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "var(--muted)", marginTop: "0.5rem", lineHeight: 1.5 }}>Or $249/year — save 28%</p>
                   </div>
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "2rem" }}>
-                    {["All 14 games + future releases", "AI Tutor (Socratic Maestro)", "Full progress dashboard", "Lives + Power-ups system", "Streak Shield protection", "Priority support"].map((f) => (
+                    {[
+                      "All 14 games + every future release",
+                      "AI Tutor — Socratic Maestro",
+                      "FSRS Spaced Repetition reviews",
+                      "LinkedIn-shareable Certificates",
+                      "Full Conductor Dashboard",
+                      "Lives + Power-ups system",
+                      "Streak Shield protection",
+                      "Priority support",
+                    ].map((f) => (
                       <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                         <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "linear-gradient(135deg,#00d4f0,#e040fb)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#08060f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -562,7 +578,14 @@ export default function HomePage() {
                   <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "var(--muted)", marginTop: "0.5rem", lineHeight: 1.5 }}>Volume discounts available.</p>
                 </div>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "2rem" }}>
-                  {["Everything in Pro", "Team progress analytics", "Manager dashboard", "Seat management", "Onboarding support"].map((f) => (
+                  {[
+                    "Everything in Pro",
+                    "Team AI Fluency analytics",
+                    "Manager dashboard",
+                    "Seat management",
+                    "Leaderboards",
+                    "Dedicated onboarding",
+                  ].map((f) => (
                     <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                       <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(123,47,190,0.25)", border: "1px solid rgba(123,47,190,0.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -577,6 +600,58 @@ export default function HomePage() {
                   Contact Us ↗
                 </a>
               </div>
+
+              {/* Simulation — Coming Soon */}
+              <div className="reveal" style={{ borderRadius: "20px", padding: "2px", background: "linear-gradient(135deg, #ffb700, #ff6b35, #e040fb)", transitionDelay: "0.3s", display: "flex", flexDirection: "column", opacity: 0.9 }}>
+                <div style={{ borderRadius: "18px", padding: "2rem", background: "rgba(10,7,20,0.97)", flex: 1, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+                  {/* Shimmer overlay */}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, rgba(255,183,0,0.04) 0%, rgba(255,107,53,0.03) 50%, rgba(224,64,251,0.04) 100%)", pointerEvents: "none" }} />
+
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "rgba(255,183,0,0.12)", border: "1px solid rgba(255,183,0,0.3)", borderRadius: "100px", padding: "0.2rem 0.75rem", marginBottom: "1.25rem", alignSelf: "flex-start" }}>
+                    <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#ffb700" }}>Phase 6 · Coming Soon</span>
+                  </div>
+                  <div style={{ marginBottom: "1.75rem" }}>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#ffb700", marginBottom: "0.75rem" }}>Simulation</div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem" }}>
+                      <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "3rem", color: "#fff", letterSpacing: "-0.03em" }}>$79</span>
+                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.85rem", color: "var(--muted)" }}>/month</span>
+                    </div>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "var(--muted)", marginTop: "0.5rem", lineHeight: 1.5 }}>Or $699/year — save 26%</p>
+                  </div>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "2rem" }}>
+                    {[
+                      "Everything in Pro",
+                      "Full AI Career Simulation",
+                      "LLM-powered workplace NPCs",
+                      "Real promotion + performance loop",
+                      "Personalized skill prerequisite graph",
+                      "The Twist Reveal — your AI mirror",
+                      "Cheat codes that work in real life",
+                    ].map((f) => (
+                      <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                        <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "rgba(255,183,0,0.15)", border: "1px solid rgba(255,183,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#ffb700" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </div>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.83rem", color: "rgba(240,238,255,0.55)" }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button disabled style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#ffb700", background: "rgba(255,183,0,0.08)", border: "1px solid rgba(255,183,0,0.25)", padding: "0.75rem", borderRadius: "100px", cursor: "not-allowed", letterSpacing: "0.02em" }}>
+                    Notify Me When Live →
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Enterprise footnote */}
+            <div className="reveal" style={{ textAlign: "center", marginTop: "2.5rem" }}>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "rgba(240,238,255,0.3)", lineHeight: 1.7 }}>
+                Need white-label, custom scenarios, or enterprise seat licensing?{" "}
+                <a href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(240,238,255,0.55)", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+                  Talk to us about Enterprise ↗
+                </a>
+              </p>
             </div>
           </div>
         </section>
