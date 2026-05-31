@@ -132,7 +132,7 @@ export default function HomePage() {
               You Need to Conduct.
             </h2>
             <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 400, fontSize: "clamp(0.95rem, 2vw, 1.15rem)", color: "rgba(240,238,255,0.65)", marginBottom: "2.5rem", maxWidth: "520px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
-              Gamified AI literacy for professionals. 5 minutes a day. No code required.
+              Gamified AI literacy for professionals. No code required.
             </p>
             <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
               <Link href="/games/welcome-to-ai" style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.85rem 2.2rem", borderRadius: "100px", textDecoration: "none" }}>
