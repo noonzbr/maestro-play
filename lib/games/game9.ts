@@ -29,6 +29,7 @@ export const game9: Game = {
     ],
   },
   aiModel:  "gemini" as const,
+  felipeOutroVideo:   "/videos/felipe-game9.mp4",
   nextGame: {
     slug:         "gemini-cli-unlocked",
     character:    "Sam",

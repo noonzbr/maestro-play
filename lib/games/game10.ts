@@ -30,6 +30,7 @@ export const game10: Game = {
     ],
   },
   aiModel:  "gemini" as const,
+  felipeOutroVideo:   "/videos/felipe-game10.mp4",
   nextGame: {
     slug:         "microsoft-copilot",
     character:    "Jake",

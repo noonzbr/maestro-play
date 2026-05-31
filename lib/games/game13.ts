@@ -44,6 +44,7 @@ export const game13: Game = {
   accentColor:     "#e040fb",
   audioTrack:      "/audio/concrete-riot.mp3",
   aiModel:         "general" as const,
+  felipeOutroVideo:   "/videos/felipe-game13.mp4",
   nextGame: {
     slug:        "welcome-to-ai-v2",
     character:   "Jake",

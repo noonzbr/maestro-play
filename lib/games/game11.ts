@@ -31,6 +31,7 @@ export const game11: Game = {
     "Discover how Microsoft Copilot transforms your daily M365 workflow — Word, Excel, Teams, Outlook — turning hours of admin into minutes of flow.",
   tagline: "The AI already in your computer. Most people never unlock it.",
   aiModel:  "copilot" as const,
+  felipeOutroVideo:   "/videos/felipe-game11.mp4",
   nextGame: {
     slug:         "copilot-studio",
     character:    "Jake",

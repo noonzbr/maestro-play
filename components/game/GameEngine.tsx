@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 
 type Props = { game: Game }
-type GameState = "brand-video" | "video" | "story" | "intro" | "playing" | "answered" | "complete"
+type GameState = "brand-video" | "video" | "story" | "intro" | "playing" | "answered" | "felipe" | "complete"
 
 /* ── Background image map — mirrors NovelScene ──────────────────────────── */
 function getSceneBgImage(location: string): string {
@@ -419,7 +419,7 @@ export default function GameEngine({ game }: Props) {
       }
     }
 
-    if (sceneIndex + 1 >= totalScenes) { setState("complete"); return }
+    if (sceneIndex + 1 >= totalScenes) { completeGame(); return }
 
     // ── Mastery gate: check accuracy before boss scene ──
     const nextScene = game.scenes[sceneIndex + 1]
@@ -439,6 +439,12 @@ export default function GameEngine({ game }: Props) {
     setState("playing")
   }, [sceneIndex, totalScenes, currentScene, sound, game.scenes, quizTotal, quizCorrect])
 
+  /* ── Routes to Felipe outro if available, otherwise straight to EndScreen ── */
+  const completeGame = useCallback(() => {
+    if (game.felipeOutroVideo) setState("felipe")
+    else setState("complete")
+  }, [game.felipeOutroVideo])
+
   const handleBossComplete = useCallback((xpEarned: number) => {
     sound.playClick()
     setTotalXp(prev => prev + xpEarned)
@@ -446,12 +452,12 @@ export default function GameEngine({ game }: Props) {
     setShowXpBurst(true)
     setBurstKey(k => k + 1)
     setTimeout(() => setShowXpBurst(false), 1500)
-    if (sceneIndex + 1 >= totalScenes) { setState("complete"); return }
+    if (sceneIndex + 1 >= totalScenes) { completeGame(); return }
     sound.playTransition()
     setSceneIndex(i => i + 1)
     setSelectedLabel(null)
     setState("playing")
-  }, [sceneIndex, totalScenes, sound])
+  }, [sceneIndex, totalScenes, sound, completeGame])
 
   const handleStart = () => {
     sound.playClick()
@@ -522,6 +528,21 @@ export default function GameEngine({ game }: Props) {
       />
     )
   }
+  /* Felipe Maestro closing video — plays fullscreen before EndScreen */
+  if (state === "felipe" && game.felipeOutroVideo) {
+    return (
+      <VideoIntro
+        src={game.felipeOutroVideo}
+        onComplete={() => setState("complete")}
+        startMusic={() => {}}
+        gameTitle={game.title}
+        gameEmoji={game.emoji}
+        accentColor={game.accentColor}
+        hasAudio={true}
+      />
+    )
+  }
+
   if (state === "complete") {
     return <EndScreen game={game} totalXp={totalXp} streak={streak} />
   }
@@ -1078,7 +1099,7 @@ export default function GameEngine({ game }: Props) {
             setTimeout(() => setShowXpBurst(false), 1500)
             sound.playFireworks()
             if (sceneIndex + 1 >= totalScenes) {
-              setState("complete")
+              completeGame()
             } else {
               sound.playTransition()
               setSceneIndex(i => i + 1)

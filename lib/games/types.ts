@@ -131,6 +131,8 @@ export type Game = {
    */
   introVideo?: string          // e.g. "/videos/g01-intro.mp4"
   endVideo?: string            // e.g. "/videos/g01-end.mp4"
+  /** Felipe Maestro closing video — plays fullscreen between last scene and EndScreen */
+  felipeOutroVideo?: string    // e.g. "/videos/felipe-game1.mp4"
   /**
    * Looping video clip for the protagonist character in dialogue scenes.
    * Only set this for a specific game's character — e.g. Jake in game 1.

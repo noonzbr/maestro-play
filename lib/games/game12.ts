@@ -35,6 +35,7 @@ export const game12: Game = {
     "Learn how Microsoft Copilot Studio lets anyone build custom AI agents — with a knowledge base, personality, and real integrations — without writing code.",
   tagline: "You don't need to code to build AI. You need to think clearly.",
   aiModel:  "copilot" as const,
+  felipeOutroVideo:   "/videos/felipe-game12.mp4",
   nextGame: {
     slug:         "prompt-lab",
     character:    "Maya",

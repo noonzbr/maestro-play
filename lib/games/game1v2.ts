@@ -48,6 +48,7 @@ export const game1v2: Game = {
   audioTrack:     "/audio/concrete-riot.mp3",
   protagonistVideo:"/videos/JakeRocking.mp4",
   aiModel:         "claude",
+  felipeOutroVideo:   "/videos/felipe-game1v2.mp4",
   nextGame: {
     slug:         "how-ai-works",
     character:    "Zoe",

@@ -19,6 +19,7 @@ export const game1: Game = {
   maestroSubline:   "Jake's story is just beginning. The orchestra awaits.",
   introVideo:       "/videos/jake-confession.mp4",
   protagonistVideo: "/videos/JakeRocking.mp4",
+  felipeOutroVideo:   "/videos/felipe-game1.mp4",
   intro: {
     sceneImage: "/images/jakebedroom.png",
     noteOrigin: { bottom: "38%", left: "54%" },

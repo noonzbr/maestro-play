@@ -32,6 +32,7 @@ export const game8: Game = {
     ],
   },
   aiModel:  "chatgpt" as const,
+  felipeOutroVideo:   "/videos/felipe-game8.mp4",
   nextGame: {
     slug:         "gemini-unlocked",
     character:    "Luna",

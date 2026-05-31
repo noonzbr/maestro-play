@@ -32,6 +32,7 @@ export const game7: Game = {
     ],
   },
   aiModel:  "claude" as const,
+  felipeOutroVideo:   "/videos/felipe-game7.mp4",
   nextGame: {
     slug:         "chatgpt-mastery",
     character:    "Alex",

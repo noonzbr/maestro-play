@@ -30,6 +30,7 @@ export const game2: Game = {
     ],
   },
   aiModel:  "general" as const,
+  felipeOutroVideo:   "/videos/felipe-game2.mp4",
   nextGame: {
     slug:         "ai-for-professionals",
     character:    "Carlos",
