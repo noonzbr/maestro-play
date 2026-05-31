@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 
 type Props = { game: Game }
-type GameState = "brand-video" | "video" | "story" | "intro" | "playing" | "answered" | "felipe" | "complete"
+type GameState = "brand-video" | "video" | "story" | "intro" | "playing" | "answered" | "felipe-transition" | "felipe" | "complete"
 
 /* ── Background image map — mirrors NovelScene ──────────────────────────── */
 function getSceneBgImage(location: string): string {
@@ -84,6 +84,76 @@ function CorrectBurst() {
           }} />
         )
       })}
+    </div>
+  )
+}
+
+/* ─── Felipe "Conductor's Strike" transition ──────────────────────────────── */
+function FelipeTransition({ onComplete, accent = "#00d4f0" }: { onComplete: () => void; accent?: string }) {
+  useEffect(() => {
+    const t = setTimeout(onComplete, 1450)
+    return () => clearTimeout(t)
+  }, [onComplete])
+
+  const rings = [0, 200, 400]
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 999,
+      background: "#000",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      overflow: "hidden",
+      animation: "felipe-overlay-in 0.18s ease forwards",
+    }}>
+      {/* Radial boom flash */}
+      <div style={{
+        position: "absolute",
+        width: "220vmax", height: "220vmax",
+        borderRadius: "50%",
+        background: `radial-gradient(circle, #fff 0%, ${accent} 18%, #e040fb 40%, #7b2fbe 60%, transparent 72%)`,
+        animation: "felipe-boom 0.95s cubic-bezier(0.16,1,0.3,1) forwards",
+        pointerEvents: "none",
+      }} />
+
+      {/* Expanding shockwave rings */}
+      {rings.map((delay, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          width: "55vmin", height: "55vmin",
+          borderRadius: "50%",
+          border: `${3 - i}px solid ${i === 0 ? "#fff" : accent}`,
+          opacity: 0,
+          animation: `felipe-ring 0.95s cubic-bezier(0.16,1,0.3,1) ${delay}ms forwards`,
+          pointerEvents: "none",
+        }} />
+      ))}
+
+      {/* ♪ symbol — blooms and dissolves */}
+      <div style={{
+        position: "absolute",
+        top: "50%", left: "50%",
+        fontFamily: "Cormorant Garamond, serif",
+        fontSize: "clamp(5rem, 18vw, 12rem)",
+        fontWeight: 700,
+        color: "#fff",
+        lineHeight: 1,
+        textShadow: `0 0 80px #fff, 0 0 140px ${accent}, 0 0 220px #e040fb`,
+        animation: "felipe-note-pop 1.45s cubic-bezier(0.16,1,0.3,1) forwards",
+        pointerEvents: "none",
+        userSelect: "none",
+      }}>
+        ♪
+      </div>
+
+      {/* Ambient glow orb underneath */}
+      <div style={{
+        position: "absolute",
+        width: "60vmin", height: "60vmin",
+        borderRadius: "50%",
+        background: `radial-gradient(circle, ${accent}55 0%, transparent 70%)`,
+        animation: "felipe-glow-pulse 0.7s ease-in-out infinite",
+        pointerEvents: "none",
+      }} />
     </div>
   )
 }
@@ -439,9 +509,9 @@ export default function GameEngine({ game }: Props) {
     setState("playing")
   }, [sceneIndex, totalScenes, currentScene, sound, game.scenes, quizTotal, quizCorrect])
 
-  /* ── Routes to Felipe outro if available, otherwise straight to EndScreen ── */
+  /* ── Routes through Felipe transition + outro, or straight to EndScreen ───── */
   const completeGame = useCallback(() => {
-    if (game.felipeOutroVideo) setState("felipe")
+    if (game.felipeOutroVideo) setState("felipe-transition")
     else setState("complete")
   }, [game.felipeOutroVideo])
 
@@ -528,6 +598,16 @@ export default function GameEngine({ game }: Props) {
       />
     )
   }
+  /* Conductor's Strike transition — 1.45s boom before Felipe video */
+  if (state === "felipe-transition") {
+    return (
+      <FelipeTransition
+        accent={game.accentColor ?? "#00d4f0"}
+        onComplete={() => setState("felipe")}
+      />
+    )
+  }
+
   /* Felipe Maestro closing video — plays fullscreen before EndScreen */
   if (state === "felipe" && game.felipeOutroVideo) {
     return (

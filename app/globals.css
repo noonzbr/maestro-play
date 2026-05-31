@@ -271,3 +271,35 @@ body:not(.in-game)::before {
 .animate-fade-rise {
   animation: fade-rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ── Felipe Maestro transition — "Conductor's Strike" ────────────────────── */
+@keyframes felipe-boom {
+  0%   { transform: scale(0);    opacity: 1; }
+  35%  { transform: scale(0.7);  opacity: 1; }
+  65%  { transform: scale(1.25); opacity: 0.55; }
+  100% { transform: scale(1.6);  opacity: 0; }
+}
+
+@keyframes felipe-ring {
+  0%   { transform: scale(0.05); opacity: 1; }
+  75%  { transform: scale(2.2);  opacity: 0.25; }
+  100% { transform: scale(2.8);  opacity: 0; }
+}
+
+@keyframes felipe-note-pop {
+  0%   { transform: translate(-50%,-50%) scale(0)   rotate(-25deg); opacity: 0; }
+  28%  { transform: translate(-50%,-50%) scale(1.35) rotate(6deg);  opacity: 1; }
+  58%  { transform: translate(-50%,-50%) scale(1.05) rotate(0deg);  opacity: 1; }
+  85%  { transform: translate(-50%,-50%) scale(1.1)  rotate(-3deg); opacity: 0.85; }
+  100% { transform: translate(-50%,-50%) scale(0.2);                opacity: 0; }
+}
+
+@keyframes felipe-overlay-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes felipe-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
