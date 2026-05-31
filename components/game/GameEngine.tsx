@@ -502,9 +502,8 @@ export default function GameEngine({ game }: Props) {
         src={game.introVideo!}
         onComplete={() => {
           sound.setGameVolume(0.5)
-          // Skip story beats if the game has none — storytelling was in the video
-          if (game.intro?.beats?.length) setState("story")
-          else setState("intro")
+          // Video told the story — always skip beats and go straight to intro card
+          setState("intro")
         }}
         startMusic={() => sound.startAmbient("cinematic", 52)}
         gameTitle={game.title}
