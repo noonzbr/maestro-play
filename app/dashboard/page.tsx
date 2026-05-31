@@ -7,6 +7,7 @@ import { allGames } from "@/lib/games"
 import { Game } from "@/lib/games/types"
 import { useAuth } from "@/context/AuthContext"
 import { supabaseBrowser } from "@/lib/supabase-browser"
+import AnimatedFlame from "@/components/ui/AnimatedFlame"
 
 /* ─── localStorage helpers ──────────────────────────────────────────────── */
 function lsGet(key: string, fallback = 0): number {
@@ -393,6 +394,7 @@ export default function DashboardPage() {
   const [gameXps,  setGameXps]  = useState<Record<number, number>>({})
   const [lastPlay, setLastPlay] = useState("")
   const [syncing,  setSyncing]  = useState(false)
+  const [dueCount, setDueCount] = useState(0)
 
   // Lives
   const [lives,    setLives]    = useState(3)
@@ -542,6 +544,12 @@ export default function DashboardPage() {
           setSyncing(false)
         })
         .catch(() => setSyncing(false))
+
+      // Fetch FSRS due count (non-blocking)
+      fetch("/api/review", { headers: { "Authorization": `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => { if (typeof data.total_due === "number") setDueCount(data.total_due) })
+        .catch(() => {})
     }).catch(() => setSyncing(false))
   }, [user])
 
@@ -729,7 +737,7 @@ export default function DashboardPage() {
                 }}>
                   <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.75rem", color: "#ff9800" }}>
                     {streak > 0
-                      ? `${streak} 🔥 day streak${mounted && shieldActive ? " 🛡️" : ""}`
+                      ? `${streak}🔥 day streak${mounted && shieldActive ? " 🛡️" : ""}`
                       : "Start a streak 🔥"}
                   </span>
                 </div>
@@ -826,7 +834,7 @@ export default function DashboardPage() {
                 Streak
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                <span style={{ fontSize: "1.8rem", animation: "flame-flicker 2.2s ease-in-out infinite", display: "inline-block" }}>🔥</span>
+                <AnimatedFlame size={36} />
                 <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.4rem", color: "#fff", lineHeight: 1 }}>
                   {cStreak}
                 </span>
@@ -887,39 +895,68 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Daily challenge */}
+            {/* Review Due / Daily Practice */}
             <div style={{
-              background: "rgba(10,7,20,0.92)", border: "1px solid rgba(0,212,240,0.18)",
+              background: dueCount > 0 ? "rgba(0,212,240,0.05)" : "rgba(10,7,20,0.92)",
+              border: dueCount > 0 ? "1px solid rgba(0,212,240,0.3)" : "1px solid rgba(0,212,240,0.18)",
               borderRadius: "20px", padding: "1.5rem 1.75rem",
               backdropFilter: "blur(20px)", animation: "dash-up 0.45s 0.25s ease both",
               display: "flex", flexDirection: "column", justifyContent: "space-between",
+              boxShadow: dueCount > 0 ? "0 0 32px rgba(0,212,240,0.08)" : "none",
+              transition: "border-color 0.3s, box-shadow 0.3s",
             }}>
               <div>
-                <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--cyan)", opacity: 0.8, marginBottom: "0.6rem" }}>
-                  Daily Challenge
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem" }}>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--cyan)", opacity: 0.8 }}>
+                    {dueCount > 0 ? "Review Due" : "Daily Practice"}
+                  </div>
+                  {dueCount > 0 && (
+                    <div style={{
+                      fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.6rem",
+                      color: "#08060f", background: "#00d4f0",
+                      borderRadius: "100px", padding: "0.1rem 0.55rem",
+                      letterSpacing: "0.02em",
+                    }}>
+                      {dueCount}
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.05rem", color: "rgba(240,238,255,0.7)", lineHeight: 1.5, marginBottom: "1rem" }}>
-                  &ldquo;The Maestro summons you to the practice room.&rdquo;
+                  {dueCount > 0
+                    ? `${dueCount} concept${dueCount !== 1 ? "s" : ""} ready for spaced repetition review.`
+                    : `"The Maestro summons you to the practice room."`
+                  }
                 </div>
               </div>
-              <div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {dueCount > 0 && (
+                  <Link href="/review" style={{ textDecoration: "none" }}>
+                    <div style={{
+                      display: "inline-flex", alignItems: "center", gap: "0.45rem",
+                      fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem",
+                      color: "#08060f",
+                      background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                      padding: "0.6rem 1.4rem", borderRadius: "100px",
+                      cursor: "pointer", letterSpacing: "0.02em",
+                      boxShadow: "0 0 24px rgba(0,212,240,0.25)",
+                    }}>
+                      🧠 Start Review Session →
+                    </div>
+                  </Link>
+                )}
                 <Link href="/games" style={{ textDecoration: "none" }}>
                   <div style={{
                     display: "inline-flex", alignItems: "center", gap: "0.45rem",
                     fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem",
-                    color: "#08060f",
-                    background: playedToday ? "rgba(88,204,2,0.85)" : "linear-gradient(90deg, #00d4f0, #e040fb)",
+                    color: dueCount > 0 ? "var(--cyan)" : "#08060f",
+                    background: dueCount > 0 ? "rgba(0,212,240,0.08)" : (playedToday ? "rgba(88,204,2,0.85)" : "linear-gradient(90deg, #00d4f0, #e040fb)"),
+                    border: dueCount > 0 ? "1px solid rgba(0,212,240,0.3)" : "none",
                     padding: "0.6rem 1.4rem", borderRadius: "100px",
                     cursor: "pointer", letterSpacing: "0.02em",
-                    boxShadow: "0 0 24px rgba(0,212,240,0.2)",
-                    transition: "transform 0.15s",
                   }}>
-                    {playedToday ? "✓ Played today — play more →" : "Begin today's session →"}
+                    {playedToday ? "✓ Played today — play more →" : "Begin today's game →"}
                   </div>
                 </Link>
-                <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.6rem", color: "var(--muted)", marginTop: "0.6rem" }}>
-                  Spaced repetition challenges unlock soon — keep building your streak
-                </div>
               </div>
             </div>
 

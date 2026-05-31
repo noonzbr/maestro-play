@@ -17,6 +17,7 @@ import SceneEnvironment from "./SceneEnvironment"
 import BossArena from "./BossArena"
 import { useSoundEngine, SoundMood } from "./SoundEngine"
 import AchievementToast, { AchievementId } from "./AchievementToast"
+import XPBurstLottie from "./XPBurstLottie"
 import { useAuth } from "@/context/AuthContext"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 
@@ -42,24 +43,7 @@ function getSceneBgImage(location: string): string {
   return ""   // truly unrecognised — show ambient gradient
 }
 
-function XPBurst({ xp }: { xp: number }) {
-  return (
-    <div style={{
-      position: "fixed",
-      top: "72px",
-      right: "2rem",
-      zIndex: 200,
-      fontFamily: "Inter, sans-serif",
-      fontWeight: 900,
-      fontSize: "1.4rem",
-      color: "#00d4f0",
-      pointerEvents: "none",
-      animation: "xp-burst 1.4s cubic-bezier(0.16,1,0.3,1) forwards",
-    }}>
-      +{xp} XP
-    </div>
-  )
-}
+/* XPBurst replaced by XPBurstLottie import above */
 
 function CorrectBurst() {
   const dots = Array.from({ length: 18 }, (_, i) => i)
@@ -372,6 +356,25 @@ export default function GameEngine({ game }: Props) {
               xpEarned: totalXp,
             }),
           }).catch(e => console.warn("Progress sync error:", e))
+
+          // ── FSRS: create spaced-repetition review cards for this game's concepts ──
+          const concepts = game.scenes
+            .filter(s => s.concept?.title && s.concept?.body)
+            .map(s => ({ title: s.concept!.title, body: s.concept!.body }))
+          if (concepts.length > 0) {
+            fetch("/api/review/create", {
+              method:  "POST",
+              headers: {
+                "Content-Type":  "application/json",
+                "Authorization": `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                gameSlug: game.slug,
+                gameWeek: game.week,
+                concepts,
+              }),
+            }).catch(e => console.warn("Review card creation error:", e))
+          }
         }).catch(() => {})
       }
 
@@ -801,7 +804,7 @@ export default function GameEngine({ game }: Props) {
       }} />
 
       {showBurst    && <CorrectBurst />}
-      {showXpBurst  && <XPBurst xp={lastXp} key={String(burstKey)} />}
+      {showXpBurst  && <XPBurstLottie xp={lastXp} accent={game.accentColor ?? "#ffd740"} key={String(burstKey)} />}
 
       {/* Progress bar */}
       <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: "3px", background: "rgba(255,255,255,0.06)", zIndex: 50 }}>
