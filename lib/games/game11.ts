@@ -30,6 +30,13 @@ export const game11: Game = {
   description:
     "Discover how Microsoft Copilot transforms your daily M365 workflow — Word, Excel, Teams, Outlook — turning hours of admin into minutes of flow.",
   tagline: "The AI already in your computer. Most people never unlock it.",
+  aiModel:  "copilot" as const,
+  nextGame: {
+    slug:         "copilot-studio",
+    character:    "Jake",
+    teaserLine:   "Jake used every Copilot feature Microsoft gave him. Now he wants to BUILD his own. Copilot Studio lets you create custom AI agents — no coding required. The music club is about to get its own AI.",
+    previewImage: "/images/guitarplayer1.png",
+  },
   scenes: [
 
     // ── SCENE 1 ── The Iceberg ────────────────────────────────────────────────
@@ -480,5 +487,127 @@ export const game11: Game = {
         "Jake had been flying the whole time.\n\nHe just hadn't looked at the instrument panel.\n\nAll year, the tools were there: the sparkle icon in Word when he was staring at a blank page at midnight. The Recap tab in Teams after every meeting he scrambled to get notes from. The Copilot sidebar in Excel while he was manually sorting through rows with his eyes. The 'Draft with Copilot' button in Outlook while he was typing the same polite email for the fourth time that week.\n\nHe thought he was working hard. He was just working alone.\n\nA co-pilot doesn't fly the plane for you. It doesn't replace your judgment about when to take off, where to land, or how to navigate when the weather turns. It handles the altitude calculations, the system checks, the routine monitoring — so you can focus on the decisions only you can make.\n\nJake submitted the concert proposal in 11 minutes.\nHe caught his own action item from a meeting he missed.\nHe analysed two years of ticket data in 30 seconds.\nHe sent a thank-you email that actually sounded like him.\n\nThe concert was sold out.\n\nNot because the AI ran the music club.\n\nBecause Jake finally stopped doing the work that was never meant to be done by a person — and started doing the work that only he could do.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w11-compare",
+      type: "ai-compare",
+      character: "Jake",
+      location: "SCHOOL HALLWAY · LAPTOP OPEN",
+      xpAward: 75,
+      aiCompare: {
+        models: ["copilot", "claude", "chatgpt"],
+        headline: "Microsoft Copilot vs Claude vs ChatGPT — For Business Productivity",
+        context: "Jake ran the same productivity tasks through all three. Meeting summaries, email drafts, spreadsheet analysis, document creation. Here's what the real-world comparison looked like.",
+        rows: [
+          {
+            dimension: "Microsoft 365 Native Integration",
+            winner: "Copilot",
+            claude:  "No native M365 integration",
+            chatgpt: "Limited M365 integration",
+            gemini:  "N/A",
+            copilot: "Native in Word, Excel, Teams, Outlook — zero friction",
+            note: "Jake's entire school runs on M365. Copilot is already in every app he uses.",
+          },
+          {
+            dimension: "Meeting Summary & Action Items",
+            winner: "Copilot",
+            claude:  "Excellent at summarizing pasted transcripts",
+            chatgpt: "Excellent at summarizing pasted transcripts",
+            gemini:  "N/A",
+            copilot: "Auto-summarizes Teams meetings, extracts action items, drafts follow-ups",
+            note: "Copilot was in Jake's meeting. It doesn't need a transcript — it heard the meeting.",
+          },
+          {
+            dimension: "Document Drafting Quality",
+            winner: "Claude",
+            claude:  "Best at nuanced, constraint-heavy professional writing",
+            chatgpt: "Excellent drafting; broad capability",
+            gemini:  "N/A",
+            copilot: "Strong M365-context-aware drafting; slightly more templated feel",
+            note: "For a 5-page grant proposal with specific voice requirements — Claude still wins on pure writing quality.",
+          },
+          {
+            dimension: "Excel & Data Analysis",
+            winner: "Copilot",
+            claude:  "Can analyze pasted data; no native Excel integration",
+            chatgpt: "Code Interpreter handles data; requires upload",
+            gemini:  "N/A",
+            copilot: "Native Excel integration — analyzes live spreadsheet data, generates formulas, creates charts",
+            note: "Jake's budget is LIVE in Excel. Copilot analyzes it in place. No exports, no uploads.",
+          },
+          {
+            dimension: "Cross-App Context Synthesis",
+            winner: "Copilot",
+            claude:  "No cross-app context",
+            chatgpt: "No cross-app context",
+            gemini:  "N/A",
+            copilot: "Microsoft Graph: synthesizes across email, calendar, docs, meetings",
+            note: "Copilot knows Jake's calendar, his email thread, and his meeting notes — and can combine them in one response.",
+          },
+        ],
+        verdict: "For M365-native workflows — Copilot wins on integration depth. For standalone writing quality — Claude still leads. Smart M365 users use Copilot for workflow tasks and Claude for high-stakes writing.",
+        question: "Jake needs to summarize 3 weeks of club email threads, calendar entries, and meeting notes into a single status report. Which tool does this with the least friction?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — best at synthesizing complex information into clear summaries",
+            correct: false,
+            feedback: "Claude's synthesis quality is excellent — but it would need Jake to manually compile and paste 3 weeks of emails, calendar data, and meeting notes. That's a lot of friction. The question is about the whole workflow, not just the writing quality.",
+            wrongFeedback: "Claude's synthesis quality is excellent — but it would need Jake to manually compile and paste 3 weeks of emails, calendar data, and meeting notes. That's a lot of friction. The question is about the whole workflow, not just the writing quality.",
+          },
+          {
+            label: "B",
+            text: "Microsoft Copilot — Microsoft Graph already has access to all of Jake's emails, calendar, and meeting notes",
+            correct: true,
+            feedback: "Exactly. Copilot has native access to Jake's M365 data through Microsoft Graph. It can pull his email threads, calendar entries, and meeting notes simultaneously and synthesize them into a status report without a single copy-paste. This is Copilot's home territory.",
+          },
+          {
+            label: "C",
+            text: "ChatGPT — can handle complex multi-source synthesis with browsing",
+            correct: false,
+            feedback: "ChatGPT can't browse Jake's email or calendar — those are private M365 systems. It would need the same manual compilation as Claude. Copilot's Microsoft Graph access is the critical differentiator for this type of cross-app synthesis.",
+            wrongFeedback: "ChatGPT can't browse Jake's email or calendar — those are private M365 systems. It would need the same manual compilation as Claude. Copilot's Microsoft Graph access is the critical differentiator for this type of cross-app synthesis.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w11-handoff",
+      type: "handoff",
+      character: "Jake",
+      location: "SCHOOL HALLWAY · AFTER CLASS",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "Okay — Copilot is everywhere in M365. I get it now. It's not magic, it's integration. The AI already knows your emails, your meetings, your files. You just have to ask.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "But I kept running into the same wall: the AI can answer questions, but it can't PROACTIVELY help people who don't know what to ask.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "Like — 47 students in the music club. Most of them have no idea how to use AI. They need something purpose-built for THEM. A custom AI just for the club.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "So I tried Copilot Studio. No-code AI agent builder. You define what it knows, how it talks, what questions it answers. Built it over a weekend.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "MelodyBot. The music club's own AI. Handles FAQs, rehearsal schedules, equipment booking. Come see how I built it.",
+        },
+      ],
+    },
+
   ],
 }

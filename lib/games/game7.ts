@@ -3,7 +3,8 @@ import { Game } from "./types"
 export const game7: Game = {
   slug: "claude-for-work",
   week: 7,
-  free: true,
+  free: false,
+  price: 4.99,
   title: "Claude for Work — AI That Knows Your Business",
   emoji: "🏢",
   accentColor: "#818cf8",
@@ -29,6 +30,13 @@ export const game7: Game = {
       { type: "dialogue",  speaker: "CEO", text: "I watched our competitor's ops team demo their AI workflow today. Six people doing what we have sixteen doing. Priya, I need to understand why we're not there." },
       { type: "final",     text: "Efficiency is not the enemy of craft. It is the space craft needs to grow." },
     ],
+  },
+  aiModel:  "claude" as const,
+  nextGame: {
+    slug:         "chatgpt-mastery",
+    character:    "Alex",
+    teaserLine:   "Priya built the system. Now Alex is going to show you a completely different AI ecosystem — ChatGPT. Custom GPTs, Canvas, Code Interpreter. Most people only ever see the tip of this iceberg.",
+    previewImage: "/images/alex.png",
   },
   scenes: [
 
@@ -381,5 +389,122 @@ export const game7: Game = {
         "Priya's team stopped getting generic AI output the week she set up the project.\n\nNot because Claude got smarter.\n\nBecause the team finally gave Claude what it needed to stop guessing.\n\nThe custom instructions hold the institutional memory. The uploaded documents hold the company knowledge. The Project holds it all together — so every teammate, every week, works from the same foundation.\n\nThe most powerful thing you can give an AI isn't a better question.\n\nIt's the context that makes every question better.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w7-compare",
+      type: "ai-compare",
+      character: "Priya",
+      location: "OFFICE · TEAM MEETING ROOM",
+      xpAward: 75,
+      aiCompare: {
+        models: ["claude", "chatgpt", "copilot"],
+        headline: "Claude Projects vs ChatGPT Teams vs Copilot — Team AI Showdown",
+        context: "Priya evaluated all three team AI tools before choosing Claude Projects. Here's the honest comparison she presented to her leadership team.",
+        rows: [
+          {
+            dimension: "Shared Context Across Team",
+            winner: "Claude",
+            claude:  "Claude Projects: shared custom instructions + knowledge base per project",
+            chatgpt: "ChatGPT Teams: team workspace but per-user context",
+            copilot: "Microsoft Graph: shared org context via M365 data",
+            note: "Claude Projects lets every team member start from identical institutional context — the biggest consistency win.",
+          },
+          {
+            dimension: "Document Upload & Analysis",
+            winner: "Claude",
+            claude:  "Upload PDFs, docs, data — project-level persistent access",
+            chatgpt: "File upload per conversation; not persistent across team sessions",
+            copilot: "SharePoint/OneDrive integration — deep M365 document access",
+            note: "Priya's team uploads SOPs, client briefs, and policy docs once. Claude accesses them every time.",
+          },
+          {
+            dimension: "Microsoft 365 Native Integration",
+            winner: "Copilot",
+            claude:  "No native M365 integration",
+            chatgpt: "Limited M365 integration",
+            copilot: "Native in Word, Excel, Teams, Outlook — zero friction for M365 shops",
+            note: "If your org is 100% Microsoft, Copilot already knows your calendar, emails, and files.",
+          },
+          {
+            dimension: "Custom AI Personas for Teams",
+            winner: "ChatGPT",
+            claude:  "Custom instructions per Project",
+            chatgpt: "Custom GPTs: fully branded AI personas shareable across team",
+            copilot: "Copilot Studio: build custom agents (separate product)",
+            note: "ChatGPT lets Priya build 'CompanyName Ops Assistant' as a Custom GPT the whole team uses.",
+          },
+          {
+            dimension: "Privacy & Data Security",
+            winner: "Claude",
+            claude:  "Team tier: data not used for training by default",
+            chatgpt: "Teams tier: data not used for training",
+            copilot: "Enterprise: Microsoft compliance and data sovereignty",
+            note: "All three have enterprise privacy tiers. Copilot has the deepest enterprise compliance stack.",
+          },
+        ],
+        verdict: "Claude Projects wins on consistent context and document analysis. Copilot wins for pure M365-native teams. ChatGPT wins for custom AI persona flexibility. Best teams often use two.",
+        question: "Priya's team needs every AI interaction to start from the same foundation of company SOPs and client context — without anyone re-explaining it each session. Which tool solves this best?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude Projects — shared custom instructions and persistent document access at the project level",
+            correct: true,
+            feedback: "Exactly. Claude Projects was built for this exact use case — one set of custom instructions, one shared knowledge base, every team member starts from the same foundation. No re-explaining. No context drift. Consistent output every session.",
+          },
+          {
+            label: "B",
+            text: "Microsoft Copilot — it already knows the company's files through Microsoft Graph",
+            correct: false,
+            feedback: "Copilot's Microsoft Graph access is powerful — but it's reactive (it knows what's in M365) rather than proactive (it doesn't automatically apply specific company SOPs as instructions). Claude Projects lets Priya define exactly what the AI must always know and always follow.",
+            wrongFeedback: "Copilot's Microsoft Graph access is powerful — but it's reactive (it knows what's in M365) rather than proactive (it doesn't automatically apply specific company SOPs as instructions). Claude Projects lets Priya define exactly what the AI must always know and always follow.",
+          },
+          {
+            label: "C",
+            text: "ChatGPT Teams — widest adoption and best ecosystem",
+            correct: false,
+            feedback: "ChatGPT Teams is excellent, and Custom GPTs solve some of this. But at the project context level — where every session starts from shared documents and instructions without manual setup — Claude Projects has a more direct solution for Priya's exact problem.",
+            wrongFeedback: "ChatGPT Teams is excellent, and Custom GPTs solve some of this. But at the project context level — where every session starts from shared documents and instructions without manual setup — Claude Projects has a more direct solution for Priya's exact problem.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w7-handoff",
+      type: "handoff",
+      character: "Priya",
+      location: "OFFICE · END OF DAY",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Priya",
+          avatar: "protagonist" as const,
+          text: "You've seen what happens when you build a brain for your team. That's Claude's world — deep context, professional consistency, team workflows.",
+        },
+        {
+          speaker: "Priya",
+          avatar: "protagonist" as const,
+          text: "But I want you to see something completely different now. There's a whole ecosystem on the other side of the fence. ChatGPT isn't just a chat window — it's a platform.",
+        },
+        {
+          speaker: "Priya",
+          avatar: "protagonist" as const,
+          text: "Alex is a content creator who went deep into it. Custom GPTs, Canvas editor, Code Interpreter, vision — the features most people scroll past because they look complicated.",
+        },
+        {
+          speaker: "Priya",
+          avatar: "protagonist" as const,
+          text: "She mapped out exactly what each feature does and when to use it. Honest review — strengths AND where it falls short. The kind of thing nobody writes on the internet because everyone's either a fanboy or a hater.",
+        },
+        {
+          speaker: "Priya",
+          avatar: "protagonist" as const,
+          text: "Ready to see the other side of the AI world?",
+        },
+      ],
+    },
+
   ],
 }

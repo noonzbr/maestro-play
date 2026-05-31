@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import PWARegister, { PWAInstallBanner } from "@/components/PWARegister"
+import { AuthProvider } from "@/context/AuthContext"
+import AuthModal from "@/components/ui/AuthModal"
 
 export const metadata: Metadata = {
   title: "MaestroPlay — AI Literacy Games",
@@ -20,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="manifest" href="/manifest.json" />
@@ -34,7 +36,10 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className="min-h-full flex flex-col">
-        {children}
+        <AuthProvider>
+          {children}
+          <AuthModal />
+        </AuthProvider>
         <PWARegister />
         <PWAInstallBanner />
       </body>

@@ -3,7 +3,8 @@ import { Game } from "./types"
 export const game3: Game = {
   slug: "ai-for-professionals",
   week: 3,
-  free: true,
+  free: false,
+  price: 4.99,
   title: "AI for Professionals",
   emoji: "⚡",
   icon: "baton" as const,
@@ -28,6 +29,13 @@ export const game3: Game = {
       { type: "dialogue",  speaker: "Diego", text: "I'm booking my next run using AI-generated jazz sessions. Same vibe, zero overhead. Honestly, Carlos — the clubs aren't asking who played the notes anymore." },
       { type: "final",     text: "The music never dies. But the musicians who don't adapt might." },
     ],
+  },
+  aiModel:  "claude" as const,
+  nextGame: {
+    slug:         "the-conductor-test",
+    character:    "Aria",
+    teaserLine:   "The Maestro Method is your foundation. But knowing the method and MASTERING it are different things. Aria is a violinist who's about to put everything to the test — and it's not pretty at first.",
+    previewImage: "/images/aria.png",
   },
   scenes: [
 
@@ -338,6 +346,117 @@ export const game3: Game = {
       type: "revelation",
       revealText: "The musician who learns to conduct commands the whole orchestra. Carlos didn't just learn to use AI — he learned to direct it with the same precision he brings to every note.",
       xpAward: 100,
+    },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w3-compare",
+      type: "ai-compare",
+      character: "Carlos",
+      location: "HOME OFFICE · EVENING",
+      xpAward: 75,
+      aiCompare: {
+        models: ["claude", "chatgpt"],
+        headline: "Claude vs ChatGPT — Which AI Actually Works for Professional Output?",
+        context: "Carlos ran the Maestro Method through both tools. Same prompt structure. Different results. Here's what he found after six months of professional use.",
+        rows: [
+          {
+            dimension: "Following Complex Instructions",
+            winner: "Claude",
+            claude:  "Holds 6–8 simultaneous constraints without dropping any",
+            chatgpt: "Strong at 3–4 constraints; may simplify under complexity",
+            note: "The Maestro Method often has multiple rules at once. Claude rarely drops one.",
+          },
+          {
+            dimension: "Professional Tone Calibration",
+            winner: "Claude",
+            claude:  "Adapts register precisely — executive brief vs. team memo vs. client email",
+            chatgpt: "Good calibration; occasionally over-formal or over-casual",
+            note: "Carlos writes for C-suite clients. Tone errors cost credibility.",
+          },
+          {
+            dimension: "Fact-Checking & Source Reliability",
+            winner: "ChatGPT",
+            claude:  "Acknowledges uncertainty; recommends verification",
+            chatgpt: "Can browse live sources; cites more frequently",
+            note: "Neither AI is a primary source. But ChatGPT's browse makes verification faster.",
+          },
+          {
+            dimension: "Speed for High-Volume Tasks",
+            winner: "ChatGPT",
+            claude:  "Slightly slower on complex multi-step requests",
+            chatgpt: "Faster responses; better for rapid-fire drafting sessions",
+            note: "When Carlos needs 15 email variants in 10 minutes — speed matters.",
+          },
+          {
+            dimension: "Refusing to Hallucinate Statistics",
+            winner: "Claude",
+            claude:  "More likely to say 'I don't have reliable data on this'",
+            chatgpt: "Occasionally confident with unverifiable numbers",
+            note: "Fake statistics in a client brief end careers. Honesty about uncertainty is a feature.",
+          },
+        ],
+        verdict: "For professional documents that carry your name — Claude's precision and honesty about limitations make it the safer default. Use ChatGPT when speed and live research matter more.",
+        question: "Carlos is writing a 2-page strategy memo for a CEO. It needs executive tone, 4 specific constraints, and ZERO made-up statistics. Which tool should he reach for?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — better at holding complex constraints and acknowledging what it doesn't know",
+            correct: true,
+            feedback: "Exactly. An exec memo with your name on it needs two things Claude does particularly well: holding all constraints simultaneously and refusing to confidently hallucinate data. This is exactly the professional use case Claude was built for.",
+          },
+          {
+            label: "B",
+            text: "ChatGPT — faster and can browse for current data",
+            correct: false,
+            feedback: "Speed helps in drafting sprints, not in precision documents. And browsing only matters if you need live data — a strategy memo usually draws on what you already know. The bottleneck here is precision and reliability, not speed.",
+            wrongFeedback: "Speed helps in drafting sprints, not in precision documents. And browsing only matters if you need live data — a strategy memo usually draws on what you already know. The bottleneck here is precision and reliability, not speed.",
+          },
+          {
+            label: "C",
+            text: "Either — they're equivalent for business writing",
+            correct: false,
+            feedback: "Run the same 6-constraint professional prompt through both. Claude typically holds more rules simultaneously and is more likely to say 'I'm not certain about this statistic.' For a document that represents you professionally, those differences matter.",
+            wrongFeedback: "Run the same 6-constraint professional prompt through both. Claude typically holds more rules simultaneously and is more likely to say 'I'm not certain about this statistic.' For a document that represents you professionally, those differences matter.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w3-handoff",
+      type: "handoff",
+      character: "Carlos",
+      location: "HOME OFFICE · WRAPPING UP",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Carlos",
+          avatar: "protagonist" as const,
+          text: "You've got the method now. What, What Not, How, Why. That's your baton. Every time you pick up an AI tool, you conduct with those four pillars.",
+        },
+        {
+          speaker: "Carlos",
+          avatar: "protagonist" as const,
+          text: "But I want to be honest with you — knowing the method and being good at it are very different things. It took me three months before my prompts stopped feeling awkward.",
+        },
+        {
+          speaker: "Carlos",
+          avatar: "protagonist" as const,
+          text: "There's a young violinist — Aria. She learned this same method and then did something smart: she tested it until it broke. And when it broke, she rebuilt it stronger.",
+        },
+        {
+          speaker: "Carlos",
+          avatar: "protagonist" as const,
+          text: "She calls it the Conductor Test. A full exam on every pillar. I'm told it's... humbling. Even for people who think they've got it figured out.",
+        },
+        {
+          speaker: "Carlos",
+          avatar: "protagonist" as const,
+          text: "Ready to find out if you're actually a conductor — or just someone who read the manual?",
+        },
+      ],
     },
 
   ],

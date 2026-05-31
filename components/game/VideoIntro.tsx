@@ -4,25 +4,34 @@ import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 
 type Props = {
+  /** Video to play. Defaults to the global MaestroPlay opener. */
+  src?: string
   onComplete: () => void
   startMusic: () => void
   gameTitle: string
   gameEmoji: string
   accentColor?: string
+  /** If true, shows a "Tap to hear" unmute CTA instead of playing muted silently */
+  hasAudio?: boolean
 }
 
 export default function VideoIntro({
+  src = "/videos/MaestroPlayVideo.mp4",
   onComplete,
   startMusic,
   gameTitle,
   gameEmoji,
   accentColor = "var(--cyan)",
+  hasAudio = false,
 }: Props) {
   const musicStarted = useRef(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoReady, setVideoReady] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
   const [soundOn, setSoundOn] = useState(false)
+  // Videos with audio start muted (browser autoplay policy) until user taps
+  const [videoMuted, setVideoMuted] = useState(true)
+  const [unmuteHint, setUnmuteHint] = useState(hasAudio)
 
   // Inject keyframes for the fallback splash (only once per page)
   useEffect(() => {
@@ -48,6 +57,14 @@ export default function VideoIntro({
       @keyframes vi-sound-pop {
         0%   { opacity:0; transform:translateY(6px); }
         100% { opacity:1; transform:translateY(0); }
+      }
+      @keyframes vi-unmute-pulse {
+        0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.2), 0 0 20px rgba(255,255,255,0.08); transform: scale(1); }
+        50%     { box-shadow: 0 0 0 10px rgba(255,255,255,0), 0 0 32px rgba(255,255,255,0.18); transform: scale(1.04); }
+      }
+      @keyframes vi-unmute-in {
+        from { opacity:0; transform:translateY(14px) scale(0.94); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
       }
     `
     document.head.appendChild(s)
@@ -96,9 +113,9 @@ export default function VideoIntro({
         {/* The video */}
         <video
           ref={videoRef}
-          src="/videos/MaestroPlayVideo.mp4"
+          src={src}
           autoPlay
-          muted
+          muted={videoMuted}
           playsInline
           onCanPlay={handleVideoCanPlay}
           onEnded={handleVideoEnded}
@@ -110,6 +127,71 @@ export default function VideoIntro({
             display: "block",
           }}
         />
+
+        {/* ── Unmute CTA — only for videos with embedded audio ── */}
+        {hasAudio && unmuteHint && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "4.5rem",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 10,
+              animation: "vi-unmute-in 0.55s 0.8s cubic-bezier(0.34,1.1,0.64,1) both",
+            }}
+          >
+            <button
+              onClick={e => {
+                e.stopPropagation()
+                setVideoMuted(false)
+                setUnmuteHint(false)
+                setSoundOn(true)
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.55rem",
+                background: "rgba(255,255,255,0.10)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255,255,255,0.22)",
+                borderRadius: "100px",
+                padding: "0.65rem 1.4rem",
+                cursor: "pointer",
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 700,
+                fontSize: "0.82rem",
+                color: "#fff",
+                letterSpacing: "0.04em",
+                animation: "vi-unmute-pulse 2.2s 1.4s ease-in-out infinite",
+                transition: "background 0.2s, border-color 0.2s",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.18)"
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.4)"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.10)"
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.22)"
+              }}
+            >
+              <span style={{ fontSize: "1rem" }}>🔊</span>
+              Tap to hear Jake
+            </button>
+          </div>
+        )}
+
+        {/* ── Muted indicator (small, top right, before unmuted) ── */}
+        {hasAudio && videoMuted && !unmuteHint === false && (
+          <div style={{
+            position: "absolute", top: "1.5rem", right: "1.5rem",
+            fontFamily: "Inter, sans-serif", fontSize: "0.65rem",
+            color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em",
+            display: "flex", alignItems: "center", gap: "0.35rem",
+          }}>
+            <span>🔇</span> muted
+          </div>
+        )}
 
         {/* Sound-on confirmation */}
         {soundOn && (

@@ -29,6 +29,13 @@ export const game2: Game = {
       { type: "final",     text: "The beat goes on — but the question is who's keeping it now." },
     ],
   },
+  aiModel:  "general" as const,
+  nextGame: {
+    slug:         "ai-for-professionals",
+    character:    "Carlos",
+    teaserLine:   "Knowing HOW the AI works is step one. Now someone needs to actually put it to work. Carlos is a jazz saxophonist who figured out how to use AI in a real professional career — and the framework he built changes everything.",
+    previewImage: "/images/carlos.png",
+  },
   scenes: [
 
     // ── LEARN 1: How AI Actually Predicts Text ────────────────────────────────
@@ -226,5 +233,125 @@ export const game2: Game = {
       ],
       xpAward: 250,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w2-compare",
+      type: "ai-compare",
+      character: "Zoe",
+      location: "MUSIC STUDIO · LAPTOP OPEN",
+      xpAward: 75,
+      aiCompare: {
+        models: ["claude", "chatgpt", "gemini", "copilot"],
+        headline: "Four AI Tools — What Each One Is Actually Built For",
+        context: "Now that you understand how AI works under the hood, it's time to understand why they're not all the same — even though they all use transformers and next-token prediction.",
+        rows: [
+          {
+            dimension: "Creative & Long-Form Writing",
+            winner: "Claude",
+            claude:  "Nuanced, emotionally aware, resists cliché",
+            chatgpt: "Clear and competent, slightly generic",
+            gemini:  "Good; strong on structure",
+            copilot: "Functional; M365-optimized writing",
+            note: "Same architecture — different training emphasis. Claude was tuned to care about quality and nuance.",
+          },
+          {
+            dimension: "Live Web Research",
+            winner: "ChatGPT",
+            claude:  "Limited real-time access",
+            chatgpt: "Browses the web by default in GPT-4o",
+            gemini:  "Deep Google Search integration",
+            copilot: "Bing-powered live search",
+            note: "If you need current events, stock prices, or live data — don't use Claude without a plugin.",
+          },
+          {
+            dimension: "Google Workspace Integration",
+            winner: "Gemini",
+            claude:  "No native Workspace integration",
+            chatgpt: "No native Workspace integration",
+            gemini:  "Native in Gmail, Docs, Drive, Sheets",
+            copilot: "M365 only",
+            note: "If your team lives in Google, Gemini is already inside your tools.",
+          },
+          {
+            dimension: "Microsoft 365 Integration",
+            winner: "Copilot",
+            claude:  "No native M365 integration",
+            chatgpt: "Limited M365 integration",
+            gemini:  "No native M365 integration",
+            copilot: "Native in Word, Excel, Teams, Outlook",
+            note: "If your org runs on Microsoft, Copilot is already in your tools waiting to be activated.",
+          },
+        ],
+        verdict: "Same underlying technology. Different training, different integrations, different strengths. The best AI user knows which instrument to pick up for which song.",
+        question: "Zoe needs to analyze patterns across 50 research papers she already has in Google Drive. Which AI tool is most naturally suited for this?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — best at nuanced comprehension",
+            correct: false,
+            feedback: "Claude is excellent at nuanced analysis — but it doesn't integrate natively with Google Drive. Zoe would need to copy/paste 50 papers manually. That's the wrong tool for this workflow.",
+            wrongFeedback: "Claude is excellent at nuanced analysis — but it doesn't integrate natively with Google Drive. Zoe would need to copy/paste 50 papers manually. That's the wrong tool for this workflow.",
+          },
+          {
+            label: "B",
+            text: "Gemini — native Google Drive integration makes it the natural choice",
+            correct: true,
+            feedback: "Exactly. Gemini lives inside Google Workspace. It can access files in Drive directly, analyze multiple documents in one session, and synthesize patterns across all 50 papers without a single copy-paste. Same AI capability — but the integration removes all the friction.",
+          },
+          {
+            label: "C",
+            text: "ChatGPT — most powerful model overall",
+            correct: false,
+            feedback: "GPT-4o is powerful, but power without integration creates friction. Uploading 50 papers one by one, losing context across sessions — the workflow collapses. Integration beats raw capability here.",
+            wrongFeedback: "GPT-4o is powerful, but power without integration creates friction. Uploading 50 papers one by one, losing context across sessions — the workflow collapses. Integration beats raw capability here.",
+          },
+          {
+            label: "D",
+            text: "Copilot — widest enterprise reach",
+            correct: false,
+            feedback: "Copilot is built for Microsoft 365. Google Drive is not in its native ecosystem. This is a Google workflow — use the Google-native AI.",
+            wrongFeedback: "Copilot is built for Microsoft 365. Google Drive is not in its native ecosystem. This is a Google workflow — use the Google-native AI.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w2-handoff",
+      type: "handoff",
+      character: "Zoe",
+      location: "MUSIC STUDIO · LATE NIGHT",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Zoe",
+          avatar: "protagonist" as const,
+          text: "Okay. You now know what's actually happening inside these things. Next-token prediction. Statistical pattern matching. Context windows. That's the engine.",
+        },
+        {
+          speaker: "Zoe",
+          avatar: "protagonist" as const,
+          text: "But an engine sitting in a garage does nothing. You need someone who knows how to drive it. And I mean — actually drive it. Not just tap the gas and hope.",
+        },
+        {
+          speaker: "Zoe",
+          avatar: "protagonist" as const,
+          text: "There's this saxophonist, Carlos. He's been using AI in his consulting work for months now. Built a whole framework for it. Calls it the Maestro Method.",
+        },
+        {
+          speaker: "Zoe",
+          avatar: "protagonist" as const,
+          text: "He showed me once. I watched him go from a blank page to a full client brief in about 20 minutes. Not because the AI is magic — because he knows exactly what to feed it.",
+        },
+        {
+          speaker: "Zoe",
+          avatar: "protagonist" as const,
+          text: "Go learn his method. What I just gave you is the why. He'll show you the how.",
+        },
+      ],
+    },
+
   ],
 }

@@ -13,10 +13,12 @@ export const game1: Game = {
   characterName:  "Jake",
   characterRole:  "17-year-old guitarist",
   characterBlurb: "A teenage guitarist who discovers AI is his greatest instrument yet",
-  characterImage: "/images/guitarplayer1.png",
-  maestroImage:   "/images/maestroplayer1.png",
-  maestroLine:    "The last time he was just a guitarist...",
-  maestroSubline: "Jake's story is just beginning. The orchestra awaits.",
+  characterImage:   "/images/guitarplayer1.png",
+  maestroImage:     "/images/maestroplayer1.png",
+  maestroLine:      "The last time he was just a guitarist...",
+  maestroSubline:   "Jake's story is just beginning. The orchestra awaits.",
+  introVideo:       "/videos/jake-confession.mp4",
+  protagonistVideo: "/videos/JakeRocking.mp4",
   intro: {
     sceneImage: "/images/jakebedroom.png",
     noteOrigin: { bottom: "38%", left: "54%" },
@@ -340,15 +342,12 @@ export const game1: Game = {
       xpAward: 100,
     },
 
-    // ── SCENE 6 (BOSS) ───────────────────────────────────────────────────────
+    // ── SCENE 6 (BOSS — 5-punch battle) ──────────────────────────────────────
     {
       id: "w1-s6",
       type: "boss",
       character: "Jake",
       location: "PRACTICE ROOM · FRIDAY · 2:14 AM",
-      scenarioText:
-        "Two weeks of experimenting. Three hours every night. Jake has filled a notebook with what works and what doesn't. Tonight, something shifts — the AI stops producing generic output and starts producing exactly what he hears in his head. Not because the AI changed. Because Jake did.",
-      npcLine: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor.",
       dialogue: [
         { speaker: "Jake", avatar: "jake" as const, text: "Two weeks of experiments. Three hours every night. I've filled an entire notebook with what works and what doesn't." },
         { speaker: "AI",   avatar: "npc" as const, npcKey: "ai" as const, text: "Ready for your next prompt." },
@@ -358,35 +357,174 @@ export const game1: Game = {
         { speaker: "AI",   avatar: "npc" as const, npcKey: "ai" as const, text: "Your musical expertise is your advantage. A beginner says 'make it good.' You describe exact texture, tension, and arc." },
         { speaker: "Jake", avatar: "jake" as const, text: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor." },
       ],
-      concept: {
-        title: "Expertise × AI = Force Multiplication",
-        body: "Deep domain knowledge doesn't become obsolete with AI — it becomes a superpower. A musician can describe exactly the texture, tension, and arc of what they want. A beginner can only say 'make it good.' The gap in output is enormous.",
-      },
-      question: "Jake realizes his years of musical training — rhythm, tension, release, dynamics, emotional arc — aren't obsolete in the AI age. They've become his superpower. What did he understand that most people never do?",
-      choices: [
+      bossQuestions: [
+        // ── Round 1: The Orchestra Without a Conductor ──────────────────────
         {
-          label: "A",
-          text: "That AI can now replace his need to practice guitar",
-          correct: false,
-          feedback: "His musical mastery became the vocabulary that lets him conduct AI with a precision no beginner can match. The instrument still matters — it becomes the language.",
+          npcLine: "Just type 'write me a song' — you're done in five minutes.",
+          question: "Tyler has made 50 AI tracks this month. Most are technically fine but interchangeable — no distinct voice, no specific emotion. They could be from any band, any decade. What single change would unlock dramatically different output?",
+          choices: [
+            {
+              label: "A",
+              text: "Switch to a more powerful AI model",
+              correct: false,
+              feedback: "A better instrument doesn't play itself. The bottleneck was never the tool — it's the direction. Give the same model specific direction and everything changes.",
+              wrongFeedback: "A better instrument doesn't play itself. The bottleneck was never the tool — it's the direction. Give the same model specific direction and everything changes.",
+            },
+            {
+              label: "B",
+              text: "Inject specific musical identity, emotional intent, and constraints into every prompt",
+              correct: true,
+              feedback: "Exactly. Generic input produces the average of everything the AI has ever learned. The moment you add who is speaking, what they feel, and what they won't do — the output collapses from infinite to specific.",
+            },
+            {
+              label: "C",
+              text: "Use AI for beats only and write everything else by hand",
+              correct: false,
+              feedback: "Compartmentalizing doesn't solve the root problem. Precision in any prompt — beats, lyrics, arrangement — is what separates generic from specific. The skill transfers everywhere.",
+              wrongFeedback: "Compartmentalizing doesn't solve the root problem. Precision in any prompt — beats, lyrics, arrangement — is what separates generic from specific. The skill transfers everywhere.",
+            },
+            {
+              label: "D",
+              text: "Hire a professional songwriter to review and improve the output",
+              correct: false,
+              feedback: "Post-production can polish edges, but it can't add the specificity that was never in the prompt. Fix the input, not just the output.",
+              wrongFeedback: "Post-production can polish edges, but it can't add the specificity that was never in the prompt. Fix the input, not just the output.",
+            },
+          ],
         },
+        // ── Round 2: The Emotion Gap ────────────────────────────────────────
         {
-          label: "B",
-          text: "That deep expertise makes you a dramatically more powerful AI conductor",
-          correct: true,
-          feedback: "THIS IS THE ENTIRE GAME. A surgeon's clinical knowledge makes them a better medical AI user. A lawyer's case knowledge makes them better at legal AI. Jake's musical ear lets him conduct AI with extraordinary precision. Expertise × AI = force multiplication.",
+          npcLine: "The AI mirrors its conductor. Emotional depth must come from your instructions.",
+          question: "Señora Vega plays an AI string quartet prompted with 'write a sad piece.' It's technically flawless — and emotionally hollow. Jake hears it immediately: 'like a robot trying to cry.' What would have produced something genuinely moving?",
+          choices: [
+            {
+              label: "A",
+              text: "Use an AI model specifically trained on emotional music",
+              correct: false,
+              feedback: "The same model that produced this hollow piece can produce something devastating. The gap is never in the model — it's in what you asked for.",
+              wrongFeedback: "The same model that produced this hollow piece can produce something devastating. The gap is never in the model — it's in what you asked for.",
+            },
+            {
+              label: "B",
+              text: "Ask the AI to 'try harder' or 'make it sadder'",
+              correct: false,
+              feedback: "Vague refinement produces vague improvement. 'Sadder' is still an average of every sad piece ever written. The specific grief of a specific moment is what actually moves people.",
+              wrongFeedback: "Vague refinement produces vague improvement. 'Sadder' is still an average of every sad piece ever written. The specific grief of a specific moment is what actually moves people.",
+            },
+            {
+              label: "C",
+              text: "Describe the exact emotional texture — whose grief, what moment, what feeling refuses to resolve",
+              correct: true,
+              feedback: "'Sad string quartet' lets AI average every sad piece it's ever seen. 'The grief of watching someone you love choose to leave — the chord that reaches but never resolves' — that's a specific human experience, not a genre. Specificity is the only path to genuine emotion.",
+            },
+            {
+              label: "D",
+              text: "Add precise technical details: tempo, key signature, instrument articulations",
+              correct: false,
+              feedback: "Technical specificity helps, but it's not what moves people. A perfect Am piece at 68 BPM can still be emotionally hollow. Emotional specificity — the story behind the sound — is what transforms technique into feeling.",
+              wrongFeedback: "Technical specificity helps, but it's not what moves people. A perfect Am piece at 68 BPM can still be emotionally hollow. Emotional specificity — the story behind the sound — is what transforms technique into feeling.",
+            },
+          ],
         },
+        // ── Round 3: Fast vs. Deep ──────────────────────────────────────────
         {
-          label: "C",
-          text: "That he needs to learn programming to use AI properly",
-          correct: false,
-          feedback: "The most powerful AI users are domain experts — musicians, doctors, writers — who speak to AI in the precise language of their craft. Code is irrelevant.",
+          question: "Tyler made a track in an afternoon that went viral. Jake spent a week on a track that got licensed for a film score. A producer compares their approaches. What's the most likely difference in how they used AI?",
+          choices: [
+            {
+              label: "A",
+              text: "Jake paid for a higher-tier AI subscription",
+              correct: false,
+              feedback: "The tool is identical. The conductor is different.",
+              wrongFeedback: "The tool is identical. The conductor is different.",
+            },
+            {
+              label: "B",
+              text: "Jake got lucky with a client who values slower production",
+              correct: false,
+              feedback: "Film licensing selects for the quality and distinctiveness of the work, not the production timeline. Something caught the music supervisor's ear.",
+              wrongFeedback: "Film licensing selects for the quality and distinctiveness of the work, not the production timeline. Something caught the music supervisor's ear.",
+            },
+            {
+              label: "C",
+              text: "Tyler optimized for speed; Jake applied deep musical knowledge to produce something too specific to be ignored",
+              correct: true,
+              feedback: "Speed is the floor of AI value — Tyler found it fast. The ceiling is what happens when years of domain expertise become the language you use to direct the AI with precision. Jake went looking for the ceiling.",
+            },
+            {
+              label: "D",
+              text: "Tyler's approach will eventually catch up once AI improves",
+              correct: false,
+              feedback: "Better AI doesn't change the fundamental principle — more powerful instruments still don't conduct themselves. Whatever direction you give a stronger model, you get more of. The conductor is still essential.",
+              wrongFeedback: "Better AI doesn't change the fundamental principle — more powerful instruments still don't conduct themselves. Whatever direction you give a stronger model, you get more of. The conductor is still essential.",
+            },
+          ],
         },
+        // ── Round 4: Context Is Your Score ─────────────────────────────────
         {
-          label: "D",
-          text: "That AI will make musicians obsolete within five years",
-          correct: false,
-          feedback: "Musicians who conduct AI become 10× more capable. But the conductor is still essential. The baton doesn't conduct itself.",
+          question: "Jake runs two prompts for the same song verse. Prompt 1: 'Write a verse about heartbreak for my punk band.' Prompt 2: 'Write a verse for a 17-year-old guitarist in a punk band — his ex started a rival band, tone: bitter but still in love, rhyme ABCB, no clichés.' Why is Prompt 2 exponentially more powerful?",
+          choices: [
+            {
+              label: "A",
+              text: "Prompt 2 is longer, so the AI 'tries harder'",
+              correct: false,
+              feedback: "Length is irrelevant. A longer vague prompt still produces vague output. It's not effort — it's information. Relevance beats volume.",
+              wrongFeedback: "Length is irrelevant. A longer vague prompt still produces vague output. It's not effort — it's information. Relevance beats volume.",
+            },
+            {
+              label: "B",
+              text: "The 'avoid clichés' constraint is the critical element",
+              correct: false,
+              feedback: "Negative constraints help, but they're not the primary driver. The bigger shift is giving Jake's identity, the specific emotional situation, and the tone — that context is what tells AI which world to write from.",
+              wrongFeedback: "Negative constraints help, but they're not the primary driver. The bigger shift is giving Jake's identity, the specific emotional situation, and the tone — that context is what tells AI which world to write from.",
+            },
+            {
+              label: "C",
+              text: "Context tells AI which world to write from — collapsing infinite possibilities down to exactly the right one",
+              correct: true,
+              feedback: "Without context, 'heartbreak' could be a thousand songs from a thousand voices. With context, there is only one song — Jake's. The moment the AI knows who is speaking and from what wound, it stops averaging and starts channeling.",
+            },
+            {
+              label: "D",
+              text: "The specific rhyme scheme (ABCB) is what unlocks better structure",
+              correct: false,
+              feedback: "Structural constraints are useful, but a perfect ABCB rhyme scheme can still be completely generic if there's no context about who is singing it and why. Structure without identity is just scaffolding.",
+              wrongFeedback: "Structural constraints are useful, but a perfect ABCB rhyme scheme can still be completely generic if there's no context about who is singing it and why. Structure without identity is just scaffolding.",
+            },
+          ],
+        },
+        // ── Round 5: Expertise × AI = Force Multiplication ─────────────────
+        {
+          npcLine: "Wait... I'm not playing the notes anymore. I'm directing them. I'm the conductor.",
+          question: "Jake and a classmate with no music training both use the same AI tool for the same task. Jake consistently gets output that sounds like a real band with a real emotional arc. His classmate gets competent but generic results. What explains the gap?",
+          choices: [
+            {
+              label: "A",
+              text: "Jake types faster and submits more prompts per session",
+              correct: false,
+              feedback: "Volume of prompting doesn't close this gap. A classmate who submits 1,000 prompts without knowing what a good bridge needs still can't identify what's missing — or ask for it precisely.",
+              wrongFeedback: "Volume of prompting doesn't close this gap. A classmate who submits 1,000 prompts without knowing what a good bridge needs still can't identify what's missing — or ask for it precisely.",
+            },
+            {
+              label: "B",
+              text: "Jake's years of musical training give him the vocabulary to describe exactly what he needs — texture, tension, arc, dynamics — while a non-expert can only say 'make it better'",
+              correct: true,
+              feedback: "THIS IS THE ENTIRE GAME. Expertise becomes the vocabulary you conduct with. Jake hears what's missing and can name it precisely — 'too much reverb on the bridge, the tension never releases at the peak.' That gap in description is the gap in output. Expertise × AI = force multiplication.",
+            },
+            {
+              label: "C",
+              text: "Jake uses longer, more detailed prompts than his classmate",
+              correct: false,
+              feedback: "Precision, not length. A 10-word prompt from someone who knows exactly what they need beats a 200-word prompt from someone who doesn't know what they're listening for.",
+              wrongFeedback: "Precision, not length. A 10-word prompt from someone who knows exactly what they need beats a 200-word prompt from someone who doesn't know what they're listening for.",
+            },
+            {
+              label: "D",
+              text: "The AI performs better for musicians because it was trained primarily on music data",
+              correct: false,
+              feedback: "The AI responds to the precision and specificity of the input, not the identity of who is typing. Jake's results are better because his prompts are better — because he hears what the music needs and can say it.",
+              wrongFeedback: "The AI responds to the precision and specificity of the input, not the identity of who is typing. Jake's results are better because his prompts are better — because he hears what the music needs and can say it.",
+            },
+          ],
         },
       ],
       xpAward: 150,

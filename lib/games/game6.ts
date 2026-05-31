@@ -30,6 +30,13 @@ export const game6: Game = {
       { type: "final",     text: "The bug was never the code. It was always working alone." },
     ],
   },
+  aiModel:  "claude" as const,
+  nextGame: {
+    slug:         "claude-for-work",
+    character:    "Priya",
+    teaserLine:   "Kai made Claude work on his code. Priya made it work for her ENTIRE team. Claude Projects changed how her whole operations department functions — and she's going to show you exactly how.",
+    previewImage: "/images/priya.png",
+  },
   scenes: [
     // ── Scene 1 ── Meet Kai ────────────────────────────────────────────────
     {
@@ -358,5 +365,122 @@ export const game6: Game = {
         "Kai shipped the feature in 40 minutes.\n\nNot because he got faster at typing.\n\nBecause he stopped treating his terminal like a typewriter and started using it like a conversation.\n\nClaude Code didn't write his software. Kai wrote his software — with a partner who never gets tired of reading the whole codebase before touching a single line.\n\nThe bug that took two hours? Fixed in eight minutes.\n\nThe auth refactor he'd been avoiding for weeks? Done before lunch.\n\nThe difference wasn't intelligence. It was interface.\n\nYour terminal is no longer just where you run commands.\n\nIt's where you think out loud with something that can actually build what you're thinking.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w6-compare",
+      type: "ai-compare",
+      character: "Kai",
+      location: "COMPUTER LAB · LATE NIGHT",
+      xpAward: 75,
+      aiCompare: {
+        models: ["claude", "chatgpt", "copilot"],
+        headline: "Claude Code vs ChatGPT vs GitHub Copilot — The Real Dev Tools Comparison",
+        context: "Kai spent two weeks testing all three coding AIs on real tasks. Not toy examples — production features and bug hunts. Here's what actually happened.",
+        rows: [
+          {
+            dimension: "Full Codebase Awareness",
+            winner: "Claude",
+            claude:  "Reads the entire codebase in one session — understands how files interact",
+            chatgpt: "Strong at file-level analysis; requires pasting relevant context",
+            copilot: "IDE-integrated; understands open files + limited workspace context",
+            note: "Kai's bug was in the interaction between 3 files. Claude saw all three simultaneously.",
+          },
+          {
+            dimension: "Inline Code Suggestions (IDE)",
+            winner: "Copilot",
+            claude:  "Terminal-based; no native inline IDE suggestions",
+            chatgpt: "No native IDE integration",
+            copilot: "Native VS Code/JetBrains integration — suggests as you type",
+            note: "For moment-to-moment coding flow, Copilot's inline suggestions are unmatched.",
+          },
+          {
+            dimension: "Complex Refactoring",
+            winner: "Claude",
+            claude:  "Plans the refactor, explains the trade-offs, executes across multiple files",
+            chatgpt: "Strong planning; execution requires copy-paste between files",
+            copilot: "Better at local completions than architectural refactors",
+            note: "Kai's auth refactor touched 7 files. Claude managed the entire operation from the terminal.",
+          },
+          {
+            dimension: "Debugging Speed",
+            winner: "Claude",
+            claude:  "Reads error logs, traces through call stack, hypothesizes root cause",
+            chatgpt: "Strong debugging with pasted context; no live file access",
+            copilot: "Good at spot suggestions; less effective on systemic bugs",
+            note: "The 2-hour bug became an 8-minute bug when Claude could read every relevant file.",
+          },
+          {
+            dimension: "Team/Enterprise Integration",
+            winner: "Copilot",
+            claude:  "Individual terminal tool; no enterprise integration",
+            chatgpt: "Limited enterprise dev tooling",
+            copilot: "GitHub Actions, Azure DevOps, enterprise security features",
+            note: "For teams with enterprise GitHub — Copilot has native CI/CD pipeline integration.",
+          },
+        ],
+        verdict: "For individual deep debugging and refactoring sessions — Claude Code wins. For everyday inline coding flow — Copilot is irreplaceable. Smart developers use both.",
+        question: "Kai needs to trace a bug that's causing a race condition across 5 async functions in 4 different files. Which tool should he reach for?",
+        choices: [
+          {
+            label: "A",
+            text: "GitHub Copilot — it's already in his IDE with full workspace context",
+            correct: false,
+            feedback: "Copilot knows his open files but lacks the agentic ability to trace a race condition across 4 files simultaneously while understanding the async relationships between them. This is a whole-codebase problem.",
+            wrongFeedback: "Copilot knows his open files but lacks the agentic ability to trace a race condition across 4 files simultaneously while understanding the async relationships between them. This is a whole-codebase problem.",
+          },
+          {
+            label: "B",
+            text: "Claude Code — reads all 4 files simultaneously and reasons about their interaction",
+            correct: true,
+            feedback: "Exactly. A race condition between async functions requires understanding the execution order across multiple files simultaneously. Claude Code reads the entire relevant context in one go and can reason about how the pieces interact — the exact scenario where its agentic architecture shines.",
+          },
+          {
+            label: "C",
+            text: "ChatGPT — strongest reasoning model overall",
+            correct: false,
+            feedback: "ChatGPT is excellent at reasoning — but it needs the context pasted in manually. Pasting 4 files of async code, maintaining the context, and iterating is exactly the friction Claude Code eliminates. The tool's ability to READ the files directly is the key advantage here.",
+            wrongFeedback: "ChatGPT is excellent at reasoning — but it needs the context pasted in manually. Pasting 4 files of async code, maintaining the context, and iterating is exactly the friction Claude Code eliminates. The tool's ability to READ the files directly is the key advantage here.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w6-handoff",
+      type: "handoff",
+      character: "Kai",
+      location: "COMPUTER LAB · POST-SHIFT",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Kai",
+          avatar: "protagonist" as const,
+          text: "Okay — so now you know what happens when you give an AI access to your actual files. Not just advice. Real changes. That's a different category of tool.",
+        },
+        {
+          speaker: "Kai",
+          avatar: "protagonist" as const,
+          text: "But I'm one developer. What happens when you need an AI that works for an entire team? Same context. Same rules. Consistent output. Every. Single. Time.",
+        },
+        {
+          speaker: "Kai",
+          avatar: "protagonist" as const,
+          text: "My friend Priya manages an ops team. She figured out Claude Projects — which is like setting up a brain that all of her team members can share.",
+        },
+        {
+          speaker: "Kai",
+          avatar: "protagonist" as const,
+          text: "Upload your company knowledge. Set custom instructions. Every AI interaction starts from the same foundation. No more 'explain our business model for the 400th time.'",
+        },
+        {
+          speaker: "Kai",
+          avatar: "protagonist" as const,
+          text: "The difference between a personal AI tool and a team AI system — Priya lives in that difference every day. Go learn it.",
+        },
+      ],
+    },
+
   ],
 }

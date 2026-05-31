@@ -7,6 +7,7 @@ import { allGames } from "@/lib/games"
 import GameCard from "@/components/ui/GameCard"
 import Nav from "@/components/ui/Nav"
 import Footer from "@/components/ui/Footer"
+import FloatingNotes from "@/components/game/FloatingNotes"
 
 const HeroScene = dynamic(() => import("@/components/three/HeroScene"), { ssr: false })
 
@@ -117,6 +118,10 @@ export default function HomePage() {
         {/* HERO */}
         <section style={{ position: "relative", height: "100vh", minHeight: "700px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
           <HeroScene />
+          {/* Subtle floating musical note particles over Three.js canvas */}
+          <div style={{ position:"absolute", inset:0, zIndex:5, pointerEvents:"none", overflow:"hidden" }}>
+            <FloatingNotes mood="normal" />
+          </div>
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, transparent 30%, rgba(8,6,15,0.85) 100%)", pointerEvents: "none" }} />
           <div style={{ position: "relative", zIndex: 10, textAlign: "center", padding: "0 1.5rem", maxWidth: "800px", animation: "fade-rise 1.2s cubic-bezier(0.16,1,0.3,1) both" }}>
             <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1.5rem" }}>♪ Maestro Play · AI Education Gaming</div>
@@ -144,6 +149,23 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* SOCIAL PROOF BAR */}
+        <div style={{ background:"rgba(0,212,240,0.04)", borderTop:"1px solid rgba(0,212,240,0.1)", borderBottom:"1px solid rgba(0,212,240,0.08)", padding:"1.25rem 2rem" }}>
+          <div style={{ maxWidth:"900px", margin:"0 auto", display:"flex", justifyContent:"center", gap:"clamp(1.5rem,5vw,4rem)", flexWrap:"wrap", alignItems:"center" }}>
+            {[
+              { n:"12", label:"Cinematic games" },
+              { n:"4",  label:"AI skill tracks" },
+              { n:"5min", label:"Per day is all it takes" },
+              { n:"0",  label:"Lines of code required" },
+            ].map(({ n, label }) => (
+              <div key={n} style={{ textAlign:"center" }}>
+                <div style={{ fontFamily:"Inter,sans-serif", fontWeight:900, fontSize:"clamp(1.4rem,3vw,2rem)", color:"#00d4f0", letterSpacing:"-0.02em", lineHeight:1 }}>{n}</div>
+                <div style={{ fontFamily:"Inter,sans-serif", fontSize:"0.65rem", color:"rgba(240,238,255,0.4)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"0.25rem" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* TICKER */}
         <div style={{ background: "var(--bg-secondary)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "0.875rem 0", overflow: "hidden" }}>
           <div style={{ display: "flex", width: "max-content" }} className="animate-ticker">
@@ -169,6 +191,32 @@ export default function HomePage() {
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(240,238,255,0.7)" }}>
                 {tool}
               </span>
+            ))}
+          </div>
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section style={{ padding:"5rem 2rem", maxWidth:"1000px", margin:"0 auto" }}>
+          <div className="reveal" style={{ textAlign:"center", marginBottom:"3.5rem" }}>
+            <div className="label-caps" style={{ color:"var(--cyan)", marginBottom:"0.75rem" }}>How It Works</div>
+            <h2 style={{ fontFamily:"Cormorant Garamond,serif", fontWeight:700, fontSize:"clamp(2rem,5vw,3rem)", color:"#fff", lineHeight:1.1, margin:0 }}>
+              Learning that actually sticks.
+            </h2>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))", gap:"1.25rem" }}>
+            {[
+              { step:"01", icon:"🎭", title:"Enter the story", desc:"Each game drops you inside a real professional's crisis. AI concepts aren't explained — they're lived.", color:"var(--cyan)" },
+              { step:"02", icon:"⚡", title:"Make decisions", desc:"Choose responses, craft prompts, direct the AI. Wrong moves have consequences. Right ones earn XP.", color:"var(--purple)" },
+              { step:"03", icon:"🧠", title:"The Maestro intervenes", desc:"After key moments, your conductor reveals why your choice worked — or didn't. The WHY is the lesson.", color:"var(--pink)" },
+              { step:"04", icon:"🎼", title:"Unlock new skills", desc:"Every game ends with a real skill you can use at work tomorrow. Not theory — a prompt, a framework, a method.", color:"#f0c040" },
+            ].map((s, i) => (
+              <div key={s.step} className="glass-card reveal" style={{ borderRadius:"16px", padding:"1.75rem 1.5rem", transitionDelay:`${i*0.08}s`, position:"relative", overflow:"hidden" }}>
+                {/* Big step number watermark */}
+                <div style={{ position:"absolute", top:"-0.5rem", right:"0.75rem", fontFamily:"Cormorant Garamond,serif", fontWeight:700, fontSize:"4.5rem", color:"rgba(255,255,255,0.03)", lineHeight:1, userSelect:"none" }}>{s.step}</div>
+                <div style={{ fontSize:"1.8rem", marginBottom:"1rem" }}>{s.icon}</div>
+                <h3 style={{ fontFamily:"Inter,sans-serif", fontWeight:800, fontSize:"0.95rem", color:s.color, marginBottom:"0.65rem", letterSpacing:"-0.01em" }}>{s.title}</h3>
+                <p style={{ fontFamily:"Inter,sans-serif", fontSize:"0.825rem", color:"rgba(240,238,255,0.55)", lineHeight:1.7, margin:0 }}>{s.desc}</p>
+              </div>
             ))}
           </div>
         </section>
@@ -337,22 +385,9 @@ export default function HomePage() {
               <div style={{ width: "260px", height: "300px", borderRadius: "20px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", padding: "3px" }}>
                 <div style={{ width: "100%", height: "100%", borderRadius: "18px", overflow: "hidden", background: "var(--bg-secondary)" }}>
                   <img
-                    src="/images/felipe.jpg"
+                    src="/images/maestroplayer1.png"
                     alt="Felipe Maestro"
                     style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }}
-                    onError={e => {
-                      // Fallback if image not yet placed
-                      const t = e.currentTarget
-                      t.style.display = "none"
-                      const parent = t.parentElement
-                      if (parent) {
-                        parent.style.display = "flex"
-                        parent.style.alignItems = "center"
-                        parent.style.justifyContent = "center"
-                        parent.style.fontSize = "5rem"
-                        parent.innerHTML = "🎵"
-                      }
-                    }}
                   />
                 </div>
               </div>
@@ -374,6 +409,35 @@ export default function HomePage() {
             <a className="reveal" href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "rgba(255,255,255,0.9)", padding: "0.6rem 1.4rem", borderRadius: "100px", textDecoration: "none", transition: "opacity 0.2s" }}>
               Learn from Felipe ↗
             </a>
+          </div>
+        </section>
+
+        {/* WHAT YOU'LL LEARN — outcome grid */}
+        <section style={{ padding:"5rem 2rem", maxWidth:"960px", margin:"0 auto" }}>
+          <div className="reveal" style={{ textAlign:"center", marginBottom:"3rem" }}>
+            <div className="label-caps" style={{ color:"var(--muted)", marginBottom:"0.75rem" }}>What You Walk Away With</div>
+            <h2 style={{ fontFamily:"Cormorant Garamond,serif", fontWeight:700, fontSize:"clamp(2rem,5vw,3rem)", color:"#fff", lineHeight:1.1, margin:0 }}>
+              Real skills. Not certificates.
+            </h2>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"0.9rem" }}>
+            {[
+              "Write prompts that actually work — every time",
+              "Know when to trust AI output and when to challenge it",
+              "Build automation pipelines without touching code",
+              "Use Claude, ChatGPT & Copilot at a professional level",
+              "Explain AI limitations to your team without sounding technical",
+              "Design prompts that get consistent, repeatable results",
+            ].map((skill, i) => (
+              <div key={i} className="reveal" style={{ display:"flex", alignItems:"flex-start", gap:"0.75rem", padding:"1rem 1.25rem", background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:"12px", transitionDelay:`${i*0.06}s` }}>
+                <div style={{ width:"20px", height:"20px", borderRadius:"50%", background:"linear-gradient(135deg,#00d4f0,#e040fb)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:"0.05rem" }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 13L9 17L19 7" stroke="#08060f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <span style={{ fontFamily:"Inter,sans-serif", fontSize:"0.875rem", color:"rgba(240,238,255,0.75)", lineHeight:1.5 }}>{skill}</span>
+              </div>
+            ))}
           </div>
         </section>
 

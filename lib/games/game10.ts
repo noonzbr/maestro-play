@@ -3,7 +3,8 @@ import { Game } from "./types"
 export const game10: Game = {
   slug: "gemini-cli-unlocked",
   week: 10,
-  free: true,
+  free: false,
+  price: 4.99,
   title: "Gemini CLI — AI for the Command Line",
   emoji: "⚡",
   accentColor: "#f59e0b",
@@ -27,6 +28,13 @@ export const game10: Game = {
       { type: "dialogue",  speaker: "Riya", text: "I finished the whole migration in eleven minutes. Gemini CLI read every file, caught three pattern variants I hadn't noticed, and asked before it touched anything. Sam, when did you last ship something this week?" },
       { type: "final",     text: "The engineer who automates the mechanical frees the human to do the irreplaceable." },
     ],
+  },
+  aiModel:  "gemini" as const,
+  nextGame: {
+    slug:         "microsoft-copilot",
+    character:    "Jake",
+    teaserLine:   "Sam automated the terminal. Now Jake's back — and this time he's dealing with a totally different world: Microsoft 365. Copilot is hiding in every app his school uses, and most people have no idea it's there.",
+    previewImage: "/images/guitarplayer1.png",
   },
   scenes: [
     // ── Scene 1 ── Meet Sam ───────────────────────────────────────────────────
@@ -363,5 +371,127 @@ export const game10: Game = {
         "Sam migrated 47 config files in 11 minutes.\n\nNot because Sam got faster.\n\nBecause Sam finally stopped doing work a machine should do and started doing work only Sam can do.\n\nThe config migration that would have taken an afternoon — and introduced at least three subtle errors — was done before the second cup of coffee. The duplicate key that would have caused a 3am incident was caught before the file was written.\n\nThe terminal didn't get smarter.\n\nThe engineer using it did.\n\nGemini CLI doesn't replace the instinct to notice something is wrong, the experience to know why, or the judgment to decide what to do next. It handles the part that was always mechanical — reading every file, applying a pattern consistently, catching the thing you'd have missed on file 43 of 47.\n\nThat's always been the whole point.\n\nThe best engineers aren't the ones who can do the most tedious work the fastest.\n\nThey're the ones who know which work shouldn't be done by a person at all.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w10-compare",
+      type: "ai-compare",
+      character: "Sam",
+      location: "SERVER ROOM · TERMINAL OPEN",
+      xpAward: 75,
+      aiCompare: {
+        models: ["gemini", "claude", "copilot"],
+        headline: "Gemini CLI vs Claude Code vs GitHub Copilot — Terminal AI Showdown",
+        context: "Sam evaluated all three for DevOps and infrastructure automation. Real tasks: bulk file migrations, CI/CD pipeline scripts, security audits. Here's the operational comparison.",
+        rows: [
+          {
+            dimension: "Bulk File Operations",
+            winner: "Gemini",
+            claude:  "Strong at file operations; requires Claude Code CLI setup",
+            chatgpt: "N/A",
+            gemini:  "Gemini CLI: processes entire directories in bulk natively",
+            copilot: "IDE-focused; limited bulk terminal operations",
+            note: "47 config files in 11 minutes. Gemini CLI's batch processing is purpose-built for this.",
+          },
+          {
+            dimension: "Codebase-Wide Refactoring",
+            winner: "Claude",
+            claude:  "Claude Code: reads entire repo, plans refactors across all files",
+            chatgpt: "N/A",
+            gemini:  "Strong; handles large codebases via 1M context",
+            copilot: "Good at local refactors; less effective for cross-repository changes",
+            note: "For complex architectural refactors touching many files — Claude Code's agentic planning wins.",
+          },
+          {
+            dimension: "CI/CD Pipeline Integration",
+            winner: "Copilot",
+            claude:  "No native GitHub Actions integration",
+            chatgpt: "N/A",
+            gemini:  "Gemini CLI headless mode: can run in CI/CD pipelines",
+            copilot: "Native GitHub Actions, Azure Pipelines, enterprise enterprise toolchain",
+            note: "For automated PR reviews and pipeline agents — Copilot has the deepest GitHub integration.",
+          },
+          {
+            dimension: "Google Cloud Integration",
+            winner: "Gemini",
+            claude:  "No native GCP integration",
+            chatgpt: "N/A",
+            gemini:  "Native GCP tooling — natural fit for Google Cloud infrastructure",
+            copilot: "Azure-native; limited GCP support",
+            note: "Sam's team runs on GCP. Gemini CLI is home turf.",
+          },
+          {
+            dimension: "Security Audit Automation",
+            winner: "Claude",
+            claude:  "Claude Code: reads entire codebase, identifies security patterns systematically",
+            chatgpt: "N/A",
+            gemini:  "Gemini CLI: can run automated security scans with scripts",
+            copilot: "Copilot security features focused on inline code suggestions",
+            note: "For a full automated security audit across a repo — Claude Code's systematic reading advantage shows.",
+          },
+        ],
+        verdict: "Gemini CLI for Google Cloud + bulk file operations. Claude Code for deep codebase reasoning and refactoring. Copilot for GitHub-native CI/CD integration. DevOps pros use all three strategically.",
+        question: "Sam needs to automatically review every new PR for security vulnerabilities before it merges, running as part of the GitHub Actions CI/CD pipeline. Which tool fits this use case best?",
+        choices: [
+          {
+            label: "A",
+            text: "Gemini CLI in headless mode — can run automated tasks in pipelines",
+            correct: false,
+            feedback: "Gemini CLI's headless mode is powerful for automation — but it lacks the native GitHub Actions integration that makes Copilot a natural fit for PR review automation in a GitHub workflow. Integration depth matters here.",
+            wrongFeedback: "Gemini CLI's headless mode is powerful for automation — but it lacks the native GitHub Actions integration that makes Copilot a natural fit for PR review automation in a GitHub workflow. Integration depth matters here.",
+          },
+          {
+            label: "B",
+            text: "GitHub Copilot — native GitHub Actions integration designed for exactly this workflow",
+            correct: true,
+            feedback: "Right. Copilot's native GitHub integration means PR review automation is a first-class workflow — not a workaround. For CI/CD pipeline agents that live inside GitHub Actions, Copilot has the deepest, most reliable integration.",
+          },
+          {
+            label: "C",
+            text: "Claude Code — strongest at systematic security analysis across large codebases",
+            correct: false,
+            feedback: "Claude Code's security analysis is excellent — but it requires terminal-level setup and doesn't have native GitHub Actions integration for automated PR workflows. For this specific use case, the integration architecture of Copilot is the decisive factor.",
+            wrongFeedback: "Claude Code's security analysis is excellent — but it requires terminal-level setup and doesn't have native GitHub Actions integration for automated PR workflows. For this specific use case, the integration architecture of Copilot is the decisive factor.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w10-handoff",
+      type: "handoff",
+      character: "Sam",
+      location: "SERVER ROOM · END OF SHIFT",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Sam",
+          avatar: "protagonist" as const,
+          text: "You've seen what AI looks like at the infrastructure layer. It's not chat. It's automation. Scripts running, files moving, pipelines executing. That's what happens when AI touches the command line.",
+        },
+        {
+          speaker: "Sam",
+          avatar: "protagonist" as const,
+          text: "Now here's the wild thing — most people in business never get anywhere near a terminal. They live in email and spreadsheets and slide decks.",
+        },
+        {
+          speaker: "Sam",
+          avatar: "protagonist" as const,
+          text: "And there's an AI that lives RIGHT THERE. In Microsoft 365. In Outlook, Word, Excel, Teams. Most organizations already have it turned on. Most employees have no idea.",
+        },
+        {
+          speaker: "Sam",
+          avatar: "protagonist" as const,
+          text: "Jake — the guitarist from the beginning — he found it. He's running his school's music club using Copilot across all of M365. Scheduling, budgeting, meeting summaries, event planning.",
+        },
+        {
+          speaker: "Sam",
+          avatar: "protagonist" as const,
+          text: "The AI you didn't know you already had. Go find it.",
+        },
+      ],
+    },
+
   ],
 }

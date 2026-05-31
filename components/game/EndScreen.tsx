@@ -1,10 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { Game } from "@/lib/games/types"
 import { allGames } from "@/lib/games"
 import GameIcon from "./GameIcon"
+import MaestroTutor from "./MaestroTutor"
+import CinematicVideo from "./CinematicVideo"
 
 type Props = {
   game: Game
@@ -134,10 +136,89 @@ function MaestroTransformation({
   )
 }
 
+/* ── Level thresholds (mirrors dashboard) ─────────────────────────────────── */
+const LEVEL_UP_THRESHOLDS = [
+  { minXp: 500,  label: "Associate Conductor", color: "#e040fb", icon: "🎼" },
+  { minXp: 1500, label: "Conductor",            color: "#ffb700", icon: "🎹" },
+  { minXp: 3000, label: "Grand Maestro",         color: "#ff6b35", icon: "🏆" },
+]
+
 // ── Main EndScreen ────────────────────────────────────────────────────────────
 export default function EndScreen({ game, totalXp, streak }: Props) {
   const hasMaestro = !!game.maestroImage
+  /**
+   * If the game has a PixVerse end video, show it FIRST (full-screen,
+   * non-looping). When it ends or the user taps, move on to the
+   * transformation / stats reveal phase.
+   */
+  const [showEndVideo,  setShowEndVideo]  = useState(!!game.endVideo)
+  const endVideoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [showTransform, setShowTransform] = useState(hasMaestro)
+  const [showTutor,     setShowTutor]     = useState(false)
+
+  // Level-up detection — did this session push the player past a threshold?
+  const [levelUpInfo, setLevelUpInfo] = useState<typeof LEVEL_UP_THRESHOLDS[0] | null>(null)
+  useEffect(() => {
+    try {
+      const stored  = parseInt(localStorage.getItem("maestro_total_xp") ?? "0") || 0
+      const prevXp  = Math.max(0, stored - totalXp)
+      for (const lvl of LEVEL_UP_THRESHOLDS) {
+        if (prevXp < lvl.minXp && stored >= lvl.minXp) {
+          setLevelUpInfo(lvl)
+          break
+        }
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!showEndVideo || !game.endVideo) return
+    // Safety auto-advance after 10 s
+    endVideoTimerRef.current = setTimeout(() => setShowEndVideo(false), 10000)
+    return () => { if (endVideoTimerRef.current) clearTimeout(endVideoTimerRef.current) }
+  }, [showEndVideo, game.endVideo])
+
+  function advanceFromEndVideo() {
+    if (endVideoTimerRef.current) clearTimeout(endVideoTimerRef.current)
+    setShowEndVideo(false)
+  }
+
+  /* ── PixVerse end cinematic (if provided) ──────────────────────────────── */
+  if (showEndVideo && game.endVideo) {
+    return (
+      <div
+        onClick={advanceFromEndVideo}
+        style={{
+          position:   "fixed",
+          inset:      0,
+          zIndex:     200,
+          background: "#000",
+          cursor:     "pointer",
+        }}
+      >
+        <CinematicVideo
+          src={game.endVideo}
+          loop={false}
+          onEnded={advanceFromEndVideo}
+          style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}
+          objectFit="cover"
+        />
+        <div style={{
+          position:       "absolute",
+          bottom:         "1.5rem",
+          right:          "1.5rem",
+          fontFamily:     "Inter, sans-serif",
+          fontSize:       "0.65rem",
+          color:          "rgba(255,255,255,0.35)",
+          letterSpacing:  "0.18em",
+          textTransform:  "uppercase",
+        }}>
+          tap to continue
+        </div>
+      </div>
+    )
+  }
   const nextGame = allGames.find((g) => g.week === game.week + 1)
   const isFinalGame = !nextGame
   const accent = game.accentColor ?? "var(--cyan)"
@@ -246,6 +327,31 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
           </>
         )}
 
+        {/* Level-up banner — appears when a level threshold was crossed */}
+        {levelUpInfo && (
+          <div style={{
+            borderRadius: "14px", padding: "0.85rem 1.5rem", marginBottom: "0.75rem",
+            background: `${levelUpInfo.color}10`,
+            border: `1px solid ${levelUpInfo.color}45`,
+            display: "flex", alignItems: "center", gap: "0.65rem",
+            animation: "scene-fade-in 0.6s ease both",
+          }}>
+            <span style={{ fontSize: "1.4rem" }}>{levelUpInfo.icon}</span>
+            <div style={{ textAlign: "left" }}>
+              <div style={{
+                fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.55rem",
+                letterSpacing: "0.28em", textTransform: "uppercase",
+                color: levelUpInfo.color, marginBottom: "0.08rem",
+              }}>
+                Level Up!
+              </div>
+              <div style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "1.1rem", color: "#fff" }}>
+                {levelUpInfo.label} Unlocked
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* XP / Streak */}
         <div className="glass-card" style={{
           borderRadius: "14px", padding: "1rem 1.5rem", marginBottom: "1.25rem",
@@ -286,29 +392,78 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
             </a>
           </div>
 
+          {/* Explore Jake's World */}
+          <Link
+            href="/worldmap"
+            style={{
+              display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem",
+              fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.9rem",
+              color:"rgba(240,238,255,0.7)",
+              background:"rgba(255,255,255,0.04)",
+              border:"1px solid rgba(255,255,255,0.1)",
+              padding:"0.8rem 2rem", borderRadius:"100px", textDecoration:"none",
+              transition:"background 0.2s, border-color 0.2s, color 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.08)"; e.currentTarget.style.color="#fff"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)" }}
+            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.color="rgba(240,238,255,0.7)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.1)" }}
+          >
+            🗺️ Explore Jake's World →
+          </Link>
+
+          {/* Chat with the Maestro */}
+          <button
+            onClick={() => setShowTutor(true)}
+            style={{
+              width: "100%", fontFamily: "Inter, sans-serif", fontWeight: 700,
+              fontSize: "0.9rem", color: accent,
+              background: `${accent}12`,
+              border: `1px solid ${accent}44`,
+              padding: "0.8rem 2rem", borderRadius: "100px", cursor: "pointer",
+              transition: "background 0.2s, border-color 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${accent}22`; e.currentTarget.style.borderColor = `${accent}88` }}
+            onMouseLeave={e => { e.currentTarget.style.background = `${accent}12`; e.currentTarget.style.borderColor = `${accent}44` }}
+          >
+            🎼 Chat with the Maestro →
+          </button>
+
           {nextGame ? (
             <Link href={`/games/${nextGame.slug}`} style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.875rem",
-              color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              padding: "0.7rem 2rem", borderRadius: "100px", textDecoration: "none",
-            }}>
-              {nextGame.free ? `Play Game ${nextGame.week} Free →` : `Unlock Game ${nextGame.week} — $${nextGame.price?.toFixed(2)} →`}
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+              fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem",
+              color: "#08060f",
+              background: `linear-gradient(90deg, ${accent}, #e040fb)`,
+              padding: "0.95rem 2rem", borderRadius: "100px", textDecoration: "none",
+              boxShadow: `0 0 32px ${accent}44`,
+              letterSpacing: "0.01em",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 0 48px ${accent}66` }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = `0 0 32px ${accent}44` }}
+            >
+              <span style={{ fontSize: "1.1rem" }}>{nextGame.emoji ?? "🎵"}</span>
+              {nextGame.free ? `Play Game ${nextGame.week} — Free →` : `Play Game ${nextGame.week} →`}
             </Link>
           ) : (
             <Link href="/games" style={{
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.875rem",
-              color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              padding: "0.7rem 2rem", borderRadius: "100px", textDecoration: "none",
+              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
+              color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+              padding: "0.9rem 2rem", borderRadius: "100px", textDecoration: "none",
             }}>
-              View All Games
+              View All Games →
             </Link>
           )}
         </div>
       </div>
+
+      {/* Maestro Tutor — Socratic post-game dialogue */}
+      {showTutor && (
+        <MaestroTutor
+          game={game}
+          onClose={() => setShowTutor(false)}
+        />
+      )}
     </div>
   )
 }

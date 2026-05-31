@@ -3,7 +3,8 @@ import { Game } from "./types"
 export const game8: Game = {
   slug: "chatgpt-mastery",
   week: 8,
-  free: true,
+  free: false,
+  price: 4.99,
   title: "ChatGPT — Beyond the Hype",
   emoji: "🤖",
   accentColor: "#19c37d",
@@ -29,6 +30,13 @@ export const game8: Game = {
       { type: "dialogue",  speaker: "Brand Manager", text: "We're pausing the partnership, Alex. We found a creator who delivers a full content calendar in two days using AI. Same quality. We need that pace now." },
       { type: "final",     text: "The algorithm rewards output. The audience rewards truth. The conductor delivers both." },
     ],
+  },
+  aiModel:  "chatgpt" as const,
+  nextGame: {
+    slug:         "gemini-unlocked",
+    character:    "Luna",
+    teaserLine:   "Alex mastered ChatGPT's ecosystem. Now meet the AI that's built right inside your Google world. Luna found something in Gemini that changed her entire dissertation process.",
+    previewImage: "/images/luna.png",
   },
   scenes: [
 
@@ -376,5 +384,122 @@ export const game8: Game = {
         "Alex spent a year asking a concert pianist to play 'Mary Had a Little Lamb.' This week, they finally asked for a sonata. The piano didn't change. The request did. Custom GPTs that work exactly like a trained team member. A Canvas editor that turns editing from chaos into craft. A Code Interpreter that makes data analysis something anyone can do. A GPT-4o that can see, speak, browse, and create — all from the same chat window. You now know how to make the request. Not the one that gets a paragraph back. The one that gets exactly what you needed — and sounds like you wrote it.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w8-compare",
+      type: "ai-compare",
+      character: "Alex",
+      location: "STUDIO · LAPTOP OPEN",
+      xpAward: 75,
+      aiCompare: {
+        models: ["chatgpt", "claude", "gemini"],
+        headline: "ChatGPT vs Claude vs Gemini — For Content Creators",
+        context: "Alex spent 30 days using all three for real content creation work. Videos, scripts, posts, graphics briefs, audience analysis. Here's the unfiltered comparison.",
+        rows: [
+          {
+            dimension: "Custom GPTs & Specialized Tools",
+            winner: "ChatGPT",
+            claude:  "Custom instructions per Project; no GPT Store equivalent",
+            chatgpt: "GPT Store: 3M+ custom GPTs for every niche use case",
+            gemini:  "Gems: custom AI personas; smaller ecosystem than GPT Store",
+            note: "Need a YouTube thumbnail critic or a TikTok script formatter? There's a Custom GPT for that.",
+          },
+          {
+            dimension: "Visual Content & Image Analysis",
+            winner: "ChatGPT",
+            claude:  "Can analyze images; no image generation built-in",
+            chatgpt: "DALL·E integrated — generate + analyze images in one session",
+            gemini:  "Imagen integration for Google-powered generation",
+            note: "Alex generates thumbnail concepts in the same chat she's scripting. ChatGPT's all-in-one wins.",
+          },
+          {
+            dimension: "Long-Form Script Writing",
+            winner: "Claude",
+            claude:  "Maintains voice and narrative arc over thousands of words",
+            chatgpt: "Good; voice can drift in very long outputs",
+            gemini:  "Solid structure; research-heavy scripts are a strength",
+            note: "A 20-minute documentary script needs a consistent narrator voice. Claude holds it.",
+          },
+          {
+            dimension: "Data Analysis (Code Interpreter)",
+            winner: "ChatGPT",
+            claude:  "Strong data reasoning; no native code execution",
+            chatgpt: "Code Interpreter runs Python — live charts, stats, pivot tables",
+            gemini:  "Google Sheets integration; less flexible than Code Interpreter",
+            note: "Alex analyzed her YouTube analytics directly in ChatGPT. No Excel needed.",
+          },
+          {
+            dimension: "SEO & Trending Topics Research",
+            winner: "ChatGPT",
+            claude:  "Reasoning on existing knowledge; limited live data",
+            chatgpt: "Browses live — current trends, competitor keywords, platform changes",
+            gemini:  "Google Trends integration is a natural advantage",
+            note: "Both ChatGPT and Gemini edge Claude here because content creators need LIVE data.",
+          },
+        ],
+        verdict: "For content creators: ChatGPT's ecosystem (Custom GPTs, DALL·E, Code Interpreter, live browse) is the most complete creative toolbox. Claude for long-form quality. Gemini for Google-integrated research.",
+        question: "Alex needs to analyze her last 6 months of YouTube analytics, create charts, and identify which video formats perform best. Which tool solves this end-to-end?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — strongest at data reasoning and pattern recognition",
+            correct: false,
+            feedback: "Claude reasons brilliantly about data — but it can't execute code or generate charts directly. Alex would need to describe the data manually rather than uploading her CSV and having it analyzed live. That's the key gap here.",
+            wrongFeedback: "Claude reasons brilliantly about data — but it can't execute code or generate charts directly. Alex would need to describe the data manually rather than uploading her CSV and having it analyzed live. That's the key gap here.",
+          },
+          {
+            label: "B",
+            text: "ChatGPT with Code Interpreter — uploads the CSV, runs Python, generates charts live",
+            correct: true,
+            feedback: "Exactly. ChatGPT's Code Interpreter runs live Python in the chat window. Alex uploads her analytics export, asks for a bar chart of average view duration by video format, and gets a visual answer in seconds. This is the use case Code Interpreter was built for.",
+          },
+          {
+            label: "C",
+            text: "Gemini — Google Sheets integration handles the analysis",
+            correct: false,
+            feedback: "Gemini's Sheets integration is useful for Google-native workflows, but it's more about assisting within Sheets than running full analytical pipelines. For a full CSV-to-charts data session, ChatGPT's Code Interpreter has a more direct workflow.",
+            wrongFeedback: "Gemini's Sheets integration is useful for Google-native workflows, but it's more about assisting within Sheets than running full analytical pipelines. For a full CSV-to-charts data session, ChatGPT's Code Interpreter has a more direct workflow.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w8-handoff",
+      type: "handoff",
+      character: "Alex",
+      location: "STUDIO · WRAPPING UP",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Alex",
+          avatar: "protagonist" as const,
+          text: "You now know what ChatGPT actually is. Not the chat window — the whole platform. Custom GPTs, Canvas, Code Interpreter, image generation. Most creators never get past the chat window.",
+        },
+        {
+          speaker: "Alex",
+          avatar: "protagonist" as const,
+          text: "But here's what I kept running into: every time I needed to research something current — trends, competitor data, live stats — I'd end up bouncing to Google anyway.",
+        },
+        {
+          speaker: "Alex",
+          avatar: "protagonist" as const,
+          text: "There's a grad student — Luna — who solved this differently. She lives in the Google ecosystem. And she found that Gemini isn't just good at search. It's good at THINKING through massive amounts of research.",
+        },
+        {
+          speaker: "Alex",
+          avatar: "protagonist" as const,
+          text: "She read her entire dissertation's worth of papers — like, all of them, at once — with Gemini's context window. Found connections that would have taken weeks manually.",
+        },
+        {
+          speaker: "Alex",
+          avatar: "protagonist" as const,
+          text: "If you've ever had to wrangle a lot of information and find the signal in the noise — Luna's story is going to hit different.",
+        },
+      ],
+    },
+
   ],
 }

@@ -15,6 +15,7 @@ export function useSoundEngine() {
   const trackRef = useRef<HTMLAudioElement | null>(null)
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const normalTrackRef = useRef<string>("/audio/concrete-riot.mp3")
+  const mutedRef = useRef(false)
 
   const getTrack = (mood: SoundMood): string => {
     if (mood === "normal" || mood === "boss") return normalTrackRef.current
@@ -27,7 +28,9 @@ export function useSoundEngine() {
   }, [])
 
   function getCtx(): AudioContext {
-    if (!ctxRef.current) ctxRef.current = new AudioContext()
+    if (!ctxRef.current || ctxRef.current.state === "closed") {
+      ctxRef.current = new AudioContext()
+    }
     if (ctxRef.current.state === "suspended") ctxRef.current.resume()
     return ctxRef.current
   }
@@ -212,6 +215,12 @@ export function useSoundEngine() {
     } catch { /* no AudioContext */ }
   }, [])
 
+  const toggleMute = useCallback(() => {
+    mutedRef.current = !mutedRef.current
+    if (trackRef.current) trackRef.current.muted = mutedRef.current
+    return mutedRef.current
+  }, [])
+
   const stopAmbient = useCallback(() => {
     runningRef.current = false
     if (schedulerRef.current) { clearTimeout(schedulerRef.current); schedulerRef.current = null }
@@ -327,7 +336,10 @@ export function useSoundEngine() {
     return () => {
       stopAmbient()
       if (trackRef.current) { trackRef.current.pause(); trackRef.current = null }
-      ctxRef.current?.close()
+      if (ctxRef.current && ctxRef.current.state !== "closed") {
+        ctxRef.current.close()
+      }
+      ctxRef.current = null
     }
   }, [stopAmbient])
 
@@ -346,5 +358,6 @@ export function useSoundEngine() {
     setNormalTrack,
     setGameVolume,
     fadeVolumeTo,
+    toggleMute,
   }
 }

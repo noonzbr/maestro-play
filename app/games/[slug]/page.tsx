@@ -1,6 +1,11 @@
 import { getGame, allGames } from "@/lib/games"
 import { notFound, redirect } from "next/navigation"
 import GameEngine from "@/components/game/GameEngine"
+import { getServerUser, hasGameAccess } from "@/lib/supabase-server"
+
+// Force server-side rendering so auth cookies are readable at request time.
+// Free game pages are cheap to render; Pro games need the security check anyway.
+export const dynamic = "force-dynamic"
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -18,9 +23,21 @@ export default async function GamePage({ params, searchParams }: Props) {
   const game = getGame(slug)
   if (!game) notFound()
 
-  // For locked games without purchase, redirect to checkout
-  // (In production, check Supabase purchase record here)
-  // We trust the client for now; middleware handles enforcement
+  // Gate pro games behind auth + purchase check
+  if (!game.free) {
+    const session = await getServerUser()
+
+    if (!session) {
+      // Not authenticated → send to checkout (which shows auth + payment gate)
+      redirect(`/checkout/${slug}`)
+    }
+
+    const access = await hasGameAccess(session.user.id, slug)
+    if (!access) {
+      // Authenticated but hasn't purchased → checkout
+      redirect(`/checkout/${slug}`)
+    }
+  }
 
   return <GameEngine game={game} />
 }

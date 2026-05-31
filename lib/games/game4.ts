@@ -3,7 +3,8 @@ import { Game } from "./types"
 export const game4: Game = {
   slug: "the-conductor-test",
   week: 4,
-  free: true,
+  free: false,
+  price: 4.99,
   title: "The Conductor Test",
   emoji: "🏆",
   icon: "musicNotes" as const,
@@ -28,6 +29,13 @@ export const game4: Game = {
       { type: "dialogue",  speaker: "Lena", text: "A conservatory in Vienna just premiered a symphony composed entirely by AI. Critics didn't notice until the programme notes. Aria, the bar just moved." },
       { type: "final",     text: "Mastery is not the destination. It is the only map that matters." },
     ],
+  },
+  aiModel:  "claude" as const,
+  nextGame: {
+    slug:         "claude-chat-unlocked",
+    character:    "Jordan",
+    teaserLine:   "You've mastered the method — now it's time to go deeper into the actual tool. Jordan is a freelance consultant who discovered what Claude Chat can REALLY do. Hint: most people use 5% of it.",
+    previewImage: "/images/jordan.png",
   },
   scenes: [
     {
@@ -154,5 +162,117 @@ export const game4: Game = {
         "You are now a Maestro Conductor. You understand how AI works, why inputs determine outputs, and how to direct AI with the precision of a conductor leading an orchestra. The What, the What Not, the How, the Why. This is your baton. The orchestra is ready. Go conduct something magnificent.",
       xpAward: 500,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w4-compare",
+      type: "ai-compare",
+      character: "Aria",
+      location: "REHEARSAL HALL · LAPTOP OPEN",
+      xpAward: 75,
+      aiCompare: {
+        models: ["claude", "chatgpt"],
+        headline: "Claude vs ChatGPT — Which Responds Better to Precision Prompting?",
+        context: "Aria ran the Conductor Test prompts through both AIs. Same four-pillar structure. Here's what the data showed about which model actually rewards precise prompting.",
+        rows: [
+          {
+            dimension: "Response to 'What Not' Constraints",
+            winner: "Claude",
+            claude:  "Consistently respects exclusion rules — avoids specified patterns reliably",
+            chatgpt: "Usually respects them; occasionally reintroduces excluded elements",
+            note: "Telling the AI what NOT to do is half the conductor's job. Claude follows this reliably.",
+          },
+          {
+            dimension: "Tone Precision ('How' Pillar)",
+            winner: "Claude",
+            claude:  "Hits specific tones accurately — intimate, formal, urgent, playful",
+            chatgpt: "Good range; sometimes defaults to a safer middle-ground register",
+            note: "Aria found Claude more willing to commit to a difficult tone when explicitly asked.",
+          },
+          {
+            dimension: "Reasoning Transparency ('Why' Pillar)",
+            winner: "Claude",
+            claude:  "Explains its choices when asked; flags uncertainty proactively",
+            chatgpt: "Explains on request; less proactive about flagging limitations",
+            note: "When you give the AI your 'why', Claude tends to use it more actively in shaping output.",
+          },
+          {
+            dimension: "Breadth of Knowledge",
+            winner: "ChatGPT",
+            claude:  "Deep on many topics; knowledge cutoff applies",
+            chatgpt: "Broader trained knowledge base; optional live browsing",
+            note: "For the 'What' pillar — knowing WHAT to ask about — ChatGPT's breadth gives more starting options.",
+          },
+          {
+            dimension: "Handling Ambiguous Prompts",
+            winner: "ChatGPT",
+            claude:  "More likely to ask clarifying questions",
+            chatgpt: "More likely to make a reasonable assumption and proceed",
+            note: "Neither is wrong — but ChatGPT's willingness to proceed can be faster in exploratory sessions.",
+          },
+        ],
+        verdict: "The four-pillar method works better with Claude because Claude was built to treat constraints as instructions rather than suggestions. ChatGPT rewards volume and exploration; Claude rewards precision.",
+        question: "Aria writes a prompt with 5 explicit constraints: topic, tone, format, exclusion list, and target audience. Which AI is most likely to honor all 5 simultaneously?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — trained to treat constraints as instructions, not suggestions",
+            correct: true,
+            feedback: "Correct. In head-to-head precision tests with multi-constraint prompts, Claude reliably holds more simultaneous rules. The four-pillar method was practically made for Claude's instruction-following architecture.",
+          },
+          {
+            label: "B",
+            text: "ChatGPT — more capable model overall",
+            correct: false,
+            feedback: "Capability and constraint-following are different things. ChatGPT is extremely capable — but when holding 5 simultaneous rules, it more commonly simplifies or drops a subtle constraint. Claude's training emphasizes following detailed instructions more completely.",
+            wrongFeedback: "Capability and constraint-following are different things. ChatGPT is extremely capable — but when holding 5 simultaneous rules, it more commonly simplifies or drops a subtle constraint. Claude's training emphasizes following detailed instructions more completely.",
+          },
+          {
+            label: "C",
+            text: "It depends entirely on the topic",
+            correct: false,
+            feedback: "Topic matters less than architecture. The difference in multi-constraint handling is consistent across subject areas — it comes from how each model was trained to interpret instructions, not what it knows.",
+            wrongFeedback: "Topic matters less than architecture. The difference in multi-constraint handling is consistent across subject areas — it comes from how each model was trained to interpret instructions, not what it knows.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w4-handoff",
+      type: "handoff",
+      character: "Aria",
+      location: "REHEARSAL HALL · POST-PERFORMANCE",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Aria",
+          avatar: "protagonist" as const,
+          text: "You passed. That's not nothing — most people who sit down at the keyboard don't make it through the conductor test without at least three wrong turns.",
+        },
+        {
+          speaker: "Aria",
+          avatar: "protagonist" as const,
+          text: "So now you can build a solid prompt. Four pillars. You know why each one matters. That's the foundation.",
+        },
+        {
+          speaker: "Aria",
+          avatar: "protagonist" as const,
+          text: "But here's what nobody talks about — the difference between a good prompt and a productive WORKFLOW. One great prompt is a note. A workflow is a symphony.",
+        },
+        {
+          speaker: "Aria",
+          avatar: "protagonist" as const,
+          text: "Jordan figured this out. Freelance consultant. Uses Claude Chat all day, every day. And I mean — ALL of it. Not just the chat window. The memory, the projects, the artifacts.",
+        },
+        {
+          speaker: "Aria",
+          avatar: "protagonist" as const,
+          text: "She told me most people are using maybe 5% of what Claude Chat can actually do. Go find out what you've been missing.",
+        },
+      ],
+    },
+
   ],
 }

@@ -1,113 +1,89 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Scene } from "@/lib/games/types"
-import GameIcon from "./GameIcon"
-import { IconName } from "./GameIcon"
+import SceneEnvironment from "./SceneEnvironment"
 
-type NpcConfig = {
-  icon: IconName
-  color: string
-  bg: string
-  image?: string
-  glowAnim: string
+/* ── NPC config — colours + initials only (no full-body portraits needed) ── */
+type NpcCfg = { color: string; initial: string }
+
+const JAKE_COLOR  = "rgba(0,212,240,0.9)"
+const JAKE_INIT   = "J"
+
+const NPC_CONFIGS: Record<string, NpcCfg> = {
+  default:     { color: "rgba(224,64,251,0.9)", initial: "AI" },
+  senora_vega: { color: "rgba(255,180,80,0.9)", initial: "SV" },
+  tyler:       { color: "rgba(80,160,255,0.9)", initial: "TY" },
+  ai:          { color: "rgba(0,212,240,0.9)",  initial: "AI" },
 }
 
-const NPC_CONFIGS: Record<string, NpcConfig> = {
-  default:     { icon: "headphones", color: "rgba(224,64,251,0.9)", bg: "rgba(224,64,251,0.06)", glowAnim: "char-glow-purple" },
-  senora_vega: { icon: "harp",       color: "rgba(255,180,80,0.9)", bg: "rgba(255,180,80,0.06)", image: "/images/senoravega.png", glowAnim: "char-glow-orange" },
-  tyler:       { icon: "headphones", color: "rgba(80,160,255,0.9)", bg: "rgba(80,160,255,0.06)", image: "/images/tyler.png",      glowAnim: "char-glow-blue"   },
-  ai:          { icon: "musicNotes", color: "rgba(0,212,240,0.9)",  bg: "rgba(0,212,240,0.06)",  glowAnim: "char-glow-cyan"  },
-}
-
+/* ── Typewriter hook ────────────────────────────────────────────────────── */
 function useTypewriter(text: string, speed: number) {
   const [displayed, setDisplayed] = useState("")
   const [done, setDone] = useState(false)
-
   useEffect(() => {
     setDisplayed("")
     setDone(false)
     if (!text) { setDone(true); return }
     let i = 0
-    const timer = setInterval(() => {
+    const t = setInterval(() => {
       i++
       setDisplayed(text.slice(0, i))
-      if (i >= text.length) { clearInterval(timer); setDone(true) }
+      if (i >= text.length) { clearInterval(t); setDone(true) }
     }, speed)
-    return () => clearInterval(timer)
+    return () => clearInterval(t)
   }, [text, speed])
-
   return { displayed, done }
 }
 
 type Props = {
-  scene: Scene
-  onComplete: () => void
+  scene:              Scene
+  onComplete:         () => void
+  /** kept for API compat — not rendered in chat format */
+  protagonistVideo?:  string
+  protagonistImage?:  string
 }
 
 export default function DialogueScene({ scene, onComplete }: Props) {
   const [lineIndex, setLineIndex] = useState(0)
-  const [skip, setSkip] = useState(false)
+  const [skip,      setSkip]      = useState(false)
+  const bottomRef                 = useRef<HTMLDivElement>(null)
+  const advanceRef                = useRef<() => void>(() => {})
 
+  /* inject keyframes once */
   useEffect(() => {
-    const id = "dialogue-kf"
+    const id = "dlg-chat-kf"
     if (document.getElementById(id)) return
     const s = document.createElement("style")
-    s.id = id
+    s.id    = id
     s.textContent = `
-      @keyframes char-glow-cyan {
-        0%,100% { filter: drop-shadow(0 0 14px rgba(0,212,240,0.2)); }
-        50%      { filter: drop-shadow(0 0 48px rgba(0,212,240,0.65)); }
-      }
-      @keyframes char-glow-blue {
-        0%,100% { filter: drop-shadow(0 0 14px rgba(80,160,255,0.2)); }
-        50%      { filter: drop-shadow(0 0 48px rgba(80,160,255,0.65)); }
-      }
-      @keyframes char-glow-orange {
-        0%,100% { filter: drop-shadow(0 0 14px rgba(255,180,80,0.2)); }
-        50%      { filter: drop-shadow(0 0 48px rgba(255,180,80,0.65)); }
-      }
-      @keyframes char-glow-purple {
-        0%,100% { filter: drop-shadow(0 0 14px rgba(224,64,251,0.2)); }
-        50%      { filter: drop-shadow(0 0 48px rgba(224,64,251,0.65)); }
-      }
-      @keyframes char-talk {
-        0%,100% { transform: translateY(0) scaleY(1); }
-        25%     { transform: translateY(-10px) scaleY(1.02); }
-        60%     { transform: translateY(-5px) scaleY(1.01); }
-      }
-      @keyframes char-enter {
-        from { opacity:0; transform:translateY(24px) scale(0.93); }
+      @keyframes dlg-bubble-in {
+        from { opacity:0; transform:translateY(10px) scale(0.97); }
         to   { opacity:1; transform:translateY(0) scale(1); }
       }
-      @keyframes dialogue-box-in {
-        from { opacity:0; transform:translateY(20px); }
-        to   { opacity:1; transform:translateY(0); }
+      @keyframes dlg-cursor {
+        0%,100% { opacity:1; }
+        50%     { opacity:0; }
       }
     `
     document.head.appendChild(s)
   }, [])
 
   const lines = scene.dialogue!
-  const line = lines[lineIndex]
+  const line  = lines[lineIndex]
   const isLast = lineIndex >= lines.length - 1
 
-  const { displayed, done } = useTypewriter(skip ? "" : line.text, 18)
+  const { displayed, done } = useTypewriter(skip ? "" : line.text, 20)
   const visibleText = skip ? line.text : displayed
-  const textDone = skip || done
-
-  const advanceRef = useRef<() => void>(() => {})
+  const textDone    = skip || done
 
   const advance = useCallback(() => {
-    if (!textDone) {
-      setSkip(true)
-    } else {
+    if (!textDone) { setSkip(true) }
+    else {
       setSkip(false)
-      if (isLast) {
-        onComplete()
-      } else {
-        setLineIndex(i => i + 1)
-      }
+      if (isLast) onComplete()
+      else setLineIndex(i => i + 1)
     }
   }, [textDone, isLast, onComplete])
 
@@ -115,10 +91,7 @@ export default function DialogueScene({ scene, onComplete }: Props) {
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
-      if (["Space", "Enter", "ArrowRight"].includes(e.code)) {
-        e.preventDefault()
-        advanceRef.current()
-      }
+      if (["Space","Enter","ArrowRight"].includes(e.code)) { e.preventDefault(); advanceRef.current() }
     }
     window.addEventListener("keydown", handle)
     return () => window.removeEventListener("keydown", handle)
@@ -126,241 +99,264 @@ export default function DialogueScene({ scene, onComplete }: Props) {
 
   useEffect(() => { setSkip(false) }, [lineIndex])
 
-  // Derive scene-level NPC from the first non-Jake line — stays fixed for the whole scene
-  const hasNpc = lines.some(l => l.avatar !== "jake")
-  const sceneNpcKey = lines.find(l => l.avatar !== "jake")?.npcKey || "default"
-  const npc = NPC_CONFIGS[sceneNpcKey] || NPC_CONFIGS.default
+  /* scroll to newest bubble */
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [lineIndex])
 
-  const isJake = line.avatar === "jake"
-  const jakeActive = isJake
-  const npcActive = !isJake
+  /* derive NPC key from first non-jake line */
+  const sceneNpcKey = lines.find(l => l.avatar !== "jake")?.npcKey ?? "default"
+  const npc         = NPC_CONFIGS[sceneNpcKey] ?? NPC_CONFIGS.default
 
-  const speakerColor = isJake ? "var(--cyan)" : npc.color
-  const speakerBorder = isJake ? "rgba(0,212,240,0.25)" : npc.color.replace("0.9", "0.25")
-  const speakerBg = isJake ? "rgba(0,212,240,0.07)" : npc.color.replace("0.9", "0.07")
-  const boxBorder = isJake ? "rgba(0,212,240,0.35)" : npc.color
+  function cfg(avatar: string) {
+    if (avatar === "jake") return { color: JAKE_COLOR,  bg: "rgba(0,212,240,0.1)",  init: JAKE_INIT,   right: true }
+    return                        { color: npc.color,   bg: npc.color.replace("0.9","0.1"), init: npc.initial, right: false }
+  }
 
-  const charTransition = "opacity 0.38s ease, transform 0.52s cubic-bezier(0.34,1.4,0.64,1)"
-
-  // Build animation strings for each character
-  const jakeAnim = jakeActive
-    ? textDone
-      ? "char-glow-cyan 3.5s ease-in-out infinite"
-      : "char-glow-cyan 3.5s ease-in-out infinite, char-talk 0.7s ease-in-out infinite"
-    : "none"
-
-  const npcGlowAnim = npcActive
-    ? textDone
-      ? `${npc.glowAnim} 3.5s ease-in-out infinite`
-      : `${npc.glowAnim} 3.5s ease-in-out infinite, char-talk 0.7s ease-in-out infinite`
-    : "none"
+  const activeCfg   = cfg(line.avatar)
+  const speakerColor = activeCfg.color
 
   return (
     <div
       onClick={advance}
       style={{
-        position: "fixed",
-        inset: 0,
-        background: "var(--bg-primary)",
-        display: "flex",
+        position:      "fixed",
+        inset:         0,
+        display:       "flex",
         flexDirection: "column",
-        cursor: "pointer",
-        zIndex: 20,
-        userSelect: "none",
+        cursor:        "pointer",
+        zIndex:        20,
+        userSelect:    "none",
+        overflow:      "hidden",
+        background:    "var(--bg-primary)",
       }}
     >
-      {/* Stage */}
-      <div style={{
-        flex: 1,
-        display: "flex",
-        alignItems: "flex-end",
-        overflow: "hidden",
-        paddingTop: "60px",
-        paddingBottom: "185px",
-        position: "relative",
-      }}>
-
-        {/* Location label */}
-        {scene.location && (
+      {/* ── Cinematic environment background ─────────────────────────────── */}
+      {scene.location && (
+        <>
+          <div style={{ position:"absolute", inset:0, zIndex:0, opacity:0.28 }}>
+            <SceneEnvironment location={scene.location} opacity={1} showCalendar={false} />
+          </div>
           <div style={{
-            position: "absolute",
-            top: "68px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            fontFamily: "Inter, sans-serif",
-            fontSize: "0.6rem",
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: "rgba(240,238,255,0.25)",
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-            pointerEvents: "none",
+            position:   "absolute",
+            inset:      0,
+            zIndex:     1,
+            background: "linear-gradient(180deg,rgba(8,6,15,0.75) 0%,rgba(6,4,14,0.93) 100%)",
+          }} />
+        </>
+      )}
+
+      {/* ── Location pill ────────────────────────────────────────────────── */}
+      {scene.location && (
+        <div style={{
+          position:       "relative",
+          zIndex:         2,
+          padding:        "4.2rem 1.5rem 0",
+          display:        "flex",
+          justifyContent: "center",
+          pointerEvents:  "none",
+        }}>
+          <div style={{
+            fontFamily:     "Inter, sans-serif",
+            fontSize:       "0.6rem",
+            letterSpacing:  "0.28em",
+            textTransform:  "uppercase",
+            color:          "rgba(240,238,255,0.45)",
+            fontWeight:     700,
+            background:     "rgba(8,6,15,0.55)",
+            backdropFilter: "blur(8px)",
+            borderRadius:   "100px",
+            padding:        "0.22rem 0.85rem",
+            border:         "1px solid rgba(255,255,255,0.07)",
           }}>
             {scene.location}
           </div>
-        )}
-
-        {/* Jake — left */}
-        <div style={{
-          flex: "0 0 46%",
-          paddingLeft: "clamp(0.5rem, 3vw, 2rem)",
-          opacity: jakeActive ? 1 : 0.3,
-          transform: jakeActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
-          transition: charTransition,
-          animation: jakeAnim,
-        }}>
-          <img
-            src="/images/guitarplayer1.png"
-            alt="Jake"
-            draggable={false}
-            style={{ width: "100%", maxHeight: "52vh", objectFit: "contain", display: "block" }}
-          />
         </div>
+      )}
 
+      {/* ── Chat thread ──────────────────────────────────────────────────── */}
+      <div
+        style={{
+          flex:          1,
+          overflowY:     "auto",
+          display:       "flex",
+          flexDirection: "column",
+          padding:       "0.75rem 1.1rem 0.5rem",
+          gap:           "0.6rem",
+          position:      "relative",
+          zIndex:        2,
+          scrollbarWidth:"none",
+        }}
+      >
+        {/* spacer — keeps messages bottom-anchored when few exist */}
         <div style={{ flex: 1 }} />
 
-        {/* NPC — right (only rendered when scene has an NPC; always present, dimmed when Jake is speaking) */}
-        {hasNpc && (npc.image ? (
-          <div style={{
-            flex: "0 0 40%",
-            paddingRight: "clamp(0.5rem, 3vw, 2rem)",
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-            opacity: npcActive ? 1 : 0.3,
-            transform: npcActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
-            transition: charTransition,
-            animation: npcGlowAnim,
-          }}>
-            <img
-              src={npc.image}
-              alt={npc.image}
-              draggable={false}
-              style={{
-                maxHeight: "52vh",
-                objectFit: "contain",
-                display: "block",
-                transform: "scaleX(-1)",
-              }}
-            />
-          </div>
-        ) : (
-          <div style={{
-            flex: "0 0 36%",
-            maxWidth: "260px",
-            paddingRight: "clamp(0.5rem, 3vw, 2rem)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            opacity: npcActive ? 1 : 0.3,
-            transform: npcActive ? "translateY(0) scale(1)" : "translateY(14px) scale(0.93)",
-            transition: charTransition,
-            animation: npcGlowAnim,
-          }}>
-            <div style={{
-              width: "clamp(120px, 18vw, 170px)",
-              background: npc.bg,
-              borderTop: `2px solid ${npc.color}`,
-              borderLeft: `2px solid ${npc.color}`,
-              borderRight: `2px solid ${npc.color}`,
-              borderBottom: "none",
-              borderRadius: "18px 18px 0 0",
-              padding: "1.75rem 1rem 1.25rem",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "0.6rem",
+        {/* ── Previous lines (fully typed, dimmed) ─────────────────────── */}
+        {lines.slice(0, lineIndex).map((l, i) => {
+          const c   = cfg(l.avatar)
+          const dim = Math.max(0.28, 0.55 - (lineIndex - i - 1) * 0.08) // fade as they recede
+          return (
+            <div key={i} style={{
+              display:       "flex",
+              flexDirection: c.right ? "row-reverse" : "row",
+              alignItems:    "flex-end",
+              gap:           "0.45rem",
+              opacity:       dim,
             }}>
-              <GameIcon name={npc.icon} size={72} />
-              <span style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 700,
-                fontSize: "0.7rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: npc.color,
-                textAlign: "center",
+              {/* avatar */}
+              <div style={{
+                width:"26px", height:"26px", borderRadius:"50%", flexShrink:0,
+                background: c.color.replace("0.9","0.15"),
+                border:     `1px solid ${c.color.replace("0.9","0.3")}`,
+                display:"flex", alignItems:"center", justifyContent:"center",
+                fontSize:"0.48rem", fontWeight:800, color:c.color,
+                fontFamily:"Inter,sans-serif", letterSpacing:"0.04em",
               }}>
-                {sceneNpcKey.replace(/_/g, " ").toUpperCase()}
-              </span>
+                {c.init}
+              </div>
+              {/* bubble */}
+              <div style={{
+                background:   c.bg,
+                border:       `1px solid ${c.color.replace("0.9","0.2")}`,
+                borderRadius: c.right ? "13px 3px 13px 13px" : "3px 13px 13px 13px",
+                padding:      "0.45rem 0.8rem",
+                maxWidth:     "78%",
+              }}>
+                <div style={{
+                  fontFamily:    "Inter,sans-serif",
+                  fontSize:      "0.45rem",
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color:         c.color,
+                  fontWeight:    700,
+                  marginBottom:  "0.2rem",
+                  opacity:       0.75,
+                }}>
+                  {l.speaker}
+                </div>
+                <p style={{
+                  fontFamily: "Cormorant Garamond,serif",
+                  fontStyle:  "italic",
+                  fontSize:   "clamp(0.88rem,2.5vw,1rem)",
+                  color:      "rgba(240,238,255,0.8)",
+                  lineHeight: 1.5,
+                  margin:     0,
+                }}>
+                  {l.text}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
+
+        {/* ── Active line (typewriter + spring entrance) ─────────────────── */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={lineIndex}
+            initial={{ opacity:0, y:14, scale:0.96 }}
+            animate={{ opacity:1, y:0,  scale:1    }}
+            transition={{ type:"spring", stiffness:420, damping:32 }}
+            style={{
+              display:       "flex",
+              flexDirection: activeCfg.right ? "row-reverse" : "row",
+              alignItems:    "flex-end",
+              gap:           "0.5rem",
+            }}
+          >
+            {/* avatar */}
+            <div style={{
+              width:"38px", height:"38px", borderRadius:"50%", flexShrink:0,
+              background:  speakerColor.replace("0.9","0.15"),
+              border:      `1.5px solid ${speakerColor.replace("0.9","0.5")}`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:"0.62rem", fontWeight:800, color:speakerColor,
+              fontFamily:"Inter,sans-serif", letterSpacing:"0.04em",
+              boxShadow: `0 0 18px ${speakerColor.replace("0.9","0.22")}`,
+            }}>
+              {activeCfg.init}
+            </div>
+            {/* bubble */}
+            <div style={{
+              background:  speakerColor.replace("0.9","0.09"),
+              border:      `1.5px solid ${speakerColor.replace("0.9","0.32")}`,
+              borderRadius: activeCfg.right ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+              padding:     "0.75rem 1.05rem",
+              maxWidth:    "82%",
+              boxShadow:   `0 0 28px ${speakerColor.replace("0.9","0.1")}`,
+            }}>
+              <div style={{
+                fontFamily:    "Inter,sans-serif",
+                fontSize:      "0.5rem",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color:         speakerColor,
+                fontWeight:    700,
+                marginBottom:  "0.28rem",
+              }}>
+                {line.speaker}
+              </div>
+              <p style={{
+                fontFamily: "Cormorant Garamond,serif",
+                fontStyle:  "italic",
+                fontSize:   "clamp(1rem,2.8vw,1.22rem)",
+                color:      "rgba(240,238,255,0.95)",
+                lineHeight: 1.58,
+                margin:     0,
+              }}>
+                {visibleText}
+                {!textDone && (
+                  <span style={{
+                    animation:  "dlg-cursor 0.65s ease-in-out infinite",
+                    color:      speakerColor,
+                    marginLeft: "2px",
+                  }}>|</span>
+                )}
+              </p>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+        <div ref={bottomRef} />
       </div>
 
-      {/* Dialogue box */}
+      {/* ── Bottom bar — progress pips + tap hint ────────────────────────── */}
       <div style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: "rgba(8,6,15,0.94)",
-        backdropFilter: "blur(28px)",
-        borderTop: `2px solid ${boxBorder}`,
-        padding: "1.2rem 2rem 1.6rem",
-        zIndex: 30,
-        minHeight: "170px",
-        animation: "dialogue-box-in 0.42s cubic-bezier(0.34,1.2,0.64,1) both",
+        position:      "relative",
+        zIndex:        2,
+        padding:       "0.65rem 1.4rem 1.2rem",
+        display:       "flex",
+        alignItems:    "center",
+        justifyContent:"space-between",
+        background:    "rgba(6,4,14,0.72)",
+        backdropFilter:"blur(20px)",
+        borderTop:     `1px solid ${speakerColor.replace("0.9","0.14")}`,
       }}>
-        <div style={{ maxWidth: "740px", margin: "0 auto" }}>
-          {/* Speaker chip */}
-          <div style={{
-            display: "inline-block",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 800,
-            fontSize: "0.7rem",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: speakerColor,
-            background: speakerBg,
-            border: `1px solid ${speakerBorder}`,
-            borderRadius: "100px",
-            padding: "0.2rem 0.75rem",
-            marginBottom: "0.6rem",
-          }}>
-            {line.speaker}
-          </div>
-
-          {/* Dialogue text */}
-          <p style={{
-            fontFamily: "Cormorant Garamond, serif",
-            fontStyle: "italic",
-            fontSize: "clamp(1.05rem, 2.8vw, 1.3rem)",
-            color: "rgba(240,238,255,0.95)",
-            lineHeight: 1.55,
-            margin: "0 0 0.8rem",
-            minHeight: "2.8rem",
-          }}>
-            {visibleText}
-            {!textDone && (
-              <span style={{ animation: "pulse-glow 0.7s ease-in-out infinite", color: "var(--cyan)", marginLeft: "2px" }}>|</span>
-            )}
-          </p>
-
-          {/* Footer: progress + hint */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", gap: "4px" }}>
-              {lines.map((_, i) => (
-                <div key={i} style={{
-                  height: "4px",
-                  width: i === lineIndex ? "16px" : "5px",
-                  borderRadius: "2px",
-                  background: i < lineIndex ? "rgba(0,212,240,0.4)" : i === lineIndex ? "var(--cyan)" : "rgba(255,255,255,0.12)",
-                  transition: "all 0.3s ease",
-                }} />
-              ))}
-            </div>
-            <span style={{
-              fontFamily: "Inter, sans-serif",
-              fontSize: "0.68rem",
-              color: textDone ? "rgba(255,255,255,0.4)" : "transparent",
-              letterSpacing: "0.08em",
-              animation: textDone ? "pulse-glow 1.8s ease-in-out infinite" : "none",
-            }}>
-              tap to continue →
-            </span>
-          </div>
+        <div style={{ display:"flex", gap:"4px", alignItems:"center" }}>
+          {lines.map((_, i) => (
+            <div key={i} style={{
+              height:      "4px",
+              width:       i === lineIndex ? "18px" : "5px",
+              borderRadius:"2px",
+              background:  i < lineIndex
+                ? speakerColor.replace("0.9","0.35")
+                : i === lineIndex
+                ? speakerColor
+                : "rgba(255,255,255,0.12)",
+              transition: "all 0.3s ease",
+            }} />
+          ))}
         </div>
+        <motion.span
+          animate={{ opacity: textDone ? 1 : 0 }}
+          transition={{ duration:0.3 }}
+          style={{
+            fontFamily:    "Inter,sans-serif",
+            fontSize:      "0.65rem",
+            color:         "rgba(255,255,255,0.35)",
+            letterSpacing: "0.08em",
+          }}
+        >
+          tap to continue →
+        </motion.span>
       </div>
     </div>
   )

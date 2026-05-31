@@ -13,9 +13,37 @@ export type GameIntro = {
 
 export type DialogueLine = {
   speaker: string
-  avatar: "jake" | "npc"
+  /** "protagonist" = right-side character (works for any game hero, not just Jake) */
+  avatar: "jake" | "protagonist" | "npc"
   npcKey?: "default" | "senora_vega" | "tyler" | "ai"
   text: string
+}
+
+/** One row in an AI model comparison table */
+export type AICompareRow = {
+  dimension: string    // e.g. "Creative Writing"
+  winner:    string    // e.g. "Claude"
+  claude?:   string    // short descriptor — e.g. "Nuanced, long-form"
+  chatgpt?:  string
+  gemini?:   string
+  copilot?:  string
+  note?:     string    // optional teaching note
+}
+
+/** Full AI model comparison block for "ai-compare" scenes */
+export type AICompareData = {
+  models:    ("claude" | "chatgpt" | "gemini" | "copilot")[]  // which models to compare
+  headline:  string                 // e.g. "Claude vs ChatGPT — Actually Different Tools"
+  context:   string                 // 1-2 sentence intro
+  rows:      AICompareRow[]
+  verdict:   string                 // closing takeaway sentence
+  question:  string                 // quiz question after the table
+  choices:   Choice[]               // standard choices array
+}
+
+export type ChoiceBreakdown = {
+  phrase: string   // exact text to highlight (substring of choice.text)
+  note:   string   // what this phrase reveals
 }
 
 export type Choice = {
@@ -23,6 +51,8 @@ export type Choice = {
   text: string
   correct: boolean
   feedback: string
+  wrongFeedback?: string   // optional wrong-answer-specific elaboration (overrides feedback when wrong)
+  breakdown?: ChoiceBreakdown[]  // annotated phrases shown after correct reveal
 }
 
 export type PromptChallengeData = {
@@ -31,9 +61,15 @@ export type PromptChallengeData = {
   placeholder?: string
 }
 
+export type BossQuestion = {
+  question:  string
+  npcLine?:  string
+  choices:   Choice[]
+}
+
 export type Scene = {
   id: string
-  type: "scenario" | "quiz" | "revelation" | "boss" | "prompt" | "learn"
+  type: "scenario" | "quiz" | "revelation" | "boss" | "prompt" | "learn" | "predict" | "handoff" | "ai-compare"
   character?: string
   location?: string
   scenarioText?: string
@@ -46,6 +82,19 @@ export type Scene = {
   xpAward: number
   revealText?: string
   promptChallenge?: PromptChallengeData
+  /** PixVerse clip played as a cinematic moment before the revelation text */
+  revelationVideo?: string    // e.g. "/videos/g01-reveal.mp4"
+  /** 5-punch boss battle rounds — if present, BossArena renders instead of SceneRenderer */
+  bossQuestions?: BossQuestion[]
+  /**
+   * "Predict the Output" scene type.
+   * Shows a chat-bubble interface: what Jake typed → player picks which AI output he actually got.
+   * Uses the standard `question`, `choices`, and `xpAward` fields.
+   * `predictPrompt` is what Jake typed into the AI (shown in a right-aligned chat bubble).
+   */
+  predictPrompt?: string
+  /** AI model comparison data — used when type === "ai-compare" */
+  aiCompare?: AICompareData
 }
 
 export type Game = {
@@ -71,4 +120,31 @@ export type Game = {
   intro?: GameIntro
   price?: number
   priceId?: string
+  /**
+   * PixVerse video clips — all optional.
+   * Drop the file in /public/videos/ and reference it here.
+   *
+   *   introVideo      — plays instead of the generic MaestroPlay opener
+   *   endVideo        — plays on the EndScreen before the transformation
+   *
+   * Naming convention: /videos/g01-intro.mp4, /videos/g01-end.mp4, etc.
+   */
+  introVideo?: string          // e.g. "/videos/g01-intro.mp4"
+  endVideo?: string            // e.g. "/videos/g01-end.mp4"
+  /**
+   * Looping video clip for the protagonist character in dialogue scenes.
+   * Only set this for a specific game's character — e.g. Jake in game 1.
+   * Falls back to characterImage (static PNG) if not provided.
+   * Convention: /videos/char-jake.mp4, /videos/char-zoe.mp4, etc.
+   */
+  protagonistVideo?: string    // e.g. "/videos/char-jake.mp4"
+  /** Which AI model this game primarily teaches */
+  aiModel?: "claude" | "chatgpt" | "gemini" | "copilot" | "general"
+  /** Handoff teaser — used to build the end-of-game "what's next" dialogue */
+  nextGame?: {
+    slug:        string     // e.g. "how-ai-works"
+    character:   string     // e.g. "Zoe"
+    teaserLine:  string     // what the current character says about the next game
+    previewImage?: string   // optional image of next character
+  }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState, useEffect, useRef } from "react"
 import { Game } from "@/lib/games/types"
 
 type Props = {
@@ -22,6 +23,8 @@ const NEON_ACCENTS: Record<string, string> = {
   "gemini-cli-unlocked":  "#fbbf24",
   "microsoft-copilot":    "#38bdf8",
   "copilot-studio":       "#c084fc",
+  "welcome-to-ai-v2":    "#00d4f0",
+  "prompt-lab":           "#e879f9",
 }
 
 // Per-image crop so the character's face is always in frame
@@ -36,6 +39,7 @@ const IMAGE_CROP: Record<string, string> = {
   "/images/alex.png":          "center top",
   "/images/luna.png":          "center 8%",
   "/images/sam.png":           "center 8%",
+  "/images/maya.png":          "center 10%",
 }
 
 // Strip "N-year-old" prefix, uppercase the role label
@@ -49,6 +53,14 @@ export default function GameCard({ game, purchased }: Props) {
   const accent = NEON_ACCENTS[game.slug] ?? game.accentColor ?? "#00d4f0"
   const crop   = IMAGE_CROP[game.characterImage ?? ""] ?? "center 8%"
   const initial = (game.characterName ?? game.title)[0].toUpperCase()
+  const [imgError, setImgError] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+  // Catch errors that fired before React hydration attached the onError handler
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth === 0) {
+      setImgError(true)
+    }
+  }, [])
 
   return (
     <Link href={href} style={{ textDecoration: "none", display: "block", height: "100%" }}>
@@ -95,10 +107,12 @@ export default function GameCard({ game, purchased }: Props) {
           overflow: "hidden",
           flexShrink: 0,
         }}>
-          {game.characterImage ? (
+          {game.characterImage && !imgError ? (
             <img
+              ref={imgRef}
               src={game.characterImage}
               alt={game.characterName ?? game.title}
+              onError={() => setImgError(true)}
               style={{
                 width: "100%",
                 height: "100%",

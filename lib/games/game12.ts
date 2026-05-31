@@ -3,7 +3,8 @@ import { Game } from "./types"
 export const game12: Game = {
   slug: "copilot-studio",
   week: 12,
-  free: true,
+  free: false,
+  price: 4.99,
   title: "Copilot Studio — Build Your Own AI Agent",
   emoji: "🏗️",
   accentColor: "#8764b8",
@@ -33,6 +34,13 @@ export const game12: Game = {
   description:
     "Learn how Microsoft Copilot Studio lets anyone build custom AI agents — with a knowledge base, personality, and real integrations — without writing code.",
   tagline: "You don't need to code to build AI. You need to think clearly.",
+  aiModel:  "copilot" as const,
+  nextGame: {
+    slug:         "prompt-lab",
+    character:    "Maya",
+    teaserLine:   "Jake built an AI agent. Now it's time to go meta — the entire next game is about the craft of prompting itself. Maya is a UX designer who turned prompt engineering into a superpower. The before and after will shock you.",
+    previewImage: "/images/maya.png",
+  },
   scenes: [
     // ── Scene 1 ── The Problem ─────────────────────────────────────────────────
     {
@@ -483,5 +491,127 @@ export const game12: Game = {
         "MelodyBot went live on a Friday afternoon.\n\nBy Monday, Jake had received two emails about the music club.\n\nBoth were from students who wanted to thank him — not ask him the same questions again.\n\nIn the first week, MelodyBot handled 94 conversations. Audition questions. Rehearsal schedules. Instrument requirements. The code of conduct. The same questions Jake had answered 31 times in a single week — now answered instantly, at 11pm when students were actually doing research, on a Saturday when Jake was at a gig, in the time between a student thinking 'I want to join' and talking themselves out of it.\n\nJake didn't write a single line of code.\n\nHe thought clearly about what the bot needed to know, what tone it should take, what it should refuse to guess at, and when it should hand off to a human. That's the whole skill.\n\nBuilding AI agents isn't about knowing how neural networks work. It's about knowing how people work — what they're really asking, what they actually need, what happens when the answer isn't there.\n\nJake knew his club. He knew his students. He knew the questions.\n\nThat made him the right person to build this.\n\nNot a developer.\n\nA conductor.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w12-compare",
+      type: "ai-compare",
+      character: "Jake",
+      location: "COMPUTER LAB · POST-LAUNCH",
+      xpAward: 75,
+      aiCompare: {
+        models: ["copilot", "chatgpt"],
+        headline: "Copilot Studio vs ChatGPT Custom GPTs — No-Code AI Agent Battle",
+        context: "Jake compared both platforms before choosing where to build MelodyBot. Same requirements: music club FAQ bot, schedule lookup, equipment booking. Different results.",
+        rows: [
+          {
+            dimension: "Microsoft 365 Integration",
+            winner: "Copilot",
+            claude:  "N/A",
+            chatgpt: "No native M365 integration",
+            gemini:  "N/A",
+            copilot: "Deep M365 integration — Teams, SharePoint, Outlook as native channels",
+            note: "MelodyBot needed to answer questions in Teams. Copilot Studio deploys directly there.",
+          },
+          {
+            dimension: "Ease of Building",
+            winner: "ChatGPT",
+            claude:  "N/A",
+            chatgpt: "Custom GPTs: 5-minute setup, conversational builder, instant publish",
+            gemini:  "N/A",
+            copilot: "More setup required; more powerful but steeper learning curve",
+            note: "ChatGPT's GPT Builder is genuinely simpler. Copilot Studio has more power but more complexity.",
+          },
+          {
+            dimension: "Knowledge Base & Document Grounding",
+            winner: "Copilot",
+            claude:  "N/A",
+            chatgpt: "File upload to Custom GPT; limited document grounding",
+            gemini:  "N/A",
+            copilot: "SharePoint-grounded knowledge base; enterprise document management",
+            note: "Jake needed MelodyBot to answer from the club's actual policy documents stored in SharePoint.",
+          },
+          {
+            dimension: "Conversation Flow Control",
+            winner: "Copilot",
+            claude:  "N/A",
+            chatgpt: "Custom GPT: conversation style configurable; limited hard flow control",
+            gemini:  "N/A",
+            copilot: "Topics system: define exact conversation flows with branching logic",
+            note: "Copilot Studio lets Jake define exactly what the bot says at each step. Custom GPTs are more free-form.",
+          },
+          {
+            dimension: "Public Distribution",
+            winner: "ChatGPT",
+            claude:  "N/A",
+            chatgpt: "GPT Store: publish publicly, anyone can use it",
+            gemini:  "N/A",
+            copilot: "Primarily enterprise/org deployment; less suited for public distribution",
+            note: "If Jake wanted MelodyBot available to anyone — Custom GPT wins on distribution reach.",
+          },
+        ],
+        verdict: "For M365-native team bots with SharePoint knowledge — Copilot Studio. For quick builds with broad public reach — ChatGPT Custom GPTs. Jake's school context made Copilot Studio the right call.",
+        question: "Jake wants to build a bot for his music club that answers questions from documents stored in SharePoint and lives inside Microsoft Teams. Which platform is purpose-built for this?",
+        choices: [
+          {
+            label: "A",
+            text: "ChatGPT Custom GPTs — simplest to build and maintain",
+            correct: false,
+            feedback: "Custom GPTs are simpler to build — but they can't natively connect to SharePoint or deploy inside Teams. Jake would lose the M365 integration that makes the bot actually useful for his school context.",
+            wrongFeedback: "Custom GPTs are simpler to build — but they can't natively connect to SharePoint or deploy inside Teams. Jake would lose the M365 integration that makes the bot actually useful for his school context.",
+          },
+          {
+            label: "B",
+            text: "Copilot Studio — native SharePoint grounding and Teams deployment",
+            correct: true,
+            feedback: "Exactly. Jake's two requirements — SharePoint knowledge base and Teams deployment — are Copilot Studio's native strengths. It was built specifically for M365-grounded bots that live inside the Microsoft ecosystem.",
+          },
+          {
+            label: "C",
+            text: "Either — they're equivalent for school use cases",
+            correct: false,
+            feedback: "They're not equivalent here. The specific requirements — SharePoint grounding and Teams channels — are core features in Copilot Studio and workarounds (or impossible) in Custom GPTs. Platform fit matters.",
+            wrongFeedback: "They're not equivalent here. The specific requirements — SharePoint grounding and Teams channels — are core features in Copilot Studio and workarounds (or impossible) in Custom GPTs. Platform fit matters.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w12-handoff",
+      type: "handoff",
+      character: "Jake",
+      location: "MUSIC CLUB ROOM · LOOKING AT SCREEN",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "MelodyBot handled 94 conversations in its first week. Zero email threads. Zero me explaining the rehearsal schedule for the hundredth time.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "We've been through a lot together. Jake the guitarist. Jake the music club president. Jake the bot builder. All the same guy — just with better tools each time.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "But here's what I kept thinking: all of this — every AI tool, every workflow, every result — comes down to one thing. How you talk to it.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "The words you choose. The structure. The context. The constraints. We've called it prompting throughout this whole journey — but we haven't gone DEEP on it. The actual craft of it.",
+        },
+        {
+          speaker: "Jake",
+          avatar: "protagonist" as const,
+          text: "There's a designer named Maya who made that her entire specialty. And trust me — after you see the before-and-after of her prompts, you're going to rethink every conversation you've ever had with an AI.",
+        },
+      ],
+    },
+
   ],
 }

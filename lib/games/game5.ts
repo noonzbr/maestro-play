@@ -30,6 +30,13 @@ export const game5: Game = {
       { type: "final",     text: "The solo artist and the orchestra are not enemies. They were always waiting to meet." },
     ],
   },
+  aiModel:  "claude" as const,
+  nextGame: {
+    slug:         "claude-code-unlocked",
+    character:    "Kai",
+    teaserLine:   "Claude Chat changed the way Jordan thinks. Claude Code changes the way Kai BUILDS. If you've ever stared at an error message for 45 minutes — this one's for you.",
+    previewImage: "/images/kai.png",
+  },
   scenes: [
 
     // ── LEARN 1: Claude vs. ChatGPT — Actually Different Tools ───────────────
@@ -434,5 +441,122 @@ export const game5: Game = {
         "You used to hand someone a to-do list and wait.\n\nNow you hand an AI a problem and think alongside it.\n\nJordan shipped a proposal, fixed a pricing strategy, handled a difficult client, and learned a new skill — all in one week. Not because Jordan got smarter.\n\nBecause Jordan stopped treating the most powerful thinking tool of this generation like a fancy spell-checker.\n\nYou now know what Claude Chat actually is.\n\nUse it like you mean it.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w5-compare",
+      type: "ai-compare",
+      character: "Jordan",
+      location: "HOME OFFICE · LAPTOP OPEN",
+      xpAward: 75,
+      aiCompare: {
+        models: ["claude", "chatgpt", "gemini"],
+        headline: "Claude Chat vs ChatGPT vs Gemini — The Freelancer's Real-World Test",
+        context: "Jordan tested all three tools on actual client work for 30 days. Not benchmarks — real deliverables. Here's what the data showed.",
+        rows: [
+          {
+            dimension: "Long-Context Document Analysis",
+            winner: "Claude",
+            claude:  "200K token context — reads entire contracts, reports without losing thread",
+            chatgpt: "128K context; handles most docs but may miss details in very long files",
+            gemini:  "1M token context; theoretically largest but consistency varies",
+            note: "Jordan's client contracts average 40 pages. Claude reads them completely and reasons about the whole document.",
+          },
+          {
+            dimension: "Consistent Professional Voice",
+            winner: "Claude",
+            claude:  "Adapts to and maintains a specific writing style across a session",
+            chatgpt: "Good adaptation; voice can drift in very long sessions",
+            gemini:  "Solid adaptation; Google-adjacent phrasing sometimes bleeds through",
+            note: "Jordan's clients hire HER voice. Claude maintains it without reminders.",
+          },
+          {
+            dimension: "Quick Research & Current Events",
+            winner: "ChatGPT",
+            claude:  "Strong reasoning but limited live web access",
+            chatgpt: "GPT-4o browses live — current pricing, news, competitor data",
+            gemini:  "Google Search integrated — excellent for current information",
+            note: "For competitive analysis with current market data, Claude alone won't cut it.",
+          },
+          {
+            dimension: "Google Workspace Workflow",
+            winner: "Gemini",
+            claude:  "Requires copy-paste from Docs/Gmail",
+            chatgpt: "Requires copy-paste from Docs/Gmail",
+            gemini:  "Native sidebar in Gmail, Docs, Drive — zero friction",
+            note: "If your client communication is in Gmail, Gemini meets you there.",
+          },
+          {
+            dimension: "Strategic Reasoning & Decision Support",
+            winner: "Claude",
+            claude:  "Thinks through implications, flags trade-offs, pushes back on weak assumptions",
+            chatgpt: "Strong analysis; more agreeable, less pushback",
+            gemini:  "Good analysis; research-focused more than reasoning-focused",
+            note: "Jordan needs a thinking partner, not a yes-machine. Claude argues back constructively.",
+          },
+        ],
+        verdict: "For deep strategic work that needs sustained context and honest pushback — Claude Chat is Jordan's default. For current market research — ChatGPT or Gemini. Smart consultants rotate tools by task.",
+        question: "Jordan is reviewing a 50-page client contract to identify risk clauses. Which tool handles this most reliably?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — 200K token context window handles the entire document reliably",
+            correct: true,
+            feedback: "Right. A 50-page contract is roughly 25,000 tokens. Claude's 200K context reads the entire document without truncation and can reason about clauses in relation to each other across the whole file. This is where Claude's long-context architecture shines.",
+          },
+          {
+            label: "B",
+            text: "Gemini — it has the largest context window (1M tokens)",
+            correct: false,
+            feedback: "Gemini's 1M token context is technically the largest — but context window size and context consistency aren't the same thing. For professional contract analysis where every clause matters, Claude's reliable handling of legal language is the more important factor.",
+            wrongFeedback: "Gemini's 1M token context is technically the largest — but context window size and context consistency aren't the same thing. For professional contract analysis where every clause matters, Claude's reliable handling of legal language is the more important factor.",
+          },
+          {
+            label: "C",
+            text: "ChatGPT — it can browse for relevant case law",
+            correct: false,
+            feedback: "Browsing helps if you need current case law — but contract review is about analyzing THIS document, not finding external data. ChatGPT's browse capability is a distraction here. The bottleneck is consistent full-document reasoning.",
+            wrongFeedback: "Browsing helps if you need current case law — but contract review is about analyzing THIS document, not finding external data. ChatGPT's browse capability is a distraction here. The bottleneck is consistent full-document reasoning.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w5-handoff",
+      type: "handoff",
+      character: "Jordan",
+      location: "HOME OFFICE · END OF WEEK",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Jordan",
+          avatar: "protagonist" as const,
+          text: "You just learned how to think alongside an AI. That's not a small thing. Most people never get there — they use it like a search engine with better grammar.",
+        },
+        {
+          speaker: "Jordan",
+          avatar: "protagonist" as const,
+          text: "But here's what I couldn't do with Claude Chat: touch my actual code. My files. My terminal. The stuff that BUILDS things.",
+        },
+        {
+          speaker: "Jordan",
+          avatar: "protagonist" as const,
+          text: "There's a developer I know — Kai. Junior engineer, six months in. He was drowning in bugs and error messages. Spending hours on things that should take minutes.",
+        },
+        {
+          speaker: "Jordan",
+          avatar: "protagonist" as const,
+          text: "Then he found Claude Code. Not chat. CODE. It reads your entire codebase, edits files directly, runs tests. It's like having a senior dev sitting next to you at 2 AM.",
+        },
+        {
+          speaker: "Jordan",
+          avatar: "protagonist" as const,
+          text: "Go see what happens when an AI doesn't just advise — it actually builds alongside you.",
+        },
+      ],
+    },
+
   ],
 }

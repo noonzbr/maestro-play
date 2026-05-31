@@ -28,6 +28,13 @@ export const game9: Game = {
       { type: "final",     text: "Intelligence was never the bottleneck. Knowing where to look always was." },
     ],
   },
+  aiModel:  "gemini" as const,
+  nextGame: {
+    slug:         "gemini-cli-unlocked",
+    character:    "Sam",
+    teaserLine:   "Luna used Gemini for research. Sam uses it for something completely different — bulk infrastructure tasks in the terminal. Gemini CLI is an AI that doesn't chat. It works.",
+    previewImage: "/images/sam.png",
+  },
   scenes: [
     // ── Scene 1 ── Meet Luna ──────────────────────────────────────────────────
     {
@@ -355,5 +362,122 @@ export const game9: Game = {
         "Luna submitted her dissertation chapter three days early.\n\nShe didn't write faster. She thought faster — because she finally had a thinking partner who could hold the entire conversation in its head at once.\n\nThe research didn't get easier. She got sharper. There's a difference.\n\nShe stopped reading every email twice to remember what had been decided. She stopped rebuilding her notes from scratch every time her argument evolved. She stopped spending Tuesday afternoons wrestling with Sheets formulas that had nothing to do with her actual research.\n\nGemini didn't do the dissertation. She did.\n\nBut it held everything she needed — the papers, the threads, the drafts, the gaps — so she could focus on the one thing only she could do:\n\nThe thinking.",
       xpAward: 200,
     },
+
+    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    {
+      id: "w9-compare",
+      type: "ai-compare",
+      character: "Luna",
+      location: "LIBRARY · RESEARCH STATION",
+      xpAward: 75,
+      aiCompare: {
+        models: ["gemini", "claude", "chatgpt"],
+        headline: "Gemini vs Claude vs ChatGPT — For Research & Academic Work",
+        context: "Luna tested all three tools across six months of dissertation research. Lit reviews, data synthesis, citation management, argument structuring. Here's the honest breakdown.",
+        rows: [
+          {
+            dimension: "Google Workspace Integration",
+            winner: "Gemini",
+            claude:  "No native Google integration",
+            chatgpt: "No native Google integration",
+            gemini:  "Native in Gmail, Docs, Drive, Slides — works where researchers already live",
+            note: "Luna's papers are in Drive. Her notes are in Docs. Gemini meets her there with zero friction.",
+          },
+          {
+            dimension: "Context Window for Long Documents",
+            winner: "Gemini",
+            claude:  "200K tokens — excellent for long docs",
+            chatgpt: "128K tokens — good for most documents",
+            gemini:  "1M tokens — reads entire research corpora simultaneously",
+            note: "Luna loaded 47 papers at once. Gemini found cross-paper patterns Claude and ChatGPT would have to process separately.",
+          },
+          {
+            dimension: "Deep Research Mode",
+            winner: "Gemini",
+            claude:  "Strong synthesis; no automated multi-source deep research",
+            chatgpt: "Browses web; no dedicated deep research workflow",
+            gemini:  "Deep Research: scans 100+ sources, synthesizes into structured report",
+            note: "Deep Research is Gemini's superpower for academic work — automated literature review.",
+          },
+          {
+            dimension: "Nuanced Argument Construction",
+            winner: "Claude",
+            claude:  "Best at building careful, nuanced academic arguments with appropriate hedging",
+            chatgpt: "Good arguments; can be overconfident",
+            gemini:  "Strong structure; sometimes research-summary heavy vs. argument-forward",
+            note: "Luna's committee required a specific style of careful hedged argumentation. Claude nailed it.",
+          },
+          {
+            dimension: "Citation & Source Reliability",
+            winner: "ChatGPT",
+            claude:  "Acknowledges uncertainty; rarely hallucinate sources when careful",
+            chatgpt: "Browse mode can verify and cite live sources",
+            gemini:  "Google Scholar integration in research mode; cites sources reliably",
+            note: "For finding and citing REAL papers — use Gemini's Deep Research or ChatGPT with browse. Never trust AI-generated citations without verification.",
+          },
+        ],
+        verdict: "For academic research: Gemini's Google integration + massive context + Deep Research mode make it the research discovery engine. Claude for writing the actual argument. Smart academics use both.",
+        question: "Luna needs to synthesize 50 papers into a literature review framework — finding themes, gaps, and contradictions across the entire corpus. Which tool is most naturally suited?",
+        choices: [
+          {
+            label: "A",
+            text: "Claude — best at nuanced synthesis and argument construction",
+            correct: false,
+            feedback: "Claude writes the best arguments — but feeding it 50 papers requires working around its context limits and manual uploads. The synthesis task itself is better handled by a tool with built-in research infrastructure and massive context.",
+            wrongFeedback: "Claude writes the best arguments — but feeding it 50 papers requires working around its context limits and manual uploads. The synthesis task itself is better handled by a tool with built-in research infrastructure and massive context.",
+          },
+          {
+            label: "B",
+            text: "Gemini — 1M context + Deep Research handles the whole corpus simultaneously",
+            correct: true,
+            feedback: "Right. Gemini's 1M token context can hold the entire 50-paper corpus in one session while Deep Research synthesizes themes across all of them. That's the architecture built for exactly this use case. Once you have the synthesis, use Claude to write the actual argument.",
+          },
+          {
+            label: "C",
+            text: "ChatGPT — it can browse to find additional papers too",
+            correct: false,
+            feedback: "ChatGPT's browsing is valuable for finding new papers — but for synthesizing 50 you ALREADY have, you need context capacity and multi-document analysis. ChatGPT's 128K context and lack of deep research mode are limiting factors here.",
+            wrongFeedback: "ChatGPT's browsing is valuable for finding new papers — but for synthesizing 50 you ALREADY have, you need context capacity and multi-document analysis. ChatGPT's 128K context and lack of deep research mode are limiting factors here.",
+          },
+        ],
+      },
+    },
+
+    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    {
+      id: "w9-handoff",
+      type: "handoff",
+      character: "Luna",
+      location: "LIBRARY · PACKING UP",
+      xpAward: 0,
+      dialogue: [
+        {
+          speaker: "Luna",
+          avatar: "protagonist" as const,
+          text: "You now know what Gemini can actually do. Not just the chat — the research infrastructure. The context window. The Google integration. The Deep Research mode.",
+        },
+        {
+          speaker: "Luna",
+          avatar: "protagonist" as const,
+          text: "Everything we did was in a browser, in documents, in the research world. There's a completely different side of Gemini that I never touched.",
+        },
+        {
+          speaker: "Luna",
+          avatar: "protagonist" as const,
+          text: "Gemini CLI. The terminal version. It doesn't chat — it works. Bulk file operations, infrastructure scripting, automated pipelines. A whole different beast.",
+        },
+        {
+          speaker: "Luna",
+          avatar: "protagonist" as const,
+          text: "Sam is a DevOps engineer. He migrated 47 configuration files in 11 minutes with Gemini CLI. Not manually — the AI DID it. In the terminal.",
+        },
+        {
+          speaker: "Luna",
+          avatar: "protagonist" as const,
+          text: "If you've ever had to do anything tedious and repetitive at the command line — what Sam found is going to change how you think about that kind of work.",
+        },
+      ],
+    },
+
   ],
 }
