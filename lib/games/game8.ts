@@ -3,8 +3,7 @@ import { Game } from "./types"
 export const game8: Game = {
   slug: "chatgpt-mastery",
   week: 8,
-  free: false,
-  price: 4.99,
+  free: true,
   title: "ChatGPT — Beyond the Hype",
   emoji: "🤖",
   accentColor: "#19c37d",
@@ -32,6 +31,7 @@ export const game8: Game = {
     ],
   },
   aiModel:  "chatgpt" as const,
+  mondayPrompt: "Create a Custom GPT for [YOUR USE CASE]. Instructions to write: 'You are [specific role]. You know: [3-5 facts about your context]. You always: [3 behaviors]. You never: [3 constraints]. When asked [TRIGGER SCENARIO], you respond with: [specific format/approach].' Upload: [knowledge files]. Test it with: 'What would you do if [edge case scenario]?'",
   felipeOutroVideo:   "/videos/felipe-game8.mp4",
   nextGame: {
     slug:         "gemini-unlocked",

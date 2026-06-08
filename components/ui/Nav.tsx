@@ -2,10 +2,12 @@
 
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
+import { usePathname } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import { signOut } from "@/lib/supabase-browser"
 
 export default function Nav() {
+  const pathname = usePathname()
   const { user, loading: authLoading, openAuthModal } = useAuth()
   const [scrolled,     setScrolled]     = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -48,7 +50,18 @@ export default function Nav() {
       }}
     >
       {/* Logo */}
-      <Link href="/" style={{ textDecoration: "none" }}>
+      <Link href="/" suppressHydrationWarning style={{ textDecorationLine: "none", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18V5l12-2v13" stroke="url(#logo-grad-nav)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="6" cy="18" r="3" fill="url(#logo-grad-nav)"/>
+          <circle cx="18" cy="16" r="3" fill="url(#logo-grad-nav)"/>
+          <defs>
+            <linearGradient id="logo-grad-nav" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#00d4f0"/>
+              <stop offset="100%" stopColor="#e040fb"/>
+            </linearGradient>
+          </defs>
+        </svg>
         <span style={{
           fontFamily:    "Inter, sans-serif",
           fontWeight:    800,
@@ -56,7 +69,7 @@ export default function Nav() {
           color:         "#fff",
           letterSpacing: "-0.02em",
         }}>
-          ♪ Maestro<span style={{
+          Maestro<span style={{
             background:          "linear-gradient(90deg,#00d4f0,#e040fb)",
             WebkitBackgroundClip:"text",
             WebkitTextFillColor: "transparent",
@@ -69,17 +82,29 @@ export default function Nav() {
       <div suppressHydrationWarning style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
         <Link
           href="/games"
-          style={{ fontFamily:"Inter, sans-serif", fontSize:"0.875rem", fontWeight:500, color:"rgba(240,238,255,0.7)", textDecoration:"none", transition:"color 0.2s" }}
+          suppressHydrationWarning
+          aria-current={pathname?.startsWith("/games") ? "page" : undefined}
+          style={{
+            fontFamily:"Inter, sans-serif", fontSize:"0.875rem", fontWeight:500,
+            color: pathname?.startsWith("/games") ? "#fff" : "rgba(240,238,255,0.82)",
+            textDecorationLine:"none", flexShrink:0, transition:"color 0.2s",
+          }}
           onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-          onMouseLeave={e => (e.currentTarget.style.color = "rgba(240,238,255,0.7)")}
+          onMouseLeave={e => (e.currentTarget.style.color = pathname?.startsWith("/games") ? "#fff" : "rgba(240,238,255,0.82)")}
         >
-          Games
+          Story Map
         </Link>
         <Link
           href="/dashboard"
-          style={{ fontFamily:"Inter, sans-serif", fontSize:"0.875rem", fontWeight:500, color:"rgba(240,238,255,0.7)", textDecoration:"none", transition:"color 0.2s" }}
+          suppressHydrationWarning
+          aria-current={pathname === "/dashboard" ? "page" : undefined}
+          style={{
+            fontFamily:"Inter, sans-serif", fontSize:"0.875rem", fontWeight:500,
+            color: pathname === "/dashboard" ? "#fff" : "rgba(240,238,255,0.82)",
+            textDecorationLine:"none", flexShrink:0, transition:"color 0.2s",
+          }}
           onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-          onMouseLeave={e => (e.currentTarget.style.color = "rgba(240,238,255,0.7)")}
+          onMouseLeave={e => (e.currentTarget.style.color = pathname === "/dashboard" ? "#fff" : "rgba(240,238,255,0.82)")}
         >
           Dashboard
         </Link>
@@ -87,9 +112,10 @@ export default function Nav() {
           href="https://aimaestro.academy"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontFamily:"Inter, sans-serif", fontSize:"0.875rem", fontWeight:500, color:"rgba(240,238,255,0.7)", textDecoration:"none", transition:"color 0.2s" }}
+          suppressHydrationWarning
+          style={{ fontFamily:"Inter, sans-serif", fontSize:"0.875rem", fontWeight:500, color:"rgba(240,238,255,0.82)", textDecoration:"none", transition:"color 0.2s" }}
           onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-          onMouseLeave={e => (e.currentTarget.style.color = "rgba(240,238,255,0.7)")}
+          onMouseLeave={e => (e.currentTarget.style.color = "rgba(240,238,255,0.82)")}
         >
           Academy
         </a>
@@ -100,6 +126,9 @@ export default function Nav() {
             <div ref={menuRef} style={{ position:"relative" }}>
               <button
                 onClick={() => setUserMenuOpen(o => !o)}
+                aria-label={userMenuOpen ? "Close account menu" : "Open account menu"}
+                aria-expanded={userMenuOpen}
+                aria-haspopup="menu"
                 style={{
                   width:"34px", height:"34px", borderRadius:"50%",
                   background:"linear-gradient(135deg, #00d4f0, #e040fb)",
@@ -123,7 +152,7 @@ export default function Nav() {
                   <div style={{ fontFamily:"Inter, sans-serif", fontSize:"0.72rem", color:"rgba(240,238,255,0.4)", padding:"0.5rem 0.85rem 0.3rem", borderBottom:"1px solid rgba(255,255,255,0.07)", marginBottom:"0.3rem" }}>
                     {user.email}
                   </div>
-                  <Link href="/dashboard" onClick={() => setUserMenuOpen(false)} style={{ display:"block", textDecoration:"none", fontFamily:"Inter, sans-serif", fontWeight:600, fontSize:"0.82rem", color:"rgba(240,238,255,0.8)", padding:"0.55rem 0.85rem", borderRadius:"10px", transition:"background 0.15s" }}
+                  <Link href="/dashboard" suppressHydrationWarning onClick={() => setUserMenuOpen(false)} style={{ display:"block", textDecorationLine:"none", fontFamily:"Inter, sans-serif", fontWeight:600, fontSize:"0.82rem", color:"rgba(240,238,255,0.8)", padding:"0.55rem 0.85rem", borderRadius:"10px", transition:"background 0.15s" }}
                     onMouseEnter={e => (e.currentTarget.style.background="rgba(255,255,255,0.06)")}
                     onMouseLeave={e => (e.currentTarget.style.background="")}
                   >
@@ -146,7 +175,7 @@ export default function Nav() {
                 onClick={() => openAuthModal("signin")}
                 style={{
                   fontFamily:"Inter, sans-serif", fontSize:"0.82rem", fontWeight:600,
-                  color:"rgba(240,238,255,0.65)", background:"none", border:"none",
+                  color:"rgba(240,238,255,0.80)", background:"none", border:"none",
                   cursor:"pointer", transition:"color 0.2s", padding:0,
                 }}
                 onMouseEnter={e => (e.currentTarget.style.color="#fff")}
@@ -156,12 +185,14 @@ export default function Nav() {
               </button>
               <Link
                 href="/games/welcome-to-ai"
+                suppressHydrationWarning
                 style={{
                   fontFamily:"Inter, sans-serif", fontSize:"0.8rem", fontWeight:700,
                   color:"#08060f",
                   background:"linear-gradient(90deg,#00d4f0,#e040fb)",
                   padding:"0.45rem 1.2rem", borderRadius:"100px",
-                  textDecoration:"none", letterSpacing:"0.02em",
+                  textDecorationLine:"none", letterSpacing:"0.02em",
+                  flexShrink: 0,
                   transition:"opacity 0.2s, transform 0.2s",
                 }}
                 onMouseEnter={e => { e.currentTarget.style.opacity="0.9"; e.currentTarget.style.transform="translateY(-1px)" }}

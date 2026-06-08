@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Choice } from "@/lib/games/types"
+import { useSoundEngine } from "./SoundEngine"
 
 type Props = {
   choice: Choice
@@ -10,6 +11,9 @@ type Props = {
   selectedLabel: string | null
   onSelect: (choice: Choice) => void
   dimmed?: boolean
+  /** Branching mode: no right/wrong verdict — the chosen option is "your path",
+   *  highlighted neutrally; the consequence below is where the learning lives. */
+  branching?: boolean
 }
 
 // Inject keyframes once
@@ -44,7 +48,8 @@ function ensureKeyframes() {
   document.head.appendChild(s)
 }
 
-export default function ChoiceButton({ choice, index, answered, selectedLabel, onSelect, dimmed }: Props) {
+export default function ChoiceButton({ choice, index, answered, selectedLabel, onSelect, dimmed, branching }: Props) {
+  const sound = useSoundEngine()
   const isSelected = selectedLabel === choice.label
   const isCorrect  = choice.correct
   const showResult = answered
@@ -60,21 +65,24 @@ export default function ChoiceButton({ choice, index, answered, selectedLabel, o
   /* ── colours ── */
   const borderColor = () => {
     if (!showResult) return isSelected ? "rgba(0,212,240,0.6)" : "rgba(255,255,255,0.1)"
+    // Branching: the path you took glows in the brand accent; others recede. No verdict.
+    if (branching)   return isSelected ? "rgba(0,212,240,0.7)" : "rgba(255,255,255,0.06)"
     if (isCorrect)               return "#58cc02"
     if (isSelected && !isCorrect) return "#ff4b4b"
     return "rgba(255,255,255,0.06)"
   }
   const bgColor = () => {
     if (!showResult) return isSelected ? "rgba(0,212,240,0.11)" : "rgba(255,255,255,0.03)"
+    if (branching)   return isSelected ? "rgba(0,212,240,0.13)" : "rgba(255,255,255,0.02)"
     if (isCorrect)               return "rgba(88,204,2,0.13)"
     if (isSelected && !isCorrect) return "rgba(255,75,75,0.11)"
     return "rgba(255,255,255,0.02)"
   }
-  const labels = ["A", "B", "C", "D"]
-
   /* ── animation ── */
   const getAnim = () => {
     if (!mounted)                           return "none"
+    if (branching && showResult && isSelected) return "choice-correct-pop 0.42s cubic-bezier(0.34,1.56,0.64,1) both"
+    if (branching)                          return `choice-enter 0.42s cubic-bezier(0.34,1.3,0.64,1) ${index * 72}ms both`
     if (showResult && isSelected && !isCorrect) return "choice-shake 0.45s cubic-bezier(.36,.07,.19,.97) both"
     if (showResult && isCorrect)            return "choice-correct-pop 0.42s cubic-bezier(0.34,1.56,0.64,1) both"
     return `choice-enter 0.42s cubic-bezier(0.34,1.3,0.64,1) ${index * 72}ms both`
@@ -82,6 +90,7 @@ export default function ChoiceButton({ choice, index, answered, selectedLabel, o
 
   function handleClick() {
     if (answered) return
+    sound.playClick()
     setPressed(true)
     setTimeout(() => setPressed(false), 220)
     onSelect(choice)
@@ -93,20 +102,24 @@ export default function ChoiceButton({ choice, index, answered, selectedLabel, o
       style={{
         width: "100%",
         textAlign: "left",
-        padding: "0.62rem 1rem",
+        padding: "0.55rem 1rem",
         borderRadius: "12px",
         border: `2px solid ${borderColor()}`,
         background: bgColor(),
         cursor: answered ? "default" : "pointer",
         display: "flex",
-        gap: "0.9rem",
+        gap: "0.7rem",
         alignItems: "center",
-        opacity: showResult && !isCorrect && !isSelected ? 0.38 : dimmed ? 0.45 : 1,
+        opacity: branching
+          ? (showResult && !isSelected ? 0.4 : 1)
+          : (showResult && !isCorrect && !isSelected ? 0.38 : dimmed ? 0.45 : 1),
         transform: pressed ? "scale(0.962) translateY(2px)" : "scale(1)",
         transition: pressed
           ? "transform 0.08s ease"
           : "transform 0.28s cubic-bezier(0.34,1.56,0.64,1), border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease, opacity 0.25s ease",
-        boxShadow: showResult && isCorrect
+        boxShadow: branching
+          ? (showResult && isSelected ? "0 0 0 3px rgba(0,212,240,0.22), 0 4px 20px rgba(0,212,240,0.12)" : "0 2px 10px rgba(0,0,0,0.28)")
+          : showResult && isCorrect
           ? "0 0 0 3px rgba(88,204,2,0.25), 0 4px 20px rgba(88,204,2,0.12)"
           : showResult && isSelected && !isCorrect
           ? "0 0 0 3px rgba(255,75,75,0.25)"
@@ -115,6 +128,7 @@ export default function ChoiceButton({ choice, index, answered, selectedLabel, o
       }}
       onMouseEnter={e => {
         if (!answered) {
+          sound.playHover()
           e.currentTarget.style.transform    = "scale(1.016) translateY(-1px)"
           e.currentTarget.style.borderColor  = "rgba(0,212,240,0.48)"
           e.currentTarget.style.background   = "rgba(0,212,240,0.07)"
@@ -130,53 +144,72 @@ export default function ChoiceButton({ choice, index, answered, selectedLabel, o
         }
       }}
     >
-      {/* Circle badge */}
+      {/* Left accent bar */}
       <div style={{
-        minWidth: "30px",
-        height: "30px",
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "Inter, sans-serif",
-        fontWeight: 800,
-        fontSize: showResult && (isCorrect || (isSelected && !isCorrect)) ? "1rem" : "0.78rem",
-        flexShrink: 0,
-        border: `2px solid ${
-          showResult && isCorrect        ? "#58cc02" :
-          showResult && isSelected       ? "#ff4b4b" :
-          isSelected                     ? "rgba(0,212,240,0.45)" :
-                                           "rgba(255,255,255,0.1)"
-        }`,
-        background: showResult && isCorrect        ? "#58cc02" :
-                    showResult && isSelected        ? "#ff4b4b" :
-                    isSelected                      ? "rgba(0,212,240,0.18)" :
-                                                      "rgba(255,255,255,0.06)",
-        color: showResult && (isCorrect || (isSelected && !isCorrect)) ? "#fff" :
-               isSelected                           ? "var(--cyan)" :
-                                                      "rgba(240,238,255,0.55)",
-        transition: "all 0.22s ease",
-      }}>
-        {showResult && isCorrect ? "✓" : showResult && isSelected && !isCorrect ? "✗" : labels[index]}
-      </div>
+        width:        "3px",
+        alignSelf:    "stretch",
+        borderRadius: "2px",
+        flexShrink:   0,
+        background: branching
+          ? (isSelected ? "rgba(0,212,240,0.65)" : "rgba(255,255,255,0.09)")
+          : showResult && isCorrect              ? "#58cc02" :
+            showResult && isSelected && !isCorrect ? "#ff4b4b" :
+            isSelected                            ? "rgba(0,212,240,0.55)" :
+                                                   "rgba(255,255,255,0.09)",
+        transition: "background 0.22s ease",
+      }} />
 
-      {/* Text */}
+      {/* Decision text — short choices (≤50 chars) read upright; long ones keep italic */}
       <span style={{
-        fontFamily: "Inter, sans-serif",
-        fontWeight: 600,
-        fontSize: "0.925rem",
-        color: showResult && isCorrect        ? "#7dff6b" :
-               showResult && isSelected       ? "#ff8080" :
-                                                "#f0eeff",
-        lineHeight: 1.45,
+        fontFamily: "Cormorant Garamond, serif",
+        fontStyle:  choice.text.length > 50 ? "italic" : "normal",
+        fontWeight: choice.text.length > 50 ? 600 : 700,
+        fontSize:   choice.text.length > 80 ? "0.88rem" : "0.96rem",
+        color: branching
+          ? (isSelected ? "#fff" : "rgba(240,238,255,0.92)")
+          : showResult && isCorrect              ? "#7dff6b" :
+            showResult && isSelected && !isCorrect ? "#ff8080" :
+                                                     "rgba(240,238,255,0.92)",
+        lineHeight: 1.55,
         flex: 1,
       }}>
         {choice.text}
       </span>
 
-      {/* Arrow hint (unanswered) */}
-      {!answered && (
-        <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "0.85rem", flexShrink: 0 }}>›</span>
+      {/* Trailing indicator — branching shows a neutral "your path" arrow, never ✓/✗ */}
+      {branching ? (
+        <div style={{
+          flexShrink: 0,
+          fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem",
+          letterSpacing: "0.12em", textTransform: "uppercase",
+          color: showResult && isSelected ? "rgba(0,212,240,0.9)" : "rgba(255,255,255,0.25)",
+          display: "flex", alignItems: "center", gap: "0.3rem",
+          transition: "color 0.22s ease",
+        }}>
+          {showResult && isSelected ? "Your path →" : answered ? "" : "›"}
+        </div>
+      ) : (
+        <div style={{
+          width:      "24px",
+          height:     "24px",
+          borderRadius:"50%",
+          display:    "flex",
+          alignItems: "center",
+          justifyContent:"center",
+          flexShrink: 0,
+          background: showResult && isCorrect              ? "#58cc02" :
+                      showResult && isSelected && !isCorrect ? "#ff4b4b" :
+                                                             "transparent",
+          color: showResult && (isCorrect || (isSelected && !isCorrect)) ? "#fff" :
+                 "rgba(255,255,255,0.2)",
+          fontSize:   showResult && (isCorrect || (isSelected && !isCorrect)) ? "0.8rem" : "0.85rem",
+          fontWeight: 800,
+          transition: "all 0.22s ease",
+        }}>
+          {showResult && isCorrect              ? "✓" :
+           showResult && isSelected && !isCorrect ? "✗" :
+           answered                              ? "" : "›"}
+        </div>
       )}
     </button>
   )

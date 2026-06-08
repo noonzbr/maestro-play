@@ -325,12 +325,12 @@ export default function DialogueScene({ scene, onComplete }: Props) {
         padding:       "0.65rem 1.4rem 1.2rem",
         display:       "flex",
         alignItems:    "center",
-        justifyContent:"space-between",
+        justifyContent:"center",
         background:    "rgba(6,4,14,0.72)",
         backdropFilter:"blur(20px)",
         borderTop:     `1px solid ${speakerColor.replace("0.9","0.14")}`,
       }}>
-        <div style={{ display:"flex", gap:"4px", alignItems:"center" }}>
+        <div style={{ position: "absolute", left: "1.4rem", display:"flex", gap:"4px", alignItems:"center" }}>
           {lines.map((_, i) => (
             <div key={i} style={{
               height:      "4px",

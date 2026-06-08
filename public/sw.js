@@ -1,5 +1,7 @@
 // MaestroPlay Service Worker
-const CACHE_NAME = "maestroplay-v2"
+// v3: removed /_next/static/ chunk caching — Turbopack builds invalidate chunks
+// on every restart and cached chunks cause "module factory not available" errors.
+const CACHE_NAME = "maestroplay-v3"
 
 // Pre-cache these on install
 const PRECACHE = [
@@ -48,12 +50,13 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== location.origin) return
   if (url.pathname.startsWith("/api/")) return
 
-  // Static assets (images, audio, icons) — Cache First
+  // Static assets (images, audio, icons only) — Cache First
+  // NOTE: /_next/static/ is intentionally excluded — Turbopack chunk hashes change
+  // on every dev restart, and caching them causes "module factory not available" errors.
   const isStatic =
     url.pathname.startsWith("/images/") ||
     url.pathname.startsWith("/audio/") ||
-    url.pathname.startsWith("/icons/") ||
-    url.pathname.startsWith("/_next/static/")
+    url.pathname.startsWith("/icons/")
 
   if (isStatic) {
     event.respondWith(

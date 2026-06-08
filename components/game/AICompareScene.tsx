@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Scene, Choice, AICompareRow } from "@/lib/games/types"
 import ChoiceButton from "./ChoiceButton"
 
@@ -51,13 +51,13 @@ function ModelChip({ model, isWinner }: { model: keyof typeof MODEL_CONFIG; isWi
       padding:      "0.18rem 0.55rem",
       transition:   "all 0.2s ease",
     }}>
-      <span style={{ fontSize: "0.7rem", color: isWinner ? cfg.color : "rgba(240,238,255,0.35)" }}>
+      <span style={{ fontSize: "0.85rem", color: isWinner ? cfg.color : "rgba(240,238,255,0.35)" }}>
         {cfg.emoji}
       </span>
       <span style={{
         fontFamily:    "Inter, sans-serif",
         fontWeight:    isWinner ? 700 : 500,
-        fontSize:      "0.6rem",
+        fontSize:      "0.8rem",
         letterSpacing: "0.08em",
         color:         isWinner ? cfg.color : "rgba(240,238,255,0.35)",
       }}>
@@ -67,7 +67,7 @@ function ModelChip({ model, isWinner }: { model: keyof typeof MODEL_CONFIG; isWi
         <span style={{
           fontFamily:  "Inter, sans-serif",
           fontWeight:  800,
-          fontSize:    "0.48rem",
+          fontSize:    "0.68rem",
           letterSpacing:"0.18em",
           textTransform:"uppercase",
           color:        cfg.color,
@@ -90,18 +90,36 @@ function CompareRow({
   models: Array<keyof typeof MODEL_CONFIG>
   index:  number
 }) {
+  const [expanded, setExpanded] = useState(false)
   const winnerCfg = MODEL_CONFIG[row.winner.toLowerCase() as keyof typeof MODEL_CONFIG]
 
   return (
-    <div style={{
-      borderRadius:  "12px",
-      background:    "rgba(255,255,255,0.015)",
-      border:        "1px solid rgba(255,255,255,0.06)",
-      padding:       "0.65rem 0.8rem",
-      animation:     `ac-row-in 0.35s ${index * 0.07}s ease both`,
-      position:      "relative",
-      overflow:      "hidden",
-    }}>
+    <div 
+      onClick={() => setExpanded(!expanded)}
+      style={{
+        borderRadius:  "12px",
+        background:    expanded ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.015)",
+        border:        expanded ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.06)",
+        padding:       "0.65rem 0.8rem",
+        animation:     `ac-row-in 0.35s ${index * 0.07}s ease both`,
+        position:      "relative",
+        overflow:      "hidden",
+        cursor:        "pointer",
+        transition:    "background 0.2s, border-color 0.2s",
+      }}
+      onMouseEnter={e => {
+        if (!expanded) {
+          e.currentTarget.style.background = "rgba(255,255,255,0.025)"
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)"
+        }
+      }}
+      onMouseLeave={e => {
+        if (!expanded) {
+          e.currentTarget.style.background = "rgba(255,255,255,0.015)"
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"
+        }
+      }}
+    >
       {/* Winner accent bar */}
       {winnerCfg && (
         <div style={{
@@ -122,85 +140,109 @@ function CompareRow({
           display:        "flex",
           alignItems:     "center",
           justifyContent: "space-between",
-          marginBottom:   "0.45rem",
+          marginBottom:   expanded ? "0.6rem" : 0,
           gap:            "0.5rem",
           flexWrap:       "wrap",
+          pointerEvents:  "none",
         }}>
-          <span style={{
-            fontFamily:    "Inter, sans-serif",
-            fontWeight:    700,
-            fontSize:      "0.7rem",
-            color:         "rgba(240,238,255,0.88)",
-            letterSpacing: "-0.01em",
-          }}>
-            {row.dimension}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span style={{
+              fontSize: "0.65rem",
+              color: "rgba(255,255,255,0.3)",
+              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
+            }}>
+              ▼
+            </span>
+            <span style={{
+              fontFamily:    "Inter, sans-serif",
+              fontWeight:    700,
+              fontSize:      "0.95rem",
+              color:         "rgba(240,238,255,0.88)",
+              letterSpacing: "-0.01em",
+            }}>
+              {row.dimension}
+            </span>
+          </div>
           {winnerCfg && (
             <ModelChip model={row.winner.toLowerCase() as keyof typeof MODEL_CONFIG} isWinner />
           )}
         </div>
 
-        {/* Per-model descriptors */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.28rem", marginBottom: row.note ? "0.45rem" : 0 }}>
-          {models.map(m => {
-            const desc = row[m]
-            if (!desc || desc === "N/A") return null
-            const cfg = MODEL_CONFIG[m]
-            const isWinner = m === row.winner.toLowerCase()
-            return (
-              <div key={m} style={{
-                display:    "flex",
-                alignItems: "flex-start",
-                gap:        "0.4rem",
-              }}>
-                <span style={{
-                  fontFamily:    "Inter, sans-serif",
-                  fontWeight:    700,
-                  fontSize:      "0.55rem",
-                  letterSpacing: "0.1em",
-                  color:         isWinner ? cfg.color : "rgba(240,238,255,0.28)",
-                  flexShrink:    0,
-                  paddingTop:    "2px",
-                  minWidth:      "50px",
-                }}>
-                  {cfg.label}
-                </span>
-                <span style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontSize:   "0.72rem",
-                  color:      isWinner ? "rgba(240,238,255,0.82)" : "rgba(240,238,255,0.42)",
-                  lineHeight: 1.45,
-                  fontWeight: isWinner ? 500 : 400,
-                }}>
-                  {desc}
-                </span>
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              style={{ overflow: "hidden" }}
+            >
+              {/* Per-model descriptors */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.38rem", marginBottom: row.note ? "0.6rem" : 0, paddingLeft: "1.1rem" }}>
+                {models.map(m => {
+                  const desc = row[m]
+                  if (!desc || desc === "N/A") return null
+                  const cfg = MODEL_CONFIG[m]
+                  const isWinner = m === row.winner.toLowerCase()
+                  return (
+                    <div key={m} style={{
+                      display:    "flex",
+                      alignItems: "flex-start",
+                      gap:        "0.4rem",
+                    }}>
+                      <span style={{
+                        fontFamily:    "Inter, sans-serif",
+                        fontWeight:    700,
+                        fontSize:      "0.75rem",
+                        letterSpacing: "0.15em",
+                        color:         isWinner ? cfg.color : "rgba(240,238,255,0.28)",
+                        flexShrink:    0,
+                        paddingTop:    "2px",
+                        minWidth:      "60px",
+                      }}>
+                        {cfg.label}
+                      </span>
+                      <span style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize:   "0.95rem",
+                        color:      isWinner ? "rgba(240,238,255,0.92)" : "rgba(240,238,255,0.42)",
+                        lineHeight: 1.45,
+                        fontWeight: isWinner ? 500 : 400,
+                      }}>
+                        {desc}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })}
-        </div>
 
-        {/* Teaching note */}
-        {row.note && (
-          <div style={{
-            display:      "flex",
-            alignItems:   "flex-start",
-            gap:          "0.35rem",
-            paddingTop:   "0.38rem",
-            borderTop:    "1px solid rgba(255,255,255,0.05)",
-          }}>
-            <span style={{ fontSize: "0.6rem", color: "rgba(255,210,80,0.6)", flexShrink: 0, paddingTop: "1px" }}>→</span>
-            <p style={{
-              fontFamily:  "Inter, sans-serif",
-              fontSize:    "0.68rem",
-              color:       "rgba(240,238,255,0.5)",
-              lineHeight:  1.5,
-              margin:      0,
-              fontStyle:   "italic",
-            }}>
-              {row.note}
-            </p>
-          </div>
-        )}
+              {/* Teaching note */}
+              {row.note && (
+                <div style={{
+                  display:      "flex",
+                  alignItems:   "flex-start",
+                  gap:          "0.35rem",
+                  paddingTop:   "0.5rem",
+                  borderTop:    "1px solid rgba(255,255,255,0.05)",
+                  paddingLeft:  "1.1rem",
+                }}>
+                  <span style={{ fontSize: "0.85rem", color: "rgba(255,210,80,0.6)", flexShrink: 0, paddingTop: "1px" }}>→</span>
+                  <p style={{
+                    fontFamily:  "Inter, sans-serif",
+                    fontSize:    "0.9rem",
+                    color:       "rgba(240,238,255,0.5)",
+                    lineHeight:  1.5,
+                    margin:      0,
+                    fontStyle:   "italic",
+                  }}>
+                    {row.note}
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -257,7 +299,7 @@ function AICompareFeedback({
         </div>
         {feedbackText && (
           <p style={{
-            fontFamily: "Inter, sans-serif", fontSize: "0.875rem",
+            fontFamily: "Inter, sans-serif", fontSize: "1.15rem",
             color: "rgba(240,238,255,0.75)", lineHeight: 1.65,
             margin: "0 0 0.85rem",
           }}>
@@ -308,13 +350,13 @@ export default function AICompareScene({
   const spring = { type: "spring" as const, stiffness: 380, damping: 30 }
 
   const selectedChoice = answered && selectedLabel
-    ? scene.choices?.find(c => c.label === selectedLabel)
+    ? (data.choices || scene.choices)?.find(c => c.label === selectedLabel)
     : null
   const correct      = selectedChoice?.correct ?? false
-  const feedbackText = selectedChoice
+  const feedbackText: string = selectedChoice
     ? (!selectedChoice.correct && selectedChoice.wrongFeedback)
       ? selectedChoice.wrongFeedback
-      : selectedChoice.feedback
+      : (selectedChoice.feedback ?? "")
     : ""
 
   return (
@@ -330,7 +372,7 @@ export default function AICompareScene({
           <ModelChip key={m} model={m} />
         ))}
         <span style={{
-          fontFamily: "Inter, sans-serif", fontSize: "0.6rem",
+          fontFamily: "Inter, sans-serif", fontSize: "0.8rem",
           letterSpacing: "0.2em", textTransform: "uppercase",
           color: "var(--muted)", fontWeight: 500,
         }}>
@@ -345,7 +387,7 @@ export default function AICompareScene({
         style={{
           fontFamily: "Cormorant Garamond, serif",
           fontWeight: 700,
-          fontSize:   "clamp(1.1rem, 3vw, 1.4rem)",
+          fontSize:   "clamp(1.35rem, 3.2vw, 1.65rem)",
           color:      "#fff",
           lineHeight: 1.2,
           marginBottom: "0.5rem",
@@ -361,8 +403,8 @@ export default function AICompareScene({
         transition={{ delay: 0.1 }}
         style={{
           fontFamily:  "Inter, sans-serif",
-          fontSize:    "0.875rem",
-          color:       "rgba(240,238,255,0.6)",
+          fontSize:    "1.15rem",
+          color:       "rgba(240,238,255,0.65)",
           lineHeight:  1.65,
           marginBottom:"0.85rem",
         }}
@@ -396,10 +438,10 @@ export default function AICompareScene({
           alignItems:   "flex-start",
         }}
       >
-        <span style={{ fontSize: "0.9rem", flexShrink: 0, paddingTop: "1px" }}>🎼</span>
+        <span style={{ fontSize: "1.1rem", flexShrink: 0, paddingTop: "1px" }}>🎼</span>
         <p style={{
           fontFamily:  "Inter, sans-serif",
-          fontSize:    "0.82rem",
+          fontSize:    "1.1rem",
           color:       "rgba(240,238,255,0.72)",
           lineHeight:  1.6,
           margin:      0,
@@ -426,7 +468,7 @@ export default function AICompareScene({
               background: "var(--cyan)", boxShadow: "0 0 6px var(--cyan)",
             }} />
             <span style={{
-              fontFamily:    "Inter, sans-serif", fontWeight: 800, fontSize: "0.58rem",
+              fontFamily:    "Inter, sans-serif", fontWeight: 800, fontSize: "0.8rem",
               letterSpacing: "0.25em", textTransform: "uppercase",
               color:         "rgba(0,212,240,0.6)",
             }}>
@@ -436,7 +478,7 @@ export default function AICompareScene({
           <h3 style={{
             fontFamily:   "Inter, sans-serif",
             fontWeight:   700,
-            fontSize:     "clamp(0.9rem, 2.2vw, 1rem)",
+            fontSize:     "clamp(1.2rem, 2.6vw, 1.45rem)",
             color:        "#fff",
             lineHeight:   1.4,
             marginBottom: "0.5rem",
@@ -469,6 +511,37 @@ export default function AICompareScene({
               />
             </motion.div>
           ))}
+        </motion.div>
+      )}
+
+      {/* ── Continue button if there are no choices (meaning this is a pure comparison slide) ── */}
+      {!data.choices && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.44 + data.rows.length * 0.06 }}
+          style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}
+        >
+          <button
+            onClick={onNext}
+            style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              color: "#08060f",
+              background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+              padding: "0.75rem 2.25rem",
+              borderRadius: "100px",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "0 0 20px rgba(0,212,240,0.25)",
+              transition: "transform 0.2s, box-shadow 0.2s"
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow="0 0 32px rgba(0,212,240,0.45)" }}
+            onMouseLeave={e => { e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow="0 0 20px rgba(0,212,240,0.25)" }}
+          >
+            Continue →
+          </button>
         </motion.div>
       )}
 

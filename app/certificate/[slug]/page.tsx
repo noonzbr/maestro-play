@@ -1,13 +1,29 @@
 import { allGames } from "@/lib/games"
 import PrintButton from "./PrintButton"
+import PlayerName, { PlayerNameValue } from "./PlayerName"
+
+// Simple deterministic hash
+function simpleHash(input: string): string {
+  let hash = 0
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32-bit int
+  }
+  const unsigned = (hash >>> 0).toString(36)
+  return "mp" + unsigned.padStart(8, "0")
+}
 
 // ── Certificate Page (Server Component) ─────────────────────────────────────
 export default async function CertificatePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ name?: string; v?: string }>
 }) {
   const { slug } = await params
+  const { name, v } = await searchParams
   const game = allGames.find((g) => g.slug === slug)
 
   if (!game) {
@@ -27,7 +43,6 @@ export default async function CertificatePage({
     )
   }
 
-  const totalXp = game.scenes.reduce((s, sc) => s + sc.xpAward, 0)
   const now = new Date()
   const issueDate = now.toLocaleDateString("en-US", {
     year: "numeric",
@@ -37,10 +52,11 @@ export default async function CertificatePage({
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
-  const descriptionFirst = (() => {
-    const first = game.description.split(".")[0]
-    return first.length > 100 ? first.slice(0, 97) + "…" : first
-  })()
+  // Verify parameters
+  const expectedHash = name ? simpleHash(`${slug}::${name.trim().slice(0, 80)}::maestroplay2025`) : ""
+  const isVerified = !!(name && v && v === expectedHash)
+
+  const certSharedUrl = `https://maestroplay.app/certificate/${game.slug}` + (name ? `?name=${encodeURIComponent(name)}&v=${v || ""}` : "")
 
   const linkedInUrl =
     `https://www.linkedin.com/profile/add` +
@@ -49,7 +65,7 @@ export default async function CertificatePage({
     `&organizationId=105930013` +
     `&issueYear=${year}` +
     `&issueMonth=${month}` +
-    `&certUrl=${encodeURIComponent("https://maestroplay.app/certificate/" + game.slug)}` +
+    `&certUrl=${encodeURIComponent(certSharedUrl)}` +
     `&certId=${encodeURIComponent(game.slug)}`
 
   return (
@@ -124,11 +140,54 @@ export default async function CertificatePage({
               fontSize: "clamp(2.2rem, 5vw, 3.5rem)",
               color: "#fff",
               lineHeight: 1.1,
-              marginBottom: "0.75rem",
+              marginBottom: "0.5rem",
               letterSpacing: "-0.01em",
             }}>
               Certificate of Completion
             </h1>
+
+            {/* Learning through Play tagline */}
+            <p style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontStyle: "italic",
+              fontSize: "clamp(0.95rem, 2vw, 1.15rem)",
+              color: "rgba(240,238,255,0.42)",
+              marginBottom: "1.5rem",
+              letterSpacing: "0.04em",
+            }}>
+              Learning Through Play
+            </p>
+
+            {/* Player name */}
+            {name ? (
+              <>
+                <div style={{
+                  fontFamily:    "Cormorant Garamond, serif",
+                  fontStyle:     "italic",
+                  fontSize:      "clamp(1.1rem, 2.8vw, 1.5rem)",
+                  color:         "rgba(240,238,255,0.72)",
+                  marginBottom:  "0.35rem",
+                  letterSpacing: "0.01em",
+                }}>
+                  awarded to
+                </div>
+                <div style={{
+                  fontFamily:    "Cormorant Garamond, serif",
+                  fontWeight:    700,
+                  fontSize:      "clamp(1.6rem, 4vw, 2.4rem)",
+                  color:         "#fff",
+                  marginBottom:  "1.75rem",
+                  letterSpacing: "-0.01em",
+                }}>
+                  {name}
+                </div>
+              </>
+            ) : (
+              <>
+                <PlayerName />
+                <PlayerNameValue />
+              </>
+            )}
 
             {/* This certifies mastery of */}
             <p style={{
@@ -179,19 +238,6 @@ export default async function CertificatePage({
               </div>
             )}
 
-            {/* Description — first sentence */}
-            <p style={{
-              fontFamily: "Inter, sans-serif",
-              fontSize: "0.875rem",
-              color: "rgba(240,238,255,0.45)",
-              lineHeight: 1.65,
-              maxWidth: "520px",
-              margin: "0 auto 2rem",
-              fontStyle: "italic",
-            }}>
-              {descriptionFirst}
-            </p>
-
             {/* Full-width divider */}
             <div style={{
               width: "100%",
@@ -200,52 +246,16 @@ export default async function CertificatePage({
               marginBottom: "1.75rem",
             }} />
 
-            {/* XP badge + date */}
+            {/* Issue date */}
             <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "2.5rem",
+              fontFamily: "Cormorant Garamond, serif",
+              fontStyle: "italic",
+              fontSize: "0.95rem",
+              color: "rgba(240,238,255,0.35)",
+              letterSpacing: "0.05em",
               marginBottom: "2rem",
-              flexWrap: "wrap",
             }}>
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                background: "rgba(0,212,240,0.08)",
-                border: "1px solid rgba(0,212,240,0.25)",
-                borderRadius: "100px",
-                padding: "0.45rem 1.1rem",
-              }}>
-                <span style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "1.15rem",
-                  color: "#00d4f0",
-                }}>
-                  {totalXp}
-                </span>
-                <span style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 600,
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "rgba(0,212,240,0.7)",
-                }}>
-                  XP
-                </span>
-              </div>
-
-              <div style={{
-                fontFamily: "Cormorant Garamond, serif",
-                fontSize: "0.95rem",
-                color: "rgba(240,238,255,0.35)",
-                letterSpacing: "0.05em",
-              }}>
-                Issued {issueDate}
-              </div>
+              Issued {issueDate}
             </div>
 
             {/* Seal */}
@@ -268,11 +278,11 @@ export default async function CertificatePage({
               <p style={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: "0.58rem",
-                color: "rgba(240,238,255,0.25)",
+                color: isVerified ? "#00d4f0" : "rgba(240,238,255,0.25)",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
               }}>
-                Verified by the MaestroPlay Cinematic Learning Platform
+                {isVerified ? `🛡️ Verified Certificate · ID: ${v}` : "Verified by the MaestroPlay Cinematic Learning Platform"}
               </p>
             </div>
 

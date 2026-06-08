@@ -5,47 +5,55 @@ import { useState } from "react"
 import { getGame } from "@/lib/games"
 import Nav from "@/components/ui/Nav"
 
-type Plan = "monthly" | "annual" | "single"
+type Pack = "starter" | "bundle"
 
-const PLAN_PRICES: Record<Plan, { label: string; amount: string; sub: string; slug: string }> = {
-  monthly: { label: "$29",    amount: "29",    sub: "/month",            slug: "pro-monthly" },
-  annual:  { label: "$249",   amount: "249",   sub: "/year (save $99)",  slug: "pro-annual"  },
-  single:  { label: "$4.99",  amount: "4.99",  sub: "one-time",          slug: ""            },
+const PACK_DETAILS: Record<Pack, { label: string; amount: string; sub: string; slug: string; features: string[] }> = {
+  starter: {
+    label: "$2.99",
+    amount: "2.99",
+    sub: "one-time purchase",
+    slug: "starter-pack",
+    features: [
+      "5 extra lives (replenish instantly)",
+      "3 Hint Tokens for tough prompt tests",
+      "2 Double XP boosts (lasts 24h)",
+      "1 Second Chance safety net",
+    ]
+  },
+  bundle: {
+    label: "$6.99",
+    amount: "6.99",
+    sub: "one-time purchase (Best Value)",
+    slug: "maestro-bundle",
+    features: [
+      "15 extra lives (replenish instantly)",
+      "8 Hint Tokens for tough prompt tests",
+      "5 Double XP boosts (lasts 24h)",
+      "3 Streak Shields",
+      "2 Second Chance safety nets",
+      "1 Streak Restore",
+      "1 XP Jackpot multiplier",
+    ]
+  }
 }
-
-const PRO_FEATURES = [
-  "All 12 games — every track unlocked",
-  "AI Tutor (Socratic Maestro) after each game",
-  "Spaced repetition daily challenges",
-  "XP + conductor levels that persist",
-  "LinkedIn-shareable track certificates",
-  "Cancel anytime",
-]
-
-const SINGLE_FEATURES = [
-  "Permanent access to this one game",
-  "Full XP + streak rewards",
-  "Play on any device",
-]
 
 export default function CheckoutPage() {
   const params    = useParams()
   const router    = useRouter()
   const slug      = params.slug as string
-  const [plan,    setPlan]    = useState<Plan>("monthly")
+  const [pack,    setPack]    = useState<Pack>("bundle") // Default to bundle (best value)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState("")
 
   const game = getGame(slug)
-  const displayName  = game?.title || "MaestroPlay Pro"
-  const displayEmoji = game?.emoji || "🎵"
+  const displayName  = game?.title || "MaestroPlay Power-up"
+  const displayEmoji = game?.emoji || "⚡"
   const accentColor  = game?.accentColor ?? "#00d4f0"
 
   const handleCheckout = async () => {
     setLoading(true)
     setError("")
-    // Determine which slug to pass to the checkout API
-    const checkoutSlug = plan === "single" ? slug : PLAN_PRICES[plan].slug
+    const checkoutSlug = PACK_DETAILS[pack].slug
     try {
       const res = await fetch("/api/checkout", {
         method:  "POST",
@@ -89,62 +97,60 @@ export default function CheckoutPage() {
 
           {/* ── Header ── */}
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-            <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>{displayEmoji}</div>
+            <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>⚡</div>
             <div style={{
               fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.58rem",
               letterSpacing: "0.3em", textTransform: "uppercase",
               color: "var(--muted)", marginBottom: "0.6rem",
             }}>
-              Unlock Game
+              Get Power-up Pack
             </div>
             <h1 style={{
               fontFamily: "Cormorant Garamond, serif", fontWeight: 700,
               fontSize: "clamp(1.6rem, 4vw, 2.6rem)", color: "#fff", lineHeight: 1.15,
               marginBottom: "0.75rem",
             }}>
-              {displayName}
+              Power up your learning
             </h1>
-            {game?.description && (
-              <p style={{
-                fontFamily: "Inter, sans-serif", fontSize: "0.9rem",
-                color: "rgba(240,238,255,0.5)", lineHeight: 1.7,
-                maxWidth: "480px", margin: "0 auto",
-              }}>
-                {game.description}
-              </p>
-            )}
+            <p style={{
+              fontFamily: "Inter, sans-serif", fontSize: "0.9rem",
+              color: "rgba(240,238,255,0.5)", lineHeight: 1.7,
+              maxWidth: "480px", margin: "0 auto",
+            }}>
+              All games are 100% free to play. Optional power-up packs help you bypass difficult questions, get hints, and maintain your streak.
+            </p>
           </div>
 
-          {/* ── Plan toggle ── */}
+          {/* ── Pack toggle ── */}
           <div style={{
             display: "flex", gap: "0.75rem", justifyContent: "center",
             marginBottom: "2rem", flexWrap: "wrap",
           }}>
-            {(["monthly", "annual", "single"] as Plan[]).map(p => (
+            {(["starter", "bundle"] as Pack[]).map(p => (
               <button
                 key={p}
-                onClick={() => setPlan(p)}
+                onClick={() => setPack(p)}
                 style={{
                   fontFamily: "Inter, sans-serif", fontWeight: 700,
                   fontSize: "0.78rem", letterSpacing: "0.04em",
                   padding: "0.55rem 1.35rem", borderRadius: "100px",
-                  border: `1.5px solid ${plan === p ? accentColor : "rgba(255,255,255,0.12)"}`,
-                  background: plan === p ? `${accentColor}18` : "transparent",
-                  color: plan === p ? accentColor : "rgba(240,238,255,0.45)",
+                  border: `1.5px solid ${pack === p ? accentColor : "rgba(255,255,255,0.12)"}`,
+                  background: pack === p ? `${accentColor}18` : "transparent",
+                  color: pack === p ? accentColor : "rgba(240,238,255,0.45)",
                   cursor: "pointer", transition: "all 0.2s ease",
                   position: "relative",
                 }}
               >
-                {p === "monthly" ? "Monthly Pro" : p === "annual" ? "Annual Pro" : "Single Game"}
-                {p === "annual" && (
+                {p === "starter" ? "Starter Pack" : "Maestro Bundle"}
+                {p === "bundle" && (
                   <span style={{
                     position: "absolute", top: "-10px", right: "-8px",
-                    background: "#58cc02", color: "#000",
+                    background: "var(--pink)", color: "#000",
                     fontFamily: "Inter, sans-serif", fontWeight: 800,
                     fontSize: "0.48rem", letterSpacing: "0.12em",
                     padding: "0.15rem 0.45rem", borderRadius: "100px",
                     textTransform: "uppercase",
-                  }}>Save $99</span>
+                  }}>Best Value</span>
                 )}
               </button>
             ))}
@@ -153,9 +159,9 @@ export default function CheckoutPage() {
           {/* ── Plan cards grid ── */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: plan !== "single" ? "1fr 1fr" : "1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
             gap: "1.5rem",
-            maxWidth: plan !== "single" ? "800px" : "480px",
+            maxWidth: "800px",
             margin: "0 auto 2rem",
           }}>
 
@@ -171,10 +177,10 @@ export default function CheckoutPage() {
                 fontSize: "0.58rem", letterSpacing: "0.28em", textTransform: "uppercase",
                 color: accentColor, marginBottom: "1.1rem",
               }}>
-                {plan === "single" ? "This Game Includes" : "Pro Includes"}
+                Pack Contents
               </div>
               <ul style={{ display: "flex", flexDirection: "column", gap: "0.7rem", margin: 0, padding: 0, listStyle: "none" }}>
-                {(plan === "single" ? SINGLE_FEATURES : PRO_FEATURES).map(f => (
+                {PACK_DETAILS[pack].features.map(f => (
                   <li key={f} style={{
                     display: "flex", alignItems: "flex-start", gap: "0.65rem",
                     fontFamily: "Inter, sans-serif", fontSize: "0.875rem",
@@ -203,25 +209,23 @@ export default function CheckoutPage() {
                     fontFamily: "Inter, sans-serif", fontWeight: 900,
                     fontSize: "3rem", color: "#fff", lineHeight: 1,
                   }}>
-                    {PLAN_PRICES[plan].label}
+                    {PACK_DETAILS[pack].label}
                   </span>
                   <span style={{
                     fontFamily: "Inter, sans-serif", fontSize: "0.875rem",
                     color: "var(--muted)", marginLeft: "0.45rem",
                   }}>
-                    {PLAN_PRICES[plan].sub}
+                    {PACK_DETAILS[pack].sub}
                   </span>
                 </div>
 
-                {plan !== "single" && (
-                  <p style={{
-                    fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
-                    fontSize: "1rem", color: "rgba(240,238,255,0.55)", lineHeight: 1.55,
-                    marginBottom: "1.5rem",
-                  }}>
-                    "Learn AI the way you'd learn guitar — by playing until it's yours."
-                  </p>
-                )}
+                <p style={{
+                  fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                  fontSize: "1rem", color: "rgba(240,238,255,0.55)", lineHeight: 1.55,
+                  marginBottom: "1.5rem",
+                }}>
+                  "No recurring monthly charges. Purchase only what you need, when you need it."
+                </p>
               </div>
 
               {error && (
@@ -256,9 +260,7 @@ export default function CheckoutPage() {
               >
                 {loading
                   ? "Redirecting to Stripe…"
-                  : plan === "single"
-                  ? `Unlock for ${PLAN_PRICES[plan].label} →`
-                  : `Start Pro — ${PLAN_PRICES[plan].label}${plan === "monthly" ? "/mo" : "/yr"} →`
+                  : `Get Pack — ${PACK_DETAILS[pack].label} →`
                 }
               </button>
 
@@ -266,9 +268,7 @@ export default function CheckoutPage() {
                 fontFamily: "Inter, sans-serif", fontSize: "0.7rem",
                 color: "var(--muted)", textAlign: "center", marginTop: "0.85rem",
               }}>
-                {plan === "single"
-                  ? "Secure payment via Stripe · Permanent access"
-                  : "Secure payment via Stripe · Cancel anytime"}
+                Secure payment via Stripe · One-time purchase
               </p>
             </div>
 
@@ -283,7 +283,7 @@ export default function CheckoutPage() {
                 color: "var(--muted)", background: "none", border: "none", cursor: "pointer",
               }}
             >
-              ← Back to tracks
+              ← Back
             </button>
           </div>
         </div>

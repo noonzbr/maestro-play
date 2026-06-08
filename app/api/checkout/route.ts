@@ -12,28 +12,46 @@ export async function POST(req: NextRequest) {
 
     const pricing = getPricing(slug)
     if (!pricing) {
-      return NextResponse.json({ error: "Invalid game slug" }, { status: 404 })
+      return NextResponse.json({ error: "Invalid product slug" }, { status: 404 })
     }
 
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+    const isSubscription = pricing.mode === "subscription"
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
+    // Build line_item differently for one-time vs recurring
+    const lineItem = isSubscription
+      ? {
+          price_data: {
+            currency: "usd",
+            product_data: { name: pricing.name },
+            unit_amount: pricing.amount,
+            recurring: { interval: pricing.interval ?? "month" } as const,
+          },
+          quantity: 1,
+        }
+      : {
           price_data: {
             currency: "usd",
             product_data: { name: pricing.name },
             unit_amount: pricing.amount,
           },
           quantity: 1,
-        },
-      ],
-      success_url: `${baseUrl}/games/${slug}?success=true`,
-      cancel_url: `${baseUrl}/checkout/${slug}`,
+        }
+
+    // Power-up packs success → dashboard; game unlocks → games page
+    const powerUpSlugs = ["starter-pack", "maestro-bundle", "conductor-pass"]
+    const successPath = powerUpSlugs.includes(slug)
+      ? `/dashboard?powerup=${slug}&success=true`
+      : `/games/${slug}?success=true`
+
+    const session = await stripe.checkout.sessions.create({
+      mode: isSubscription ? "subscription" : "payment",
+      line_items: [lineItem],
+      success_url: `${baseUrl}${successPath}`,
+      cancel_url:  `${baseUrl}/?cancelled=true`,
       metadata: {
-        gameSlug: slug,
-        userId: userId ?? "",
+        productSlug: slug,
+        userId:      userId ?? "",
       },
     })
 

@@ -1,355 +1,534 @@
 import { Game } from "./types"
 
+/**
+ * GAME 2 — "Signal vs. Noise"
+ * Character: Zoe Chen, 19-year-old session drummer
+ * Core concept: What is AI — and what is NOT?
+ * Busts 5 myths: sentience, accuracy, neutrality, creativity, replacement
+ *
+ * BRANCHING MAP:
+ *   [0]  w2-intro-learn    → learn scene (no choices, Continue)
+ *   [1]  w2-branch-1       → skipFeedback, 4 paths
+ *   [2]  w2-myth-1         → PATH A quiz
+ *   [3]  w2-myth-2         → PATH A, nextLeadsTo: w2-crucible
+ *   [4]  w2-middle-1       → PATH B/C quiz
+ *   [5]  w2-middle-2       → PATH B/C, nextLeadsTo: w2-crucible
+ *   [6]  w2-conductor-1    → PATH D quiz
+ *   [7]  w2-conductor-2    → PATH D, nextLeadsTo: w2-boss
+ *   [8]  w2-crucible       → skipFeedback: A→ending-2, B→w2-recovery
+ *   [9]  w2-recovery       → sequential → w2-boss
+ *   [10] w2-boss           → sequential → w2-ending-1
+ *   [11] w2-ending-1       → THE CONDUCTOR, nextLeadsTo: w2-ai-compare
+ *   [12] w2-ending-2       → THE WAKE-UP, nextLeadsTo: w2-ai-compare
+ *   [13] w2-ai-compare     → nextLeadsTo: w2-handoff
+ *   [14] w2-handoff        → end
+ *
+ * Jake's EP threads through the narrative — referenced in intro and Ending 1 —
+ * connecting Game 2 to Game 1's story without naming Jake until the final reveal.
+ */
+
 export const game2: Game = {
-  slug: "how-ai-works",
-  week: 2,
-  free: true,
-  title: "Discover How AI Works",
-  emoji: "🧠",
-  icon: "headphones" as const,
-  duration: "7 min",
-  description: "Understand what's actually happening inside AI — why your inputs produce the outputs they do.",
-  tagline: "Same tool. Wildly different results. Here's why.",
+  slug:           "how-ai-works",
+  week:           2,
+  free:           true,
+  title:          "Signal vs. Noise",
+  emoji:          "🥁",
+  icon:           "metronome" as const,
+  accentColor:    "#f59e0b",
+  duration:       "10 min",
+  description:    "A viral post. A music exec. Five AI myths that could end Zoe's career — or launch it into something she never saw coming.",
+  tagline:        "AI isn't what they told you. That gap is your advantage.",
   characterName:  "Zoe",
-  characterRole:  "19-year-old drummer",
-  characterBlurb: "A rhythm-driven drummer uncovering how AI actually thinks — and why it's not magic",
+  characterRole:  "19-year-old session drummer",
+  characterBlurb: "She replaced every myth about AI with something far more useful: clarity.",
   characterImage: "/images/zoe.png",
   maestroImage:   "/images/maestro-zoe.png",
   maestroLine:    "The last time she was just a drummer...",
-  maestroSubline: "Zoe's rhythm just found its conductor. Keep the beat.",
+  maestroSubline: "Zoe didn't survive the AI era. She became the one who explains it.",
   audioTrack:     "/audio/zoe-glass-circuit.mp3",
+  introVideo:     "/videos/g02-intro.mp4",          // → GENERATE: see docs/ASSET_DASHBOARD.md
+  felipeOutroVideo: "/videos/felipe-game2.mp4",     // ✅ already exists
+  aiModel:        "general" as const,
+
+  nextGame: {
+    slug:         "ai-for-professionals",
+    character:    "Carlos",
+    teaserLine:   "You now know what AI is — and what it isn't. But knowing the theory and deploying it in a real professional career are completely different problems. Carlos figured out a framework that actually works — and it almost cost him everything to find it.",
+    previewImage: "/images/carlos.png",
+  },
+
+  mondayPrompt: "You are my research assistant. I need you to fact-check this claim: [CLAIM]. Do NOT simply confirm it. Search for contradictions, caveats, and sources that challenge it. Present: 1) Evidence supporting it, 2) Evidence against it, 3) Your confidence rating (1-10). If you are uncertain about any source, say so explicitly.",
+
   intro: {
     sceneImage: "/images/scene-zoe.png",
     sceneColor: "#0a0608",
     noteOrigin: { bottom: "42%", left: "48%" },
     beats: [
-      { type: "location",  text: "REHEARSAL STUDIO · FRIDAY · 9:22 PM" },
-      { type: "narration", text: "She kept time for everyone else — and somehow never had any left for herself." },
-      { type: "dialogue",  speaker: "Marcus", text: "My producer used AI to map the entire album arrangement in one afternoon. Said he doesn't need a session drummer anymore. Just samples and stems." },
-      { type: "final",     text: "The beat goes on — but the question is who's keeping it now." },
+      { type: "location",  text: "RECORDING STUDIO · TUESDAY · 2:14 PM" },
+      { type: "narration", text: "She'd played 3,000 sessions. She'd never once been replaced by a machine. Until last Tuesday." },
+      { type: "dialogue",  speaker: "Marcus", text: "Label loved it. 'The drummer is incredible.' They think I recorded it live. I used a plugin. Cost me $8 a month." },
+      { type: "narration", text: "Two weeks ago, a friend's EP dropped. AI-directed. Raw, brilliant, deeply personal. She'd played it on repeat. The AI didn't make it feel human — the human made it feel that way. How?" },
+      { type: "final",     text: "The beat goes on. The question is whether Zoe understands AI well enough to stay ahead of it — or whether she's been thinking about it all wrong." },
     ],
   },
-  aiModel:  "general" as const,
-  felipeOutroVideo:   "/videos/felipe-game2.mp4",
-  nextGame: {
-    slug:         "ai-for-professionals",
-    character:    "Carlos",
-    teaserLine:   "Knowing HOW the AI works is step one. Now someone needs to actually put it to work. Carlos is a jazz saxophonist who figured out how to use AI in a real professional career — and the framework he built changes everything.",
-    previewImage: "/images/carlos.png",
-  },
+
   scenes: [
 
-    // ── LEARN 1: How AI Actually Predicts Text ────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // [0] LEARN — What AI Actually IS (foundation before the choice)
+    // ─────────────────────────────────────────────────────────────────────────
     {
-      id: "w2-learn-1",
-      type: "learn",
-      location: "REHEARSAL STUDIO · BEFORE PRACTICE",
+      id:       "w2-intro-learn",
+      type:     "learn",
+      location: "RECORDING STUDIO · HALLWAY · 3:00 PM",
+      xpAward:  30,
       concept: {
-        title: "HOW AI ACTUALLY PREDICTS TEXT",
-        body: "Large language models don't 'know' things the way you know them. They predict. Given everything you've written so far, what's the most statistically likely next word? Then the next? And the next? That's it. No understanding. No consciousness. Just extraordinarily sophisticated pattern completion — at scale.",
+        title: "FIVE THINGS AI IS NOT",
+        body:  "AI is not conscious (no feelings/awareness) and not always accurate (hallucinates likely text). It is not neutral (reflects bias) and does not create (only executes direction). Crucially, AI never replaces human judgment — it only amplifies it.",
       },
-      scenarioText: "Zoe heard a drummer start a groove and her whole body knew exactly where beat two would land — before it arrived. AI predicts the same way: not thinking, just completing patterns at a scale she can barely imagine. Your input is the groove; everything the AI generates follows from it.",
-      learnHighlight: "AI doesn't know the answer — it predicts the most likely next word, then the next, then the next.",
-      xpAward: 25,
+      scenarioText:   "Marcus replaced his live drummer with an $8/month AI plugin. Stunned, Zoe searches her phone. She needs to understand what AI actually IS to survive this shift.",
+      learnHighlight: "Understanding what AI isn't is the first step to directing it with clarity.",
     },
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // [1] MATCH — Zoe Chen's DM from TechBeat247 (Mitigating text overload with Matching game)
+    // ─────────────────────────────────────────────────────────────────────────
     {
-      id: "w2-s1",
-      type: "scenario",
-      character: "Zoe, Drummer, 19",
-      location: "REHEARSAL STUDIO · AFTER PRACTICE",
-      scenarioText:
-        "You and your colleague both use ChatGPT Plus. She produces crisp, client-ready strategy memos. You get 600 words of fluffy generic text that doesn't reflect your company, your tone, or your actual ask. Same subscription. Same model. What's different?",
-      question: "Why does AI produce such different results for different people using the same tool?",
+      id:           "w2-branch-1",
+      type:         "match",
+      location:     "SOCIAL MEDIA · 11:52 PM",
+      character:    "Zoe, Session Drummer, 19",
+      scenarioText: "Music blogger TechBeat247 DMs Zoe: 'Our 50,000 followers want one honest summary: What IS AI? Let's bust the popular myths.' Zoe designs an interactive Matching challenge to clarify the hype.",
+      question:     "Match each popular AI Myth to its underlying Reality:",
+      matchPairs: [
+        { left: "Myth: AI Thinks Like a Human",  right: "Reality: It completes statistical patterns of training data" },
+        { left: "Myth: AI is Conscious/Aware",   right: "Reality: It has no feelings, intent, or self-awareness" },
+        { left: "Myth: AI is Objective/Neutral", right: "Reality: It systematizes and amplifies training data biases" },
+        { left: "Myth: AI Replaces Human Taste",  right: "Reality: It only executes direction; human judgment defines quality" }
+      ],
+      xpAward:      35,
+      nextLeadsTo:  "w2-mechanism-order",
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [2] ORDER — Engineering Process (Interactive sequence ordering)
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      id:           "w2-mechanism-order",
+      type:         "order",
+      location:     "RECORDING STUDIO · THE GIG",
+      character:    "Zoe, Session Drummer, 19",
+      scenarioText: "The post goes viral! Diana Voss (VP at Meridian Records) notices Zoe's clarity and invites her to present to the A&R team. Before the meeting, Diana's lead engineer tests Zoe: 'Order the steps of how a prediction machine generates output.'",
+      question:     "Arrange these steps in the correct sequence to show how AI calculates its output:",
+      orderItems: [
+        { id: "1", text: "Read the user's prompt and active context window", correctPosition: 1 },
+        { id: "2", text: "Scan training data to match statistical patterns", correctPosition: 2 },
+        { id: "3", text: "Calculate the most likely next note or word token", correctPosition: 3 },
+        { id: "4", text: "Output the prediction and repeat the generation loop", correctPosition: 4 }
+      ],
+      xpAward:      40,
+      nextLeadsTo:  "w2-crucible",
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [8] THE CRUCIBLE — Decision under pressure (skipFeedback)
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      id:           "w2-crucible",
+      type:         "scenario",
+      skipFeedback: true,
+      location:     "MERIDIAN RECORDS · CONFERENCE ROOM · THURSDAY",
+      xpAward:      0,
+      character:    "Zoe, Session Drummer, 19",
+      scenarioText: "Diana grills her: 'One producer uses AI for speed/cost. Another refuses it. Artistically, they're equal. Why should I keep paying the non-AI producer?'",
+      question:     "What does Zoe say to Diana Voss?",
       choices: [
         {
-          label: "A",
-          text: "Some people have a special premium account tier",
-          correct: false,
-          feedback:
-            "Account tier affects speed and volume — not output quality for the same inputs. The model is the same. What changes the output is what you put in.",
+          label:   "A",
+          text:    "Because there's something in human-made music that AI can't replicate — call it soul, presence, intentionality. Your audience feels it even if they can't name it.",
+          leadsTo: "w2-ending-2",
         },
         {
-          label: "B",
-          text: "AI predicts the most likely next words from your input — better inputs train better predictions",
-          correct: true,
-          feedback:
-            "Exactly right. AI language models are trained to predict the most statistically likely continuation of your text. Rich, structured, context-loaded inputs activate richer, more specific responses. Thin inputs activate thin, generic completions.",
-        },
-        {
-          label: "C",
-          text: "The AI randomly picks different quality levels each time",
-          correct: false,
-          feedback:
-            "Not random — probabilistic but guided. There's variance in outputs (controlled by 'temperature'), but the dominant driver is always input quality. Garbage in, garbage out applies here more than anywhere.",
-        },
-        {
-          label: "D",
-          text: "AI performs better for people who speak more formally",
-          correct: false,
-          feedback:
-            "Formality has nothing to do with it. Clarity and context do. A casual but structured prompt outperforms a formal but vague one every time.",
+          label:   "B",
+          text:    "The question isn't human vs. AI. It's the quality of judgment the human brings to the AI. Give both producers the same tools. The one with better musical judgment will produce better output. You're not comparing human to AI — you're comparing two different quality directors.",
+          leadsTo: "w2-recovery",
         },
       ],
-      xpAward: 100,
     },
 
-    // ── LEARN 2: Why AI Makes Stuff Up ────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // [9] RECOVERY — One more chance before the boss
+    // ─────────────────────────────────────────────────────────────────────────
     {
-      id: "w2-learn-2",
-      type: "learn",
-      location: "REHEARSAL STUDIO · TAKING A BREAK",
-      concept: {
-        title: "WHY AI MAKES STUFF UP — HALLUCINATION EXPLAINED",
-        body: "AI doesn't have a fact-checker. It predicts the most likely continuation of your prompt — and sometimes the most statistically likely-sounding sentence happens to be factually wrong. The model doesn't know it's wrong. It has no way to know. This is called hallucination, and every AI model does it.",
-      },
-      scenarioText: "Marcus's producer emailed a venue for the tour — and got no reply, because it had closed two years ago. The AI listed it with the same crisp confidence as the real ones, and nobody checked. That's hallucination: the pattern sounds right, the fact is wrong.",
-      learnHighlight: "AI is always confident. Confidence is not accuracy. Verify any fact that matters before you act on it.",
-      xpAward: 25,
-    },
-
-    {
-      id: "w2-s2",
-      type: "quiz",
-      scenarioText:
-        "Machine learning is how AI gets its capabilities. It learns patterns from data — billions of examples — rather than being programmed with explicit rules.",
-      question: "Which of these is the clearest example of machine learning in action?",
+      id:        "w2-recovery",
+      type:      "scenario",
+      character: "Zoe, Session Drummer, 19",
+      location:  "MERIDIAN RECORDS · CONFERENCE ROOM",
+      xpAward:   25,
+      scenarioText: "Diana summarizes: 'So, equip the producer who has better judgment with AI tools, and their output will surpass the speed-focused producer.' Zoe: 'Yes. The tool is neutral; judgment isn't.' Diana nods. 'Then what is your recommendation?'",
+      question:  "What actionable recommendation does Zoe give Diana?",
       choices: [
         {
-          label: "A",
-          text: "A calculator that adds numbers using a fixed formula",
-          correct: false,
-          feedback:
-            "That's rule-based programming — explicit logic, no learning. Machine learning is about finding patterns in data, not executing predetermined formulas.",
+          label:    "A",
+          text:     "Fire both and hire someone who already uses AI well — you need a clean slate",
+          correct:  false,
+          feedback: "This discards proven musical judgment to chase an efficiency metric. Musical judgment takes years to build. AI skills can be taught in weeks. Always invest in the scarce resource.",
         },
         {
-          label: "B",
-          text: "An email filter that learned to flag spam by seeing millions of spam examples",
-          correct: true,
-          feedback:
-            "Perfect. That email filter wasn't programmed with spam rules — it found patterns across millions of examples and built its own model of 'what spam looks like.' That's machine learning.",
+          label:    "B",
+          text:     "Train your non-AI producer in AI tools. Then evaluate your AI-only producer on the quality of creative direction — not output speed.",
+          correct:  true,
+          feedback: "Right. You can teach AI tools in a week. You cannot teach a decade of musical judgment in a week. Invest in the scarce resource. The bottleneck in AI-assisted creative work is almost never the tool — it's the quality of the human directing it.",
         },
         {
-          label: "C",
-          text: "A website that shows you the same homepage every time",
-          correct: false,
-          feedback:
-            "Static content. No learning, no adaptation. Machine learning systems improve and personalize based on new data — the opposite of a fixed webpage.",
+          label:    "C",
+          text:     "Keep the AI producer — efficiency wins in today's market and will increasingly determine commercial success",
+          correct:  false,
+          feedback: "Efficiency with poor judgment produces poor output faster. The market rewards great output. Diana's real problem isn't cost or speed — it's having producers with the right combination of judgment AND efficiency. Speed without direction is just noise amplified at scale.",
         },
         {
-          label: "D",
-          text: "A GPS that follows pre-programmed turn-by-turn directions",
-          correct: false,
-          feedback:
-            "Pre-programmed rules, not machine learning. A GPS that uses ML would learn from real-time traffic patterns and user behavior to improve its routes over time.",
+          label:    "D",
+          text:     "It depends on the genre — some genres require human touch, others are naturally more AI-compatible",
+          correct:  false,
+          feedback: "Genre is a surface variable. The underlying truth is constant across creative domains: human judgment determines the quality of AI-directed output. Redirecting Diana's question toward genre avoids the framework she came here to understand.",
         },
       ],
-      xpAward: 150,
     },
 
-    // ── LEARN 3: Context Windows and Temperature ───────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // [10] BOSS — Diana Voss's Real Test (5 rounds, AI myth-busting)
+    // ─────────────────────────────────────────────────────────────────────────
     {
-      id: "w2-learn-3",
-      type: "learn",
-      location: "REHEARSAL STUDIO · PACKING UP",
-      concept: {
-        title: "CONTEXT WINDOWS AND TEMPERATURE",
-        body: "Two concepts beginners hear constantly and rarely understand: context window (how much AI can 'see' at once) and temperature (how creative vs. predictable its outputs are). You don't need to set these as a normal user — but understanding them tells you a lot about why AI behaves the way it does.",
-      },
-      scenarioText: "Zoe imagined a drummer who could only hear the last four bars — everything before, gone. That's Claude's context window: when a chat runs long, the earliest messages fall out of frame and AI literally can't see them. Temperature is the other dial: low makes it precise, high makes it creative.",
-      learnHighlight: "Context window = AI's working memory. Temperature = its creativity dial. Both explain why AI behaves the way it does.",
-      xpAward: 25,
-    },
+      id:        "w2-boss",
+      type:      "boss",
+      location:  "MERIDIAN RECORDS · THE REAL TEST",
+      xpAward:   0,
+      character: "Diana Voss, VP Artist Development, Meridian Records",
+      npcLine:   "Let's test your framework. Five real situations my team faced this month. Get them right to prove you understand this tech.",
+      scenarioText: "Diana pulls out her notebook. 'Every time AI confused my A&R team, I wrote it down. Let's see if your clarity holds under pressure.'",
+      bossQuestions: [
 
-    {
-      id: "w2-s3",
-      type: "quiz",
-      scenarioText:
-        "You type a question into Google. You get a list of links to pages that might have the answer. You type the same question into Claude. You get a direct, composed response. Same question. Completely different experience.",
-      question: "What makes generative AI fundamentally different from a search engine?",
-      choices: [
+        // Round 1 — Accuracy / Hallucination
         {
-          label: "A",
-          text: "Search engines are faster",
-          correct: false,
-          feedback:
-            "Speed is comparable. The difference is architectural — search retrieves existing pages, generative AI creates new text. Neither is inherently faster.",
+          question: "Your A&R manager told the team: 'ChatGPT confirmed this artist is the most-streamed Brazilian act of 2024.' Your team nearly booked them for a headlining slot based on this. What is the critical problem?",
+          npcLine:  "This one actually cost us money last quarter.",
+          choices: [
+            {
+              label:    "A",
+              text:     "ChatGPT's training data is outdated — it doesn't have access to real-time streaming numbers",
+              correct:  false,
+              feedback: "Training cutoffs are a real issue — but secondary here. The fundamental problem: AI language models generate plausible-sounding text, not verified facts. Even with current data access, an LLM would state this with equal confidence whether it was querying a real database or simply producing what sounds like a credible analysis.",
+            },
+            {
+              label:    "B",
+              text:     "AI language models generate confident-sounding text — they don't verify specific claims against a live database. 'Most-streamed' is a precise factual claim that requires real data.",
+              correct:  true,
+              feedback: "Exactly. ChatGPT doesn't query Spotify. It generates text that sounds like what follows from your prompt. 'Most-streamed Brazilian artist' is exactly what a credible music AI analyst would say — so it generated it. Every specific factual claim from an AI requires external verification. No exceptions, regardless of how confident the AI sounds.",
+            },
+            {
+              label:    "C",
+              text:     "Your team should use a specialized music data AI instead of a general AI like ChatGPT",
+              correct:  false,
+              feedback: "Specialized tools that query actual databases are different — but the lesson applies everywhere: understand what class of tool you're using and what it can and cannot do. Generic LLMs do not verify claims against real-world data sources. Know the boundary.",
+            },
+            {
+              label:    "D",
+              text:     "AI is generally unreliable and shouldn't inform major business decisions at all",
+              correct:  false,
+              feedback: "Overcorrection. AI is highly reliable for synthesis, pattern analysis, ideation, editing, and research. It's specifically unreliable for precise factual claims requiring external verification. The capability boundary matters — don't erase a useful tool because you misunderstood where it ends.",
+            },
+          ],
         },
+
+        // Round 2 — Neutrality / Bias
         {
-          label: "B",
-          text: "Generative AI creates new content by synthesizing patterns; search retrieves existing content",
-          correct: true,
-          feedback:
-            "This is the key insight. Search finds a page someone already wrote. Generative AI synthesizes a response that may never have existed before — drawing on patterns learned from vast training data to create something new for your specific context.",
+          question: "Your label's A&R algorithm recommends 'rock artists' predominantly from one demographic. The engineer says: 'AI is objective — it just found what performs.' What do you tell him?",
+          npcLine:  "This came up in our DEI audit last month. The engineer genuinely believed he was correct.",
+          choices: [
+            {
+              label:    "A",
+              text:     "The AI is correct — it found objective patterns in actual performance data that reflect industry reality",
+              correct:  false,
+              feedback: "Performance data isn't neutral — it reflects who historically got promoted, who received radio play, who had label support, who got mainstream marketing. An AI that learns from this data learns structural advantage, not objective musical quality or listener preference.",
+            },
+            {
+              label:    "B",
+              text:     "AI reflects its training data — if the data contains historical bias, the AI amplifies and presents that bias as objective fact",
+              correct:  true,
+              feedback: "Right. 'Objective' means 'without subjective judgment.' But training data contains the accumulated decisions of humans with subjective judgment, historical bias, and structural inequality. AI that learns from that data doesn't transcend the bias — it systematizes and legitimizes it. That's more dangerous than explicit human bias.",
+            },
+            {
+              label:    "C",
+              text:     "There's a technical bug in the algorithm — someone needs to find and fix it in the code",
+              correct:  false,
+              feedback: "There may be no bug at all. The algorithm might be doing exactly what it was designed to do — and the training data is the source of the problem. Framing it as a technical error locates the fix in the wrong place and leads to the wrong solution.",
+            },
+            {
+              label:    "D",
+              text:     "This is purely a legal and HR compliance issue — route it through those departments",
+              correct:  false,
+              feedback: "It may become a legal matter — but addressing it requires understanding AI first. Routing it entirely to compliance avoids the question of why the AI does this and how to fix it at the source. Legal and technical understanding need to work together here.",
+            },
+          ],
         },
+
+        // Round 3 — Creativity Myth
         {
-          label: "C",
-          text: "Generative AI is always more accurate than search engines",
-          correct: false,
-          feedback:
-            "Not always. AI can 'hallucinate' — generate plausible-sounding but incorrect information. Search links you to source documents you can verify. Each has strengths. Knowing when to use which is part of AI literacy.",
+          question: "A producer tells you: 'Suno AI generated this entire track — there is zero human creativity in it.' Your artist is deciding whether to release it. What's accurate?",
+          npcLine:  "This is the one my team gets wrong every single time. Every time.",
+          choices: [
+            {
+              label:    "A",
+              text:     "The producer is right — AI-generated music contains no human creativity by definition",
+              correct:  false,
+              feedback: "The producer made hundreds of creative decisions: the prompt, the genre descriptors, the emotional tone, the iteration choices, the decision to stop at this version, the selection from multiple outputs. Every single one required creative judgment. AI executed. Humans originated. 'AI made this' erases the human work.",
+            },
+            {
+              label:    "B",
+              text:     "Human creativity lives in every decision the human made while directing the AI — the prompt, the vision, the curation, the selection",
+              correct:  true,
+              feedback: "Right. 'The AI made this' is never the complete story. 'I directed AI to make this using my creative judgment' is what actually happened. This matters for understanding the craft, improving future work, and increasingly for legal attribution. The direction IS the creativity.",
+            },
+            {
+              label:    "C",
+              text:     "It's genuinely ambiguous — AI creativity is still legally and philosophically undefined",
+              correct:  false,
+              feedback: "The legal dimension is real but separate from the descriptive question. Whether human creativity was present doesn't wait for a legal definition — it's observable. Humans made choices. Choices are creativity. The law will catch up; the underlying reality is already clear.",
+            },
+            {
+              label:    "D",
+              text:     "The track should be labeled as AI-generated for transparency — that settles the question",
+              correct:  false,
+              feedback: "Transparency is a good practice — but a separate question from creative attribution. You can be fully transparent about AI use AND accurate about the human creative contribution. These aren't either/or. Transparency doesn't resolve the attribution question.",
+            },
+          ],
         },
+
+        // Round 4 — Vague Prompt / Specificity
         {
-          label: "D",
-          text: "Search engines use AI, generative AI doesn't",
-          correct: false,
-          feedback:
-            "The reverse. Modern search engines increasingly use AI. Generative AI (like Claude, GPT-4, Gemini) is built entirely on AI — specifically large language models trained on massive text datasets.",
+          question: "Your artist used Claude to write their album liner notes. They're polished. The artist is proud. But you read them and they sound like every AI-assisted artist's liner notes you've seen this year. What happened — and how do you fix it?",
+          npcLine:  "I see this mistake constantly. It's subtle until you know what to look for.",
+          choices: [
+            {
+              label:    "A",
+              text:     "Claude isn't well-suited for capturing individual artistic voice — they should try a different AI model",
+              correct:  false,
+              feedback: "Claude is capable of extraordinary voice capture — when given specific material to anchor to. The model isn't the problem. The prompt is. 'Write in my voice' without examples gives Claude nothing specific about this artist. It defaults to the voice of every artist who has asked that question before.",
+            },
+            {
+              label:    "B",
+              text:     "Vague prompts activate generic patterns — 'write in my voice' without examples, transcripts, or references gives AI nothing specific to work from",
+              correct:  true,
+              feedback: "Exactly. AI predicts what follows from your input. 'Write in my voice' is a prompt thousands of artists have submitted. Claude generates what statistically follows from that prompt across all of them — which is the average of 'authentic-sounding artist statement.' Feed it specific examples and it produces specific, distinctive output.",
+            },
+            {
+              label:    "C",
+              text:     "AI fundamentally cannot capture individual artistic voice — this is an inherent technological limitation",
+              correct:  false,
+              feedback: "Artists who gave Claude dozens of examples of their own writing, emails, interview transcripts, and creative notes have gotten outputs indistinguishable from their own voice. The limitation isn't technological; it's the specificity of context provided. Feed the machine what makes you specific.",
+            },
+            {
+              label:    "D",
+              text:     "The liner notes are probably fine — all liner notes sound similar anyway and audiences don't read them carefully",
+              correct:  false,
+              feedback: "The opportunity isn't 'are these acceptable.' It's: AI could help this artist produce liner notes that are genuinely, distinctively them — capturing the specific voice that makes them stand out in a flooded market. Accepting generic when specific is achievable is leaving real value on the table.",
+            },
+          ],
+        },
+
+        // Round 5 — Replacement Myth (the big one)
+        {
+          question: "A new artist on your roster says: 'AI is going to replace me.' A veteran artist says: 'AI can never replace me — I have soul.' Which gives them a more useful framework for the next decade?",
+          npcLine:  "This is the question I wish someone had answered honestly for me five years ago.",
+          choices: [
+            {
+              label:    "A",
+              text:     "The veteran is right — authentic human artistry, lived experience, and soul cannot be replicated by any AI system",
+              correct:  false,
+              feedback: "The veteran's confidence might be warranted — but 'I have soul' is not a strategy. It's a belief. What makes a human artist irreplaceable isn't just their essence — it's their specific ability to direct AI toward outputs only they would create. Soul without a framework for directing AI is a posture, not a position.",
+            },
+            {
+              label:    "B",
+              text:     "The new artist is right to be concerned — AI capabilities are advancing faster than most realize",
+              correct:  false,
+              feedback: "Fear without direction isn't useful to anyone. The new artist's concern is understandable but not actionable. What they need is a framework for where human value lives in an AI-augmented world — not validation of the anxiety.",
+            },
+            {
+              label:    "C",
+              text:     "Neither — the most useful frame is: AI amplifies whoever directs it. The question isn't 'will AI replace me' but 'how do I become the best possible director of AI in my craft'",
+              correct:  true,
+              feedback: "Right. AI doesn't replace humans — it amplifies the humans directing it. Artists who understand AI well enough to direct it toward their specific creative vision will outperform both: the afraid artist who refuses it, and the naive artist who uses it as a substitute for creative direction. Direction is the skill that matters now.",
+            },
+            {
+              label:    "D",
+              text:     "This is too philosophical — artists should focus on craft and not get distracted by AI questions",
+              correct:  false,
+              feedback: "Ignoring AI doesn't protect artists from it. In 2026, the craft question and the AI question are the same question. How you use AI IS part of craft now. Artists who understand this are making better work faster. Artists who ignore it are making the same work slower.",
+            },
+          ],
         },
       ],
-      xpAward: 150,
-    },
-    {
-      id: "w2-s4",
-      type: "boss",
-      scenarioText: "CONDUCTOR TEST — Three rapid-fire questions. Streak bonus: +50 XP for 3 in a row.",
-      question: "An AI model generates text by doing which of the following?",
-      choices: [
-        {
-          label: "A",
-          text: "Searching the internet in real time for the best answer",
-          correct: false,
-          feedback: "Most base LLMs have no internet access — they work from training data. Some tools add search on top.",
-        },
-        {
-          label: "B",
-          text: "Predicting the most statistically likely next token given the input context",
-          correct: true,
-          feedback:
-            "Correct. Under the hood, every LLM is doing sophisticated next-token prediction at scale. Your prompt is the context window. The model fills it forward.",
-        },
-        {
-          label: "C",
-          text: "Looking up answers in a built-in encyclopedia",
-          correct: false,
-          feedback: "Not a lookup system — a generative system. It creates rather than retrieves.",
-        },
-        {
-          label: "D",
-          text: "Randomly selecting words from its vocabulary",
-          correct: false,
-          feedback:
-            "Weighted probability, not randomness. Temperature controls creativity, but the outputs are always statistically grounded in training patterns.",
-        },
-      ],
-      xpAward: 250,
     },
 
-    // ═══ AI COMPARE ══════════════════════════════════════════════════════════
+    // ─────────────────────────────────────────────────────────────────────────
+    // [11] ENDING 1 — THE CONDUCTOR
+    // Path: Any route through boss victory
+    // ─────────────────────────────────────────────────────────────────────────
     {
-      id: "w2-compare",
-      type: "ai-compare",
-      character: "Zoe",
-      location: "MUSIC STUDIO · LAPTOP OPEN",
-      xpAward: 75,
+      id:          "w2-ending-1",
+      type:        "revelation",
+      location:    "MERIDIAN RECORDS · DIANA'S OFFICE",
+      xpAward:     100,
+      nextLeadsTo: "w2-ai-compare",
+      revealText:  "Diana Voss slides a contract across the table: 'AI Music Education Consultant.'\n\n'Why me?' Zoe asks.\n\n'Every consultant either says AI is magic or says it's a threat,' Diana answers. 'You showed my team what it actually is: a pattern-completing mirror. And then you showed them how that changes their actual jobs.'\n\nZoe signs.\n\nShe realizes now why her friend's AI-directed EP felt so human. The AI simply reflected the human's five years of musical taste and precise creative direction. The AI is a mirror; human direction is the signal. All the hype and fear is just noise.",
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [12] ENDING 2 — THE WAKE-UP
+    // Path: Crucible choice A (soul answer) → direct to this ending
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      id:          "w2-ending-2",
+      type:        "revelation",
+      location:    "MERIDIAN RECORDS · LOBBY",
+      xpAward:     100,
+      nextLeadsTo: "w2-ai-compare",
+      revealText:  "Diana Voss sighs. 'Betting on \"soul\" over strategy isn't a plan. The artists who do that are watching AI-directed competitors outperform them. Not because AI has soul, but because the human directors have better musical judgment and scale.'\n\nShe leans in. 'It's not magic. It's taste, curation, and knowing when to stop. When you can name it, you can protect it. But calling it magic leaves you defenseless.'\n\nZoe leaves without a contract, but with something better: she finally knows the difference between feeling right and being right, and how to close the gap.",
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [13] AI COMPARE — The Right Tool for the Right Job
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      id:          "w2-ai-compare",
+      type:        "ai-compare",
+      location:    "MERIDIAN RECORDS · PRESENTATION ROOM",
+      xpAward:     10,
+      nextLeadsTo: "w2-ai-compare-quiz",
+      character:   "Zoe, Session Drummer, 19",
+      scenarioText: "Zoe concludes her presentation: 'The Right Tool for the Right Job.' Different AI tools are trained for different tasks and fail in different ways. Choosing the right one is key.",
       aiCompare: {
-        models: ["claude", "chatgpt", "gemini", "copilot"],
-        headline: "Four AI Tools — What Each One Is Actually Built For",
-        context: "Now that you understand how AI works under the hood, it's time to understand why they're not all the same — even though they all use transformers and next-token prediction.",
+        models:   ["claude", "chatgpt", "gemini", "copilot"],
+        headline: "AI Tools in Music & Creative Work — What Each Actually Does",
+        context:  "Every AI tool is a prediction machine — but each was trained on different data, optimized for different tasks, and has different capability limits. For creative professionals, choosing the right tool for the right task is a real skill.",
         rows: [
           {
-            dimension: "Creative & Long-Form Writing",
-            winner: "Claude",
-            claude:  "Nuanced, emotionally aware, resists cliché",
-            chatgpt: "Clear and competent, slightly generic",
-            gemini:  "Good; strong on structure",
-            copilot: "Functional; M365-optimized writing",
-            note: "Same architecture — different training emphasis. Claude was tuned to care about quality and nuance.",
+            dimension: "Long-form creative writing & voice",
+            winner:    "Claude",
+            claude:    "Maintains consistent voice across thousands of words; nuanced and context-aware",
+            chatgpt:   "Strong but can lose consistency in very long pieces",
+            gemini:    "Good for summaries; weaker on sustained creative narrative",
+            copilot:   "Optimized for professional docs — not creative voice",
+            note:      "For artist bios, liner notes, press kits, and long-form creative text, Claude's extended context and training make it the most consistent.",
           },
           {
-            dimension: "Live Web Research",
-            winner: "ChatGPT",
-            claude:  "Limited real-time access",
-            chatgpt: "Browses the web by default in GPT-4o",
-            gemini:  "Deep Google Search integration",
-            copilot: "Bing-powered live search",
-            note: "If you need current events, stock prices, or live data — don't use Claude without a plugin.",
+            dimension: "Music lyrics & songwriting",
+            winner:    "ChatGPT",
+            claude:    "Excellent with detailed context and examples; strong rhythm instinct",
+            chatgpt:   "Versatile; strong natural rhyme and rhythm; widely trained on lyric formats",
+            gemini:    "Competent but generic without highly specific prompting",
+            copilot:   "Not optimized for creative or artistic writing tasks",
+            note:      "Both Claude and ChatGPT perform well. The quality of your prompt matters far more than the tool — give either one specific examples of your voice.",
           },
           {
-            dimension: "Google Workspace Integration",
-            winner: "Gemini",
-            claude:  "No native Workspace integration",
-            chatgpt: "No native Workspace integration",
-            gemini:  "Native in Gmail, Docs, Drive, Sheets",
-            copilot: "M365 only",
-            note: "If your team lives in Google, Gemini is already inside your tools.",
+            dimension: "Factual research & live data",
+            winner:    "Gemini",
+            claude:    "Strong synthesis; verify specific claims independently",
+            chatgpt:   "Hallucinates confidently on specific facts — always verify",
+            gemini:    "Google Search integration provides real-time, verifiable information",
+            copilot:   "Bing integration helps with recency and current events",
+            note:      "No AI replaces primary source verification for specific factual claims — but Gemini's live search integration makes it the most reliable for current data.",
           },
           {
-            dimension: "Microsoft 365 Integration",
-            winner: "Copilot",
-            claude:  "No native M365 integration",
-            chatgpt: "Limited M365 integration",
-            gemini:  "No native M365 integration",
-            copilot: "Native in Word, Excel, Teams, Outlook",
-            note: "If your org runs on Microsoft, Copilot is already in your tools waiting to be activated.",
+            dimension: "Professional emails & business writing",
+            winner:    "Copilot",
+            claude:    "Excellent professional tone; works in any context",
+            chatgpt:   "Strong; widely used in business; natural professional register",
+            gemini:    "Good with Google Workspace integration (Docs, Gmail)",
+            copilot:   "Built for Microsoft 365 — native in Outlook, Word, Teams; eliminates friction",
+            note:      "If your team lives in Microsoft 365, Copilot's native integration is a real workflow advantage. Otherwise Claude and ChatGPT perform similarly.",
+          },
+          {
+            dimension: "Acknowledging its own limitations",
+            winner:    "Claude",
+            claude:    "Most consistently transparent about uncertainty; says 'I'm not sure' when appropriate",
+            chatgpt:   "Sometimes overconfident; less likely to flag uncertain claims",
+            gemini:    "Reasonably calibrated; improving",
+            copilot:   "Optimized for helpfulness; sometimes at the expense of accuracy",
+            note:      "When you need an AI to tell you what it doesn't know — before you make a business decision based on it — Claude is most likely to say so.",
           },
         ],
-        verdict: "Same underlying technology. Different training, different integrations, different strengths. The best AI user knows which instrument to pick up for which song.",
-        question: "Zoe needs to analyze patterns across 50 research papers she already has in Google Drive. Which AI tool is most naturally suited for this?",
-        choices: [
-          {
-            label: "A",
-            text: "Claude — best at nuanced comprehension",
-            correct: false,
-            feedback: "Claude is excellent at nuanced analysis — but it doesn't integrate natively with Google Drive. Zoe would need to copy/paste 50 papers manually. That's the wrong tool for this workflow.",
-            wrongFeedback: "Claude is excellent at nuanced analysis — but it doesn't integrate natively with Google Drive. Zoe would need to copy/paste 50 papers manually. That's the wrong tool for this workflow.",
-          },
-          {
-            label: "B",
-            text: "Gemini — native Google Drive integration makes it the natural choice",
-            correct: true,
-            feedback: "Exactly. Gemini lives inside Google Workspace. It can access files in Drive directly, analyze multiple documents in one session, and synthesize patterns across all 50 papers without a single copy-paste. Same AI capability — but the integration removes all the friction.",
-          },
-          {
-            label: "C",
-            text: "ChatGPT — most powerful model overall",
-            correct: false,
-            feedback: "GPT-4o is powerful, but power without integration creates friction. Uploading 50 papers one by one, losing context across sessions — the workflow collapses. Integration beats raw capability here.",
-            wrongFeedback: "GPT-4o is powerful, but power without integration creates friction. Uploading 50 papers one by one, losing context across sessions — the workflow collapses. Integration beats raw capability here.",
-          },
-          {
-            label: "D",
-            text: "Copilot — widest enterprise reach",
-            correct: false,
-            feedback: "Copilot is built for Microsoft 365. Google Drive is not in its native ecosystem. This is a Google workflow — use the Google-native AI.",
-            wrongFeedback: "Copilot is built for Microsoft 365. Google Drive is not in its native ecosystem. This is a Google workflow — use the Google-native AI.",
-          },
-        ],
+        verdict:  "The tool matters less than you think. Your prompt, your context, and the quality of your creative direction matter far more. Learn the strengths of each — then focus most of your energy on becoming a better director. The bottleneck is almost never the AI.",
       },
     },
 
-    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    // ─────────────────────────────────────────────────────────────────────────
+    // [13b] AI COMPARE QUIZ — The Right Tool Quiz
+    // ─────────────────────────────────────────────────────────────────────────
     {
-      id: "w2-handoff",
-      type: "handoff",
-      character: "Zoe",
-      location: "MUSIC STUDIO · LATE NIGHT",
-      xpAward: 0,
+      id:           "w2-ai-compare-quiz",
+      type:         "quiz",
+      character:    "Zoe, Session Drummer, 19",
+      location:     "MERIDIAN RECORDS · PRESENTATION ROOM",
+      xpAward:      20,
+      nextLeadsTo:  "w2-handoff",
+      scenarioText: "An A&R manager asks: 'Which AI should our team use for evaluating new artists?' What's the most accurate guidance?",
+      choices: [
+        {
+          label:    "A",
+          text:     "Claude — it's the most nuanced and understands creative work better than the alternatives",
+          correct:  false,
+          feedback: "Claude excels at creative synthesis — but 'evaluating new artists' involves specific factual research (streaming numbers, tour history) that requires live data. No single AI is the complete answer for complex professional workflows. Match tool to task.",
+        },
+        {
+          label:    "B",
+          text:     "ChatGPT — it's the most widely tested and has the largest music industry user base",
+          correct:  false,
+          feedback: "Wide adoption doesn't solve the tool-task mismatch. ChatGPT excels at generation and synthesis — less so for specific factual claims about real artists. A widely-used tool used incorrectly still produces incorrect output.",
+        },
+        {
+          label:    "C",
+          text:     "Use the right tool for each part of the task — Gemini for factual research, Claude or ChatGPT for synthesis and writing, and verify specific claims with primary sources regardless of which AI you use",
+          correct:  true,
+          feedback: "Right. 'Which AI should we use?' is almost always the wrong question. 'What are we trying to accomplish at this step?' is the right question. Different tools, different tasks, different parts of the workflow — and human verification of specific factual claims is non-negotiable no matter which AI you use.",
+        },
+        {
+          label:    "D",
+          text:     "None — AI doesn't understand music and shouldn't be part of A&R decision-making",
+          correct:  false,
+          feedback: "Overcorrection. AI can synthesize press coverage, surface competitive context, identify genre trends, draft research briefs, and generate outreach — all genuinely valuable in A&R. The limitation is specific factual claims and genuine musical taste. Know the boundary; don't erase the tool.",
+        },
+      ],
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [14] HANDOFF — Zoe → Carlos (Game 3)
+    // ─────────────────────────────────────────────────────────────────────────
+    {
+      id:       "w2-handoff",
+      type:     "handoff",
+      location: "RECORDING STUDIO · THE NEXT WEEK",
+      xpAward:  0,
       dialogue: [
         {
           speaker: "Zoe",
-          avatar: "protagonist" as const,
-          text: "Okay. You now know what's actually happening inside these things. Next-token prediction. Statistical pattern matching. Context windows. That's the engine.",
+          avatar:  "protagonist" as const,
+          text:    "I came into this thinking the question was: 'Can AI replace me?' I'm leaving with a completely different question.",
         },
         {
           speaker: "Zoe",
-          avatar: "protagonist" as const,
-          text: "But an engine sitting in a garage does nothing. You need someone who knows how to drive it. And I mean — actually drive it. Not just tap the gas and hope.",
+          avatar:  "protagonist" as const,
+          text:    "The question is: 'What is the quality of the human directing the AI?' That's the only variable that matters at the level of excellence. And that variable — that's me. That's entirely on me.",
         },
         {
           speaker: "Zoe",
-          avatar: "protagonist" as const,
-          text: "There's this saxophonist, Carlos. He's been using AI in his consulting work for months now. Built a whole framework for it. Calls it the Maestro Method.",
+          avatar:  "protagonist" as const,
+          text:    "But here's what I'm still figuring out. Knowing what AI is — and actually deploying it inside a real professional career, with real stakes and real clients — those are two completely different problems. Has anyone actually cracked that?",
         },
         {
-          speaker: "Zoe",
-          avatar: "protagonist" as const,
-          text: "He showed me once. I watched him go from a blank page to a full client brief in about 20 minutes. Not because the AI is magic — because he knows exactly what to feed it.",
-        },
-        {
-          speaker: "Zoe",
-          avatar: "protagonist" as const,
-          text: "Go learn his method. What I just gave you is the why. He'll show you the how.",
+          speaker: "Carlos",
+          avatar:  "npc" as const,
+          text:    "Someone has. But it took two years, three failed projects, one jazz gig that almost broke me, and a boardroom moment I nearly didn't survive. Come find me at Nexus Group.",
         },
       ],
     },

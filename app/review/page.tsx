@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { supabaseBrowser } from "@/lib/supabase-browser"
-import { Rating, type ReviewCard } from "@/lib/fsrs"
+import { Rating, type ReviewCard, f, rowToCard, cardToRow } from "@/lib/fsrs"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,7 +48,23 @@ export default function ReviewPage() {
     async function loadCards() {
       const token = await getBearerToken()
       if (!token) {
-        setState({ phase: "error", message: "You must be signed in to review cards." })
+        // Fallback to localStorage FSRS cards
+        try {
+          const localCardsJson = localStorage.getItem("maestro_review_cards") || "[]"
+          const localCards: ReviewCard[] = JSON.parse(localCardsJson)
+          const now = new Date()
+          const dueCards = localCards.filter(c => new Date(c.due) <= now)
+
+          if (dueCards.length === 0) {
+            setState({ phase: "empty" })
+            return
+          }
+
+          setCards(dueCards)
+          setState({ phase: "front", card: dueCards[0], index: 0, total: dueCards.length })
+        } catch (err) {
+          setState({ phase: "error", message: "Failed to load local review cards." })
+        }
         return
       }
 
@@ -98,6 +114,58 @@ export default function ReviewPage() {
 
     if (currentState.phase !== "back" && currentState.phase !== "rating") {
       setIsSubmitting(false)
+      return
+    }
+
+    // Local FSRS scheduling fallback
+    if (!token) {
+      try {
+        const localCardsJson = localStorage.getItem("maestro_review_cards") || "[]"
+        const localCards: ReviewCard[] = JSON.parse(localCardsJson)
+
+        const cardIndexInLocal = localCards.findIndex(lc => lc.id === currentState.card.id)
+        if (cardIndexInLocal === -1) throw new Error("Card not found locally")
+
+        const row = localCards[cardIndexInLocal]
+        const cardObj = rowToCard(row)
+        const now = new Date()
+
+        // Run FSRS scheduler
+        const scheduling = f.repeat(cardObj, now)
+        const result = (scheduling as any)[ratingValue]
+        const nextCard = result.card
+
+        const updatedRow = cardToRow(nextCard, {
+          game_slug: row.game_slug,
+          game_week: row.game_week,
+          concept_title: row.concept_title,
+          concept_body: row.concept_body,
+        }) as ReviewCard
+
+        updatedRow.id = row.id // preserve local ID
+        localCards[cardIndexInLocal] = updatedRow
+
+        localStorage.setItem("maestro_review_cards", JSON.stringify(localCards))
+
+        const nextCount = reviewedCount + 1
+        setReviewedCount(nextCount)
+
+        const nextIndex = currentState.index + 1
+        if (nextIndex >= currentState.total) {
+          setState({ phase: "done", reviewed: nextCount })
+        } else {
+          setState({
+            phase: "front",
+            card: cards[nextIndex],
+            index: nextIndex,
+            total: currentState.total,
+          })
+        }
+      } catch (err) {
+        setState({ phase: "error", message: err instanceof Error ? err.message : "Unknown error" })
+      } finally {
+        setIsSubmitting(false)
+      }
       return
     }
 

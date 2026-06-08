@@ -16,15 +16,21 @@ type Props = {
   scene: Scene
   location?: string
   onComplete: (xp: number) => void
+  fastText?: boolean
 }
 
 // Typewriter hook identical to DialogueScene pattern
-function useTypewriter(text: string, speed: number, active: boolean) {
+function useTypewriter(text: string, speed: number, active: boolean, fastText = false) {
   const [displayed, setDisplayed] = useState("")
   const [done, setDone] = useState(false)
 
   useEffect(() => {
     if (!active) return
+    if (fastText) {
+      setDisplayed(text)
+      setDone(true)
+      return
+    }
     setDisplayed("")
     setDone(false)
     if (!text) { setDone(true); return }
@@ -35,7 +41,7 @@ function useTypewriter(text: string, speed: number, active: boolean) {
       if (i >= text.length) { clearInterval(timer); setDone(true) }
     }, speed)
     return () => clearInterval(timer)
-  }, [text, speed, active])
+  }, [text, speed, active, fastText])
 
   return { displayed, done }
 }
@@ -106,7 +112,7 @@ function ScoreBar({ label, value, delay }: { label: string; value: number; delay
   )
 }
 
-export default function PromptChallenge({ scene, location, onComplete }: Props) {
+export default function PromptChallenge({ scene, location, onComplete, fastText = false }: Props) {
   const [phase, setPhase] = useState<Phase>("idle")
   const [userPrompt, setUserPrompt] = useState("")
   const [result, setResult] = useState<ApiResult | null>(null)
@@ -127,17 +133,18 @@ export default function PromptChallenge({ scene, location, onComplete }: Props) 
     result?.aiResponse ?? "",
     18,
     phase === "result",
+    fastText,
   )
 
   // Cascade reveals after typewriter finishes
   useEffect(() => {
     if (!twDone || phase !== "result") return
-    const t1 = setTimeout(() => setShowScores(true), 200)
-    const t2 = setTimeout(() => setShowFeedback(true), 200 + 3 * 200 + 400)
-    const t3 = setTimeout(() => setShowXp(true), 200 + 3 * 200 + 800)
-    const t4 = setTimeout(() => setShowContinue(true), 200 + 3 * 200 + 1400)
+    const t1 = setTimeout(() => setShowScores(true), fastText ? 0 : 200)
+    const t2 = setTimeout(() => setShowFeedback(true), fastText ? 0 : 200 + 3 * 200 + 400)
+    const t3 = setTimeout(() => setShowXp(true), fastText ? 0 : 200 + 3 * 200 + 800)
+    const t4 = setTimeout(() => setShowContinue(true), fastText ? 0 : 200 + 3 * 200 + 1400)
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4) }
-  }, [twDone, phase])
+  }, [twDone, phase, fastText])
 
   // Inject keyframes once
   useEffect(() => {

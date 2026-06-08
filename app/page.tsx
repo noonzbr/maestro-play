@@ -2,175 +2,708 @@
 
 import dynamic from "next/dynamic"
 import Link from "next/link"
-import { useEffect, useState, useRef, useCallback } from "react"
-import { allGames } from "@/lib/games"
-import GameCard from "@/components/ui/GameCard"
+import { useEffect, useState, useCallback, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import Nav from "@/components/ui/Nav"
 import Footer from "@/components/ui/Footer"
 import FloatingNotes from "@/components/game/FloatingNotes"
+import PromptSandbox from "@/components/game/PromptSandbox"
 
-const HeroScene = dynamic(() => import("@/components/three/HeroScene"), { ssr: false })
+/* ── Custom Handcrafted SVG Icons ── */
+const SVGXpBolt = ({ size = 20, color = "#ffd740" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "inline-block", verticalAlign: "middle" }}>
+    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill={`url(#bolt-grad-${color.replace('#','')})`} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <defs>
+      <linearGradient id={`bolt-grad-${color.replace('#','')}`} x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#fff" stopOpacity="0.4"/>
+        <stop offset="100%" stopColor={color} stopOpacity="1"/>
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const SVGFlame = ({ size = 20, color = "#ff6d00" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "inline-block", verticalAlign: "middle" }}>
+    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" fill={`url(#flame-grad-${color.replace('#','')})`} stroke={color} strokeWidth="1.5"/>
+    <path d="M15 11a3 3 0 11-6 0c0-1.657 1-3 3-5 2 2 3 3.343 3 5z" fill="#fff" fillOpacity="0.5"/>
+    <defs>
+      <linearGradient id={`flame-grad-${color.replace('#','')}`} x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#ffd740" />
+        <stop offset="100%" stopColor={color} />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const SVGLogoNote = ({ color = "#00d4f0" }: { color?: string }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 18V5l12-2v13" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="6" cy="18" r="3" fill={color}/>
+    <circle cx="18" cy="16" r="3" fill={color}/>
+  </svg>
+)
+
+const SVGCheck = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00d4f0" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6L9 17l-5-5"/>
+  </svg>
+)
+
+const SVGStar = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="#ffd740" stroke="#ffd740" strokeWidth="1" style={{ display: "inline-block" }}>
+    <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
+  </svg>
+)
+
+const SVGMagnifier = ({ color = "#00d4f0" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="M21 21l-4.35-4.35"/>
+  </svg>
+)
+
+const SVGShield = ({ color = "#4488ff" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </svg>
+)
+
+const SVGMaestroBaton = ({ color = "#e040fb" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 3h12M6 8h12M6 13h12M6 18h12M3 3l18 18"/>
+  </svg>
+)
+
+const SVGCircleArrow = ({ color = "#00e676" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l.57.81"/>
+  </svg>
+)
+
+const SVGHeart = ({ color = "#ff4b6e" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+  </svg>
+)
+
+const SVGCrown = ({ color = "#ffb700" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/>
+  </svg>
+)
+
+const SVGBulb = ({ color = "#7b2fbe" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 14c.2-.2.4-.4.6-.7C16.8 11.7 17 10 15.8 8.3 14.5 6.6 12 6.2 10.3 7.3s-1.8 3.5-.6 5c.2.3.4.5.6.7v3h6v-3zM9 18h6M10 22h4"/>
+  </svg>
+)
+
+const SVGFastForward = ({ color = "#e040fb" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13,19 22,12 13,5"/>
+    <polygon points="2,19 11,12 2,5"/>
+  </svg>
+)
+
+const SVGTrophy = ({ color = "#ffb700" }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34M12 2a5 5 0 00-5 5v5c0 2.76 2.24 5 5 5s5-2.24 5-5V7a5 5 0 00-5-5z"/>
+  </svg>
+)
+
+// ssr:false prevents Three.js crashing on server
+const HeroScene = dynamic(() => import("@/components/three/HeroScene"), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      position: "absolute", inset: 0, zIndex: 0,
+      background: "radial-gradient(ellipse at 50% 50%, rgba(123,47,190,0.18) 0%, transparent 65%)",
+      borderRadius: "18px",
+    }} aria-hidden="true" />
+  ),
+})
 
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal")
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible") }),
-      { threshold: 0.10 }
+      { threshold: 0.08 }
     )
     els.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [])
 }
 
-function LiveDemo() {
-  const [selected, setSelected] = useState<string | null>(null)
-  const [answered, setAnswered] = useState(false)
-
-  const choices = [
-    { label: "A", text: "AI isn't smart enough yet", correct: false },
-    { label: "B", text: "They don't pay for Pro", correct: false },
-    { label: "C", text: "They describe without structure", correct: true },
-    { label: "D", text: "Only works for developers", correct: false },
-  ]
-
-  const handleSelect = (label: string) => {
-    if (answered) return
-    setSelected(label)
-    setAnswered(true)
+async function startCheckout(slug: string) {
+  try {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug }),
+    })
+    const data = await res.json()
+    if (data.url) window.location.href = data.url
+    else console.error("Checkout error:", data)
+  } catch (e) {
+    console.error("Checkout fetch failed:", e)
   }
+}
 
-  const reset = () => { setSelected(null); setAnswered(false) }
+// ── Synths for interactive mockup sound effects ──
+const playSynthTone = (freq: number, duration: number, type: OscillatorType = "sine", vol = 0.1) => {
+  if (typeof window === "undefined") return
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    if (!AudioCtx) return
+    const ctx = new AudioCtx()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = type
+    osc.frequency.setValueAtTime(freq, ctx.currentTime)
+    gain.gain.setValueAtTime(vol, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start()
+    osc.stop(ctx.currentTime + duration)
+  } catch {}
+}
 
-  return (
-    <div className="glass-card" style={{ borderRadius: "20px", padding: "2rem", height: "100%" }}>
-      <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1rem" }}>Live Preview</div>
-      <div style={{ background: "rgba(0,212,240,0.05)", border: "1px solid rgba(0,212,240,0.15)", borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem" }}>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "rgba(240,238,255,0.85)", lineHeight: 1.7 }}>
-          Your colleague automated her report in <strong style={{ color: "#fff" }}>4 minutes</strong>. You spent <strong style={{ color: "#fff" }}>3 hours</strong>. Same tool. What does she know?
-        </p>
-      </div>
-      <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "#fff", marginBottom: "1rem" }}>
-        Why do most people get poor results from AI?
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.5rem" }}>
-        {choices.map((c) => {
-          const isSelected = selected === c.label
-          const showResult = answered
-          const bgColor = showResult && c.correct ? "rgba(0,255,128,0.08)" : showResult && isSelected && !c.correct ? "rgba(255,80,80,0.08)" : isSelected ? "rgba(0,212,240,0.08)" : "rgba(255,255,255,0.03)"
-          const borderColor = showResult && c.correct ? "rgba(0,255,128,0.5)" : showResult && isSelected && !c.correct ? "rgba(255,80,80,0.5)" : isSelected ? "rgba(0,212,240,0.4)" : "rgba(255,255,255,0.08)"
-          return (
-            <button key={c.label} onClick={() => handleSelect(c.label)} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem 1rem", borderRadius: "10px", border: `1px solid ${borderColor}`, background: bgColor, cursor: answered ? "default" : "pointer", textAlign: "left", transition: "all 0.2s" }}>
-              <span style={{ width: "24px", height: "24px", borderRadius: "6px", background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.7rem", color: showResult && c.correct ? "#00ff80" : showResult && isSelected ? "#ff8080" : "rgba(240,238,255,0.5)", flexShrink: 0 }}>
-                {showResult && c.correct ? "✓" : showResult && isSelected ? "✗" : c.label}
-              </span>
-              <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.825rem", color: showResult && c.correct ? "#00ff80" : showResult && isSelected && !c.correct ? "#ff8080" : "rgba(240,238,255,0.8)" }}>
-                {c.text}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      {answered && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--cyan)", fontWeight: 700 }}>
-            {selected === "C" ? "✓ Correct! +100 XP" : "Not quite — C is correct"}
-          </span>
-          <button onClick={reset} style={{ fontFamily: "Inter, sans-serif", fontSize: "0.75rem", color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}>Try again</button>
-        </div>
-      )}
-    </div>
-  )
+const playMockClick = () => playSynthTone(600, 0.1, "triangle", 0.04)
+const playMockHover = () => playSynthTone(880, 0.04, "sine", 0.01)
+
+const playMockSuccess = () => {
+  if (typeof window === "undefined") return
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    const ctx = new AudioCtx()
+    const t = ctx.currentTime
+    const tone = (f: number, start: number, dur: number, v: number) => {
+      const osc = ctx.createOscillator()
+      const g = ctx.createGain()
+      osc.frequency.setValueAtTime(f, start)
+      g.gain.setValueAtTime(v, start)
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur)
+      osc.connect(g); g.connect(ctx.destination)
+      osc.start(start); osc.stop(start + dur)
+    }
+    tone(261.63, t, 0.4, 0.08)
+    tone(329.63, t + 0.08, 0.4, 0.08)
+    tone(392.0, t + 0.16, 0.4, 0.08)
+    tone(523.25, t + 0.24, 0.5, 0.12)
+  } catch {}
+}
+
+const playMockWrong = () => {
+  if (typeof window === "undefined") return
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    const ctx = new AudioCtx()
+    const t = ctx.currentTime
+    const tone = (f: number, start: number, dur: number, v: number, type: OscillatorType) => {
+      const osc = ctx.createOscillator()
+      const g = ctx.createGain()
+      osc.type = type
+      osc.frequency.setValueAtTime(f, start)
+      g.gain.setValueAtTime(v, start)
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur)
+      osc.connect(g); g.connect(ctx.destination)
+      osc.start(start); osc.stop(start + dur)
+    }
+    tone(246.94, t, 0.35, 0.06, "sawtooth")
+    tone(349.23, t, 0.35, 0.06, "sawtooth")
+  } catch {}
+}
+
+// ── Multi-Character Visual Novel Mockup Config ──
+type MockCharacter = "jake" | "zoe" | "carlos" | "vega"
+type CharacterScenario = {
+  characterName: string
+  avatar: string
+  bg: string
+  color: string
+  dialogueInit: string
+  optionA: string
+  optionB: string
+  dialogueA: string
+  dialogueB: string
+  speakerA: string
+  speakerB: string
+  avatarA: string
+  avatarB: string
+  colorA: string
+  colorB: string
+  xpA: number
+  hpA: number
+  xpB: number
+  hpB: number
+}
+
+const CHARACTER_SCENARIOS: Record<MockCharacter, CharacterScenario> = {
+  jake: {
+    characterName: "Jake",
+    avatar: "/images/guitarplayer1.png",
+    bg: "/images/bg-bedroom.png",
+    color: "var(--cyan)",
+    dialogueInit: "Look, Tyler. Making music with AI isn't about letting the machine do everything. It's about being the Conductor. You shape the key, tempo, and soul. Watch this...",
+    optionA: "🎸 Conductor Prompt: Define strict key, tempo, & rules",
+    optionB: "🤖 Shortcut Prompt: Ask AI 'write me a hit pop song' instantly",
+    dialogueA: "Incredible, Jake! That is the Conductor's Mindset. By specifying constraints and rules, you kept the melody authentic. +100 XP!",
+    dialogueB: "Ugh, it came back in 8 seconds but sounds so cliché. 'Chasing dreams under neon lights'... Señora Vega is definitely going to fail us.",
+    speakerA: "SEÑORA VEGA",
+    speakerB: "TYLER",
+    avatarA: "/images/senoravega.png",
+    avatarB: "/images/tyler.png",
+    colorA: "var(--purple)",
+    colorB: "var(--pink)",
+    xpA: 1300, hpA: 5,
+    xpB: 1200, hpB: 4,
+  },
+  zoe: {
+    characterName: "Zoe",
+    avatar: "/images/zoe.png",
+    bg: "/images/bg-practiceroom.png",
+    color: "var(--purple)",
+    dialogueInit: "Our tour bookings are a mess! I need to write an email automation script to send to venue managers. Should I tell Claude the exact email parameters or just ask for a script?",
+    optionA: "🥁 Conductor Prompt: Configure tour dates, variables, & exclusions",
+    optionB: "🤖 Shortcut Prompt: Ask Claude 'write email script' instantly",
+    dialogueA: "Awesome! Claude generated a clean JSON automation that matches our exact calendar block. It worked perfectly! +100 XP!",
+    dialogueB: "Oh no! The script had hardcoded placeholder variables. It sent out three duplicates to the same venue. The manager is furious!",
+    speakerA: "ZOE",
+    speakerB: "ZOE",
+    avatarA: "/images/zoe.png",
+    avatarB: "/images/zoe.png",
+    colorA: "var(--purple)",
+    colorB: "var(--purple)",
+    xpA: 1300, hpA: 5,
+    xpB: 1200, hpB: 4,
+  },
+  carlos: {
+    characterName: "Carlos",
+    avatar: "/images/carlos.png",
+    bg: "/images/bg-bandpractice.png",
+    color: "#ffd740",
+    dialogueInit: "I want to blend classic jazz chord progressions with modern hip-hop synths. I'll test ChatGPT against Gemini to see who has the best voicing.",
+    optionA: "🎹 Conductor Prompt: Compare chord structures with music theory rules",
+    optionB: "🤖 Shortcut Prompt: Ask both models for 'a cool jazz progression'",
+    dialogueA: "Nice! ChatGPT gave clean extensions, while Gemini caught the rootless voicings. Let's blend them! +100 XP!",
+    dialogueB: "Meh, they both just gave me the standard ii-V-I progression. It sounds so generic, no soul in it...",
+    speakerA: "CARLOS",
+    speakerB: "CARLOS",
+    avatarA: "/images/carlos.png",
+    avatarB: "/images/carlos.png",
+    colorA: "#ffd740",
+    colorB: "#ffd740",
+    xpA: 1300, hpA: 5,
+    xpB: 1200, hpB: 4,
+  },
+  vega: {
+    characterName: "Sra. Vega",
+    avatar: "/images/senoravega.png",
+    bg: "/images/bg-musicclass.png",
+    color: "var(--pink)",
+    dialogueInit: "Welcome to the Conductor's Exam. To pass, you must demonstrate prompt discipline. If you want a report, how do you specify the constraints?",
+    optionA: "📝 Codex Prompt: Define exact scope, format, and forbidden words",
+    optionB: "🤖 Shortcut Prompt: Ask for 'a detailed report' and edit later",
+    dialogueA: "Excellent! A true conductor establishes strict boundaries. You have passed the final exam! +200 XP!",
+    dialogueB: "Unacceptable. You are letting the AI write sloppy prose. That is a fail on this round.",
+    speakerA: "SEÑORA VEGA",
+    speakerB: "SEÑORA VEGA",
+    avatarA: "/images/senoravega.png",
+    avatarB: "/images/senoravega.png",
+    colorA: "var(--pink)",
+    colorB: "var(--pink)",
+    xpA: 1400, hpA: 5,
+    xpB: 1200, hpB: 3,
+  }
 }
 
 export default function HomePage() {
   useReveal()
-  const carouselRef  = useRef<HTMLDivElement>(null)
-  const carouselPaused = useRef(false)
+  const [checkingOut, setCheckingOut] = useState<string | null>(null)
+  const [hasProgress, setHasProgress] = useState(false)
 
-  const scrollCarousel = useCallback((dir: "left" | "right") => {
-    const el = carouselRef.current
-    if (!el) return
-    const card = el.querySelector<HTMLElement>("div[data-card]")
-    const step = (card?.offsetWidth ?? 320) + 20
-    el.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" })
-  }, [])
+  // Interactive Visual Novel Simulator Mockup state
+  const [activeChar, setActiveChar] = useState<MockCharacter>("jake")
+  const [vnState, setVnState] = useState<"init" | "choiceA" | "choiceB">("init")
+  const [vnText, setVnText] = useState("")
+  const [vnSpeaker, setVnSpeaker] = useState("")
+  const [vnSpeakerColor, setVnSpeakerColor] = useState("var(--cyan)")
+  const [vnSpeakerImage, setVnSpeakerImage] = useState("")
+  const [vnXp, setVnXp] = useState(1200)
+  const [vnHp, setVnHp] = useState(5)
+
+  // Roadmap active phase tab
+  const [activePhase, setActivePhase] = useState<number>(3)
+
+  // Sync simulator values when character tab changes
+  useEffect(() => {
+    const sc = CHARACTER_SCENARIOS[activeChar]
+    setVnState("init")
+    setVnText(sc.dialogueInit)
+    setVnSpeaker(sc.characterName.toUpperCase())
+    setVnSpeakerColor(sc.color)
+    setVnSpeakerImage(sc.avatar)
+    setVnXp(1200)
+    setVnHp(5)
+  }, [activeChar])
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (carouselPaused.current) return
-      const el = carouselRef.current
-      if (!el) return
-      const card = el.querySelector<HTMLElement>("div[data-card]")
-      const step = (card?.offsetWidth ?? 320) + 20
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10
-      el.scrollBy({ left: atEnd ? -(el.scrollWidth) : step, behavior: "smooth" })
-    }, 3500)
-    return () => clearInterval(id)
+    try {
+      const totalXp = parseInt(localStorage.getItem("maestro_total_xp") ?? "0") || 0
+      const game1Xp = parseInt(localStorage.getItem("maestro_game_1_xp") ?? "0") || 0
+      if (totalXp > 0 || game1Xp > 0) {
+        setHasProgress(true)
+      }
+    } catch {}
   }, [])
+
+  const handlePurchase = useCallback(async (slug: string) => {
+    setCheckingOut(slug)
+    await startCheckout(slug)
+    setCheckingOut(null)
+  }, [])
+
+  const handleMockChoice = (choice: "choiceA" | "choiceB") => {
+    const sc = CHARACTER_SCENARIOS[activeChar]
+    if (choice === "choiceA") {
+      setVnState("choiceA")
+      setVnSpeaker(sc.speakerA)
+      setVnSpeakerColor(sc.colorA)
+      setVnSpeakerImage(sc.avatarA)
+      setVnText(sc.dialogueA)
+      setVnXp(sc.xpA)
+      setVnHp(sc.hpA)
+      playMockSuccess()
+    } else {
+      setVnState("choiceB")
+      setVnSpeaker(sc.speakerB)
+      setVnSpeakerColor(sc.colorB)
+      setVnSpeakerImage(sc.avatarB)
+      setVnText(sc.dialogueB)
+      setVnXp(sc.xpB)
+      setVnHp(sc.hpB)
+      playMockWrong()
+    }
+  }
+
+  const handleResetMock = () => {
+    playMockClick()
+    const sc = CHARACTER_SCENARIOS[activeChar]
+    setVnState("init")
+    setVnText(sc.dialogueInit)
+    setVnSpeaker(sc.characterName.toUpperCase())
+    setVnSpeakerColor(sc.color)
+    setVnSpeakerImage(sc.avatar)
+    setVnXp(1200)
+    setVnHp(5)
+  }
+
+  const handleCharTabChange = (char: MockCharacter) => {
+    playMockClick()
+    setActiveChar(char)
+  }
 
   return (
     <>
       <Nav />
-      <main style={{ background: "var(--bg-primary)", overflowX: "hidden" }}>
+      <main id="main-content" style={{ background: "var(--bg-primary)", overflowX: "hidden" }}>
 
-        {/* ── HERO ────────────────────────────────────────────────────────────── */}
-        <section style={{ position: "relative", height: "100vh", minHeight: "700px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+        {/* ══════════════════════════════════════════════════════════════════════
+            HERO — split layout with Three.js ambient orbs + Visual Novel Simulator
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", background: "#08060f" }}>
+
+          {/* CSS gradient orbs */}
+          <div aria-hidden="true" style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+            <div className="hero-orb-purple" />
+            <div className="hero-orb-cyan"   />
+            <div className="hero-orb-pink"   />
+          </div>
+
           <HeroScene />
-          <div style={{ position:"absolute", inset:0, zIndex:5, pointerEvents:"none", overflow:"hidden" }}>
+          <div style={{ position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none", overflow: "hidden" }}>
             <FloatingNotes mood="normal" />
           </div>
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, transparent 30%, rgba(8,6,15,0.85) 100%)", pointerEvents: "none" }} />
-          <div style={{ position: "relative", zIndex: 10, textAlign: "center", padding: "0 1.5rem", maxWidth: "800px", animation: "fade-rise 1.2s cubic-bezier(0.16,1,0.3,1) both" }}>
-            <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "1.5rem" }}>♪ Maestro Play · AI Education Gaming</div>
-            <h1 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "clamp(2.8rem, 8vw, 6rem)", color: "#fff", lineHeight: 1.0, letterSpacing: "-0.03em", marginBottom: "0.5rem" }}>
-              You Don&apos;t Need to Code.
-            </h1>
-            <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 400, fontSize: "clamp(2rem, 6vw, 4.5rem)", background: "linear-gradient(90deg,#00d4f0,#7b2fbe,#e040fb)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", lineHeight: 1.1, marginBottom: "2rem" }}>
-              You Need to Conduct.
-            </h2>
-            <p style={{ fontFamily: "Inter, sans-serif", fontWeight: 400, fontSize: "clamp(0.95rem, 2vw, 1.15rem)", color: "rgba(240,238,255,0.65)", marginBottom: "2.5rem", maxWidth: "520px", margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
-              Gamified AI literacy for professionals. No code required.
-            </p>
-            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/games/welcome-to-ai" style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.85rem 2.2rem", borderRadius: "100px", textDecoration: "none" }}>
-                Play Free →
-              </Link>
-              <Link href="/games" style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.9rem", color: "rgba(240,238,255,0.8)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "0.85rem 2.2rem", borderRadius: "100px", textDecoration: "none" }}>
-                View All Games
-              </Link>
+
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(110deg, rgba(8,6,15,0.92) 0%, rgba(8,6,15,0.76) 45%, rgba(8,6,15,0.9) 100%)", pointerEvents: "none", zIndex: 6 }} />
+
+          <div className="hero-grid-2col" style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: "1280px", margin: "0 auto", padding: "6rem 3rem 5rem", display: "grid", gridTemplateColumns: "1fr 1.05fr", gap: "3.5rem", alignItems: "center" }}>
+            
+            {/* LEFT — headline + CTA */}
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.65rem", marginBottom: "1.75rem" }}>
+                <div style={{ width: "28px", height: "1px", background: "var(--cyan)" }} />
+                <span className="label-caps" style={{ color: "var(--cyan)", letterSpacing: "0.15em", fontSize: "0.75rem" }}>
+                  Cinematic AI Learning Game · Master ChatGPT, Claude & Gemini
+                </span>
+              </div>
+
+              <h1 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 5.5vw, 4.8rem)", color: "#fff", lineHeight: 0.95, letterSpacing: "-0.045em", marginBottom: "0.5rem" }}>
+                Master AI by Playing a Game.
+              </h1>
+
+              <h2
+                aria-label="You Need to Conduct."
+                style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 400, fontSize: "clamp(2rem, 4vw, 3.8rem)", background: "linear-gradient(90deg, #00d4f0 0%, #a855f7 50%, #e040fb 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", lineHeight: 1.05, marginBottom: "1.75rem" }}
+              >
+                You Don&apos;t Need to Code. You Need to Conduct.
+              </h2>
+
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "clamp(0.95rem, 1.8vw, 1.1rem)", color: "rgba(240,238,255,0.85)", lineHeight: 1.8, marginBottom: "2.5rem", maxWidth: "480px" }}>
+                No boring lectures or dry docs. Step into a cinematic visual novel RPG where you learn professional prompt engineering and model orchestration. Write actual prompts, guide characters through career-defining crises, and see the immediate story consequences of your AI decisions.
+              </p>
+
+              <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                {hasProgress ? (
+                  <Link href="/worldmap"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1.1rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 40px rgba(0,212,240,0.45), 0 4px 24px rgba(0,0,0,0.3)", letterSpacing: "-0.01em", transition: "transform 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+                    Resume Story Map →
+                  </Link>
+                ) : (
+                  <Link href="/games/welcome-to-ai"
+                    style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1.1rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 40px rgba(0,212,240,0.45), 0 4px 24px rgba(0,0,0,0.3)", letterSpacing: "-0.01em", transition: "transform 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+                    Play Game 1 — Free →
+                  </Link>
+                )}
+                <Link href="#portal"
+                  style={{ display: "inline-flex", alignItems: "center", fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.95rem", color: "rgba(240,238,255,0.75)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", padding: "1.1rem 2.2rem", borderRadius: "100px", textDecoration: "none", transition: "background 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
+                  Launch Campaign Lobby
+                </Link>
+              </div>
             </div>
+
+            {/* RIGHT — Interactive Visual Novel Simulator Bezel with Character Tabs */}
+            <div className="hero-right-col" style={{ position: "relative", display: "flex", flexDirection: "column", justifySelf: "center", width: "100%", maxWidth: "540px" }}>
+              
+              {/* Character Selector tabs */}
+              <div style={{
+                display: "flex", background: "rgba(6, 4, 14, 0.9)", border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "14px 14px 0 0", padding: "0.4rem", gap: "0.3rem", width: "fit-content",
+                borderBottom: "none", zIndex: 12, position: "relative", top: "1px"
+              }}>
+                {(["jake", "zoe", "carlos", "vega"] as MockCharacter[]).map((tab) => {
+                  const sc = CHARACTER_SCENARIOS[tab]
+                  const isActive = activeChar === tab
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => handleCharTabChange(tab)}
+                      onMouseEnter={playMockHover}
+                      style={{
+                        background: isActive ? sc.color : "transparent",
+                        border: "none", borderRadius: "10px", padding: "0.35rem 0.85rem",
+                        color: isActive ? "#08060f" : "rgba(255,255,255,0.6)",
+                        fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800,
+                        cursor: "pointer", transition: "all 0.2s ease",
+                        textTransform: "uppercase", letterSpacing: "0.02em"
+                      }}
+                    >
+                      {sc.characterName}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div 
+                style={{
+                  borderRadius: "0 24px 24px 24px",
+                  padding: "4px",
+                  background: `linear-gradient(135deg, ${vnSpeakerColor}55 0%, rgba(123,47,190,0.35) 50%, rgba(224,64,251,0.45) 100%)`,
+                  boxShadow: `0 0 60px ${vnSpeakerColor}12, 0 25px 60px rgba(0,0,0,0.65)`,
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  overflow: "hidden"
+                }}
+              >
+                {/* Mockup Game Screen bezel */}
+                <div style={{ borderRadius: "20px", overflow: "hidden", position: "relative", height: "380px", background: "#05040a" }}>
+                  
+                  {/* HUD Top Bar */}
+                  <div style={{
+                    position: "absolute", top: 0, left: 0, right: 0, height: "36px",
+                    background: "rgba(6, 4, 12, 0.95)", borderBottom: "1.5px solid rgba(255,255,255,0.06)",
+                    zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "0 1rem", fontFamily: "Inter, sans-serif", fontSize: "0.68rem", fontWeight: 700,
+                    letterSpacing: "0.06em", color: "rgba(255,255,255,0.4)"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: vnSpeakerColor }}>
+                      <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: vnSpeakerColor, boxShadow: `0 0 10px ${vnSpeakerColor}` }}></span>
+                      <span>MOCKUP ENGINE // {activeChar.toUpperCase()}_TRACK</span>
+                    </div>
+                    <div style={{ display: "flex", gap: "0.95rem", alignItems: "center" }}>
+                      <span style={{ color: "#ffd740" }}><SVGXpBolt size={12} color="#ffd740" /> {vnXp} XP</span>
+                      <span style={{ color: "#ff4b6e" }}>{Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i} style={{ opacity: i < vnHp ? 1 : 0.28, marginRight: "1px" }}>💚</span>
+                      ))}</span>
+                      <span style={{ color: "#ff6d00" }}><SVGFlame size={12} color="#ffd740"/> 7D</span>
+                    </div>
+                  </div>
+
+                  {/* Scene Background */}
+                  <div 
+                    style={{
+                      position: "absolute", inset: 0,
+                      backgroundImage: `url(${CHARACTER_SCENARIOS[activeChar].bg})`,
+                      backgroundSize: "cover", backgroundPosition: "center 40%",
+                      zIndex: 1, transition: "background-image 0.5s ease"
+                    }}
+                  />
+
+                  {/* Character Sprite render */}
+                  <AnimatePresence mode="wait">
+                    {vnSpeakerImage && (
+                      <motion.img
+                        key={vnSpeakerImage}
+                        src={vnSpeakerImage}
+                        alt={vnSpeaker}
+                        initial={{ opacity: 0, x: -25, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, x: 25, scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+                        style={{
+                          position: "absolute", bottom: "15%", left: "4%",
+                          height: "72%", width: "42%", objectFit: "contain",
+                          objectPosition: "bottom center", zIndex: 5,
+                          filter: "drop-shadow(0 8px 16px rgba(0,0,0,0.5))"
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Light sweeps overlay */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: `linear-gradient(135deg, ${vnSpeakerColor}12 0%, transparent 60%)`,
+                    zIndex: 2, pointerEvents: "none"
+                  }} />
+
+                  {/* Floating Action Choices inside Simulator */}
+                  {vnState === "init" && (
+                    <div style={{
+                      position: "absolute", top: "24%", right: "6%", left: "44%",
+                      zIndex: 12, display: "flex", flexDirection: "column", gap: "0.6rem"
+                    }}>
+                      <button
+                        onClick={() => handleMockChoice("choiceA")}
+                        style={{
+                          background: "rgba(6, 4, 14, 0.93)", border: `1.5px solid ${vnSpeakerColor}77`,
+                          borderRadius: "12px", padding: "0.65rem 0.8rem", color: "#fff",
+                          fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 700,
+                          textAlign: "left", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+                          transition: "border-color 0.2s, transform 0.2s"
+                        }}
+                        onMouseEnter={e => {
+                          playMockHover()
+                          e.currentTarget.style.borderColor = vnSpeakerColor
+                          e.currentTarget.style.transform = "translateY(-2px)"
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.borderColor = `${vnSpeakerColor}77`
+                          e.currentTarget.style.transform = "translateY(0)"
+                        }}
+                      >
+                        <span style={{ color: vnSpeakerColor, display: "block", marginBottom: "0.15rem", fontSize: "0.58rem" }}>OPTION A (CONDUCTOR)</span>
+                        {CHARACTER_SCENARIOS[activeChar].optionA}
+                      </button>
+                      <button
+                        onClick={() => handleMockChoice("choiceB")}
+                        style={{
+                          background: "rgba(6, 4, 14, 0.93)", border: "1.5px solid rgba(255,255,255,0.22)",
+                          borderRadius: "12px", padding: "0.65rem 0.8rem", color: "#fff",
+                          fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 700,
+                          textAlign: "left", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+                          transition: "border-color 0.2s, transform 0.2s"
+                        }}
+                        onMouseEnter={e => {
+                          playMockHover()
+                          e.currentTarget.style.borderColor = "var(--pink)"
+                          e.currentTarget.style.transform = "translateY(-2px)"
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.borderColor = "rgba(255,255,255,0.22)"
+                          e.currentTarget.style.transform = "translateY(0)"
+                        }}
+                      >
+                        <span style={{ color: "var(--pink)", display: "block", marginBottom: "0.15rem", fontSize: "0.58rem" }}>OPTION B (SHORTCUT)</span>
+                        {CHARACTER_SCENARIOS[activeChar].optionB}
+                      </button>
+                    </div>
+                  )}
+
+                  {vnState !== "init" && (
+                    <button
+                      onClick={handleResetMock}
+                      style={{
+                        position: "absolute", top: "18%", right: "6%", zIndex: 12,
+                        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.18)",
+                        borderRadius: "100px", padding: "0.35rem 0.85rem", color: "#fff",
+                        fontFamily: "Inter, sans-serif", fontSize: "0.65rem", fontWeight: 700,
+                        cursor: "pointer", display: "flex", alignItems: "center", gap: "0.3rem",
+                        transition: "background 0.2s"
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
+                    >
+                      ✕ Reset Scenario
+                    </button>
+                  )}
+
+                  {/* Dialogue Box Overlay */}
+                  <div style={{
+                    position: "absolute", bottom: "10px", left: "10px", right: "10px", height: "108px",
+                    background: "rgba(6, 4, 14, 0.95)", border: `1.5px solid ${vnSpeakerColor}77`,
+                    borderRadius: "14px", padding: "0.75rem 1rem", zIndex: 10,
+                    boxShadow: `0 4px 20px ${vnSpeakerColor}12, inset 0 0 12px ${vnSpeakerColor}0a`
+                  }}>
+                    <div style={{
+                      fontFamily: "Inter, sans-serif", fontSize: "0.58rem", fontWeight: 900,
+                      letterSpacing: "0.12rem", color: vnSpeakerColor, textTransform: "uppercase",
+                      marginBottom: "0.3rem"
+                    }}>
+                      {vnSpeaker}
+                    </div>
+                    <p style={{
+                      fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                      fontSize: "clamp(0.85rem, 2vw, 0.95rem)", color: "rgba(240,238,255,0.92)",
+                      lineHeight: 1.45, margin: 0, overflow: "hidden"
+                    }}>
+                      &ldquo;{vnText}&rdquo;
+                    </p>
+                    <span style={{
+                      position: "absolute", bottom: "0.5rem", right: "0.8rem",
+                      fontSize: "0.65rem", color: vnSpeakerColor, animation: "pulse-glow 1.5s infinite"
+                    }}>▼</span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
           </div>
-          <div style={{ position: "absolute", bottom: "2rem", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", animation: "pulse-glow 2s ease-in-out infinite" }}>
-            <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--muted)" }}>Scroll</span>
-            <div style={{ width: "1px", height: "40px", background: "linear-gradient(180deg, rgba(0,212,240,0.6), transparent)" }} />
+
+          {/* Scroll cue */}
+          <div aria-hidden="true" style={{ position: "absolute", bottom: "2rem", left: "50%", transform: "translateX(-50%)", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", animation: "pulse-glow 2.5s ease-in-out infinite" }}>
+            <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.58rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(240,238,255,0.4)" }}>Scroll to Launch</span>
+            <div style={{ width: "1px", height: "34px", background: "linear-gradient(180deg, rgba(0,212,240,0.5), transparent)" }} />
           </div>
         </section>
 
-        {/* ── SOCIAL PROOF BAR ────────────────────────────────────────────────── */}
-        <div style={{ background:"rgba(0,212,240,0.04)", borderTop:"1px solid rgba(0,212,240,0.1)", borderBottom:"1px solid rgba(0,212,240,0.08)", padding:"1.25rem 2rem" }}>
-          <div style={{ maxWidth:"900px", margin:"0 auto", display:"flex", justifyContent:"center", gap:"clamp(1.5rem,5vw,4rem)", flexWrap:"wrap", alignItems:"center" }}>
-            {[
-              { n:"14",  label:"Cinematic games" },
-              { n:"4",   label:"AI skill tracks" },
-              { n:"5+",  label:"AI tools mastered" },
-              { n:"0",   label:"Lines of code required" },
-            ].map(({ n, label }) => (
-              <div key={label} style={{ textAlign:"center" }}>
-                <div style={{ fontFamily:"Inter,sans-serif", fontWeight:900, fontSize:"clamp(1.4rem,3vw,2rem)", color:"#00d4f0", letterSpacing:"-0.02em", lineHeight:1 }}>{n}</div>
-                <div style={{ fontFamily:"Inter,sans-serif", fontSize:"0.65rem", color:"rgba(240,238,255,0.4)", letterSpacing:"0.1em", textTransform:"uppercase", marginTop:"0.25rem" }}>{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── TICKER ──────────────────────────────────────────────────────────── */}
-        <div style={{ background: "var(--bg-secondary)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "0.875rem 0", overflow: "hidden" }}>
+        {/* ══════════════════════════════════════════════════════════════════════
+            TICKER
+        ══════════════════════════════════════════════════════════════════════ */}
+        <div aria-hidden="true" style={{ background: "var(--bg-secondary)", borderBottom: "1px solid rgba(255,255,255,0.04)", padding: "0.75rem 0", overflow: "hidden" }}>
           <div style={{ display: "flex", width: "max-content" }} className="animate-ticker">
             {[...Array(2)].map((_, ri) => (
               <div key={ri} style={{ display: "flex", whiteSpace: "nowrap" }}>
-                {["Prompt Engineering", "AI Orchestration", "Machine Learning", "Generative AI", "The What", "The What Not", "The How", "The Why", "No Code Required", "Career AI Fluency", "ChatGPT · Claude · Gemini", "Master Your Tools"].map((item, i) => (
-                  <span key={i} style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: "0.8rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)", padding: "0 2rem" }}>
+                {["Prompt Engineering","AI Orchestration","Machine Learning","Generative AI","The What","The What Not","The How","The Why","No Code Required","Career AI Fluency","ChatGPT · Claude · Gemini","Master Your Tools"].map((item, i) => (
+                  <span key={i} style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: "0.75rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)", padding: "0 2rem" }}>
                     {item} <span style={{ color: "var(--cyan)", margin: "0 0.5rem" }}>·</span>
                   </span>
                 ))}
@@ -179,497 +712,725 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── THE PROFESSIONAL GAP ────────────────────────────────────────────── */}
-        <section style={{ padding: "6rem 2rem", background: "rgba(0,0,0,0.35)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-          <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
-              <div className="label-caps" style={{ color: "#ff6b6b", marginBottom: "0.75rem" }}>The Reality Check</div>
-              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2.2rem,5vw,3.8rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1rem" }}>
-                The AI gap is widening.<br />
-                <em style={{ color: "rgba(240,238,255,0.45)", fontStyle: "italic" }}>Every single week.</em>
+        {/* ══════════════════════════════════════════════════════════════════════
+            CAMPAIGN PORTAL: ONE POINT OF ENTRY
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section id="portal" style={{ padding: "6rem 2rem 5rem", background: "rgba(8,6,15,0.45)", position: "relative" }}>
+          <div style={{ maxWidth: "860px", margin: "0 auto", textAlign: "center" }}>
+            <div className="reveal">
+              <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>System Entryway</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 5vw, 3.8rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1.25rem" }}>
+                Enter the Campaign Lobby
               </h2>
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "rgba(240,238,255,0.55)", maxWidth: "540px", margin: "0 auto", lineHeight: 1.7 }}>
-                Your colleagues are using AI to do in minutes what you do in hours. The difference isn&apos;t the tool — it&apos;s the skill.
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "var(--muted)", maxWidth: "540px", margin: "0 auto 2.5rem", lineHeight: 1.75 }}>
+                No split tracks, no scattered entries. Launch into Game 1 and map your way linearly through the districts of Westbrook.
               </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", marginBottom: "3.5rem" }}>
-              {/* Without AI fluency */}
-              <div className="reveal" style={{ borderRadius: "20px", padding: "2rem 2rem 2.5rem", background: "rgba(255,80,80,0.04)", border: "1px solid rgba(255,80,80,0.15)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.75rem" }}>
-                  <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(255,80,80,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem" }}>✗</div>
-                  <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "rgba(255,120,120,0.9)", letterSpacing: "0.02em" }}>Without AI fluency</span>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {[
-                    "Hours on tasks your AI-fluent colleague finishes in minutes",
-                    "Generic, forgettable outputs that need heavy editing",
-                    "Watching others get credit for AI-augmented work",
-                    "Nodding in AI strategy meetings you don't fully follow",
-                    "A quiet fear that automation is coming for your role",
-                  ].map((item, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.65rem" }}>
-                      <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "rgba(255,120,120,0.5)", marginTop: "0.5rem", flexShrink: 0 }} />
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "rgba(240,238,255,0.5)", lineHeight: 1.55 }}>{item}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Glowing Entry Terminal Box */}
+            <div 
+              className="reveal"
+              style={{
+                background: "rgba(12, 8, 22, 0.72)",
+                border: "2px solid rgba(0, 212, 240, 0.28)",
+                borderRadius: "24px",
+                padding: "2.5rem 2rem",
+                boxShadow: "0 0 40px rgba(0, 212, 240, 0.08), inset 0 0 30px rgba(0, 212, 240, 0.03)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", background: "rgba(0, 212, 240, 0.08)", border: "1px solid rgba(0, 212, 240, 0.22)", borderRadius: "100px", padding: "0.3rem 1rem", marginBottom: "1.5rem" }}>
+                <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: "var(--cyan)", boxShadow: "0 0 6px var(--cyan)" }} />
+                <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--cyan)" }}>District 01: Jake&apos;s Bedroom</span>
               </div>
 
-              {/* With MaestroPlay */}
-              <div className="reveal" style={{ borderRadius: "20px", padding: "2rem 2rem 2.5rem", background: "rgba(0,212,240,0.04)", border: "1px solid rgba(0,212,240,0.2)", transitionDelay: "0.1s" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.75rem" }}>
-                  <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "rgba(0,212,240,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem" }}>♪</div>
-                  <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#00d4f0", letterSpacing: "0.02em" }}>With MaestroPlay</span>
+              <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.5rem", color: "#fff", margin: "0 0 0.5rem" }}>Game 1: Welcome to the Exciting World of AI</h3>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "rgba(240,238,255,0.72)", maxWidth: "580px", margin: "0 0 2rem", lineHeight: 1.6 }}>
+                Follow Jake, a 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.
+              </p>
+
+              <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+                {hasProgress ? (
+                  <Link 
+                    href="/games/welcome-to-ai" 
+                    style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1.1rem 2.8rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 30px rgba(0,212,240,0.35)", transition: "transform 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    Resume Campaign Quest →
+                  </Link>
+                ) : (
+                  <Link 
+                    href="/games/welcome-to-ai" 
+                    style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1.1rem 2.8rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 30px rgba(0,212,240,0.35)", transition: "transform 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    Launch Campaign — Free →
+                  </Link>
+                )}
+
+                <Link 
+                  href="/worldmap" 
+                  style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem", color: "rgba(240,238,255,0.8)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", padding: "1.1rem 2.2rem", borderRadius: "100px", textDecoration: "none", transition: "background 0.2s" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+                >
+                  Open Campaign Map 🗺️
+                </Link>
+              </div>
+
+              <div style={{ marginTop: "2rem", display: "flex", gap: "1.5rem", flexWrap: "wrap", justifyContent: "center" }}>
+                {["10-min play session", "No credit card", "FSR Spaced Repetition", "Pro Certificate"].map((feat, fi) => (
+                  <span key={fi} style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                    <SVGCheck /> {feat}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            MEET CODA (AI Socratic Tutor)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "rgba(8,6,15,0.45)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
+              <div>
+                <div className="label-caps reveal" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Socratic AI Companion</div>
+                <h2 className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#fff", marginBottom: "1.25rem", lineHeight: 1.1 }}>
+                  Meet Coda, Your Socratic AI Tutor
+                </h2>
+                <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.85)", lineHeight: 1.8, marginBottom: "1.25rem" }}>
+                  Coda is the online AI tutor companion that floats beside you through every Visual Novel scene to teach you the core principles of AI fluency. Coda does not do your homework, write your prompts, or hand you the answer.
+                </p>
+                <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.92rem", color: "var(--muted)", lineHeight: 1.75, marginBottom: "2rem" }}>
+                  Instead, Coda guides you through Socratic inquiry: she monitors your prompt engineering choices in real-time, spots logical loopholes, and uses visceral analogies (like orchestras and cooking) to bridge conceptual gaps. If you are completely stuck, Coda has a Socratic &ldquo;Escape Hatch&rdquo; offering up to 3 direct answers per campaign session.
+                </p>
+                <div className="reveal" style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#fff" }}>
+                    <span style={{ color: "var(--cyan)" }}>🛡️</span> Stuck detection
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#fff" }}>
+                    <span style={{ color: "var(--purple)" }}>🧠</span> Socratic clues
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#fff" }}>
+                    <span style={{ color: "var(--pink)" }}>🎼</span> Metaphorical guidance
+                  </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {[
-                    "Prompts that produce professional-quality output every time",
-                    "The person your team turns to for AI strategy and decisions",
-                    "Confidence to lead AI conversations at any seniority level",
-                    "10× faster delivery on research, writing, and analysis",
-                    "AI as your competitive advantage — not your threat",
-                  ].map((item, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "0.65rem" }}>
-                      <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "linear-gradient(135deg,#00d4f0,#e040fb)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "0.15rem" }}>
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#08060f" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </div>
+              <div className="reveal" style={{ display: "flex", justifyContent: "center" }}>
+                <div style={{ position: "relative", width: "240px" }}>
+                  <div style={{ borderRadius: "24px", background: "linear-gradient(135deg, #00d4f0, #e040fb)", padding: "2px", boxShadow: "0 0 50px rgba(0,212,240,0.18)" }}>
+                    <div style={{ borderRadius: "22px", overflow: "hidden", background: "#0c0816", height: "300px", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <img src="/images/ai-tutor.png" alt="Coda" style={{ width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "screen" }} />
+                      <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem", right: "1.5rem", background: "rgba(12,8,22,0.92)", border: "1px solid rgba(0,212,240,0.3)", borderRadius: "12px", padding: "0.6rem 0.8rem", textAlign: "left" }}>
+                        <span style={{ display: "block", fontFamily: "Inter, sans-serif", fontSize: "0.58rem", fontWeight: 800, color: "var(--cyan)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.15rem" }}>Coda Companion</span>
+                        <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "0.85rem", color: "#fff", margin: 0, lineHeight: 1.3 }}>
+                          &ldquo;I cannot give you answers — but I can help you think.&rdquo;
+                        </p>
                       </div>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "rgba(240,238,255,0.8)", lineHeight: 1.55 }}>{item}</span>
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            <div className="reveal" style={{ textAlign: "center" }}>
-              <Link href="/games/welcome-to-ai" style={{ display: "inline-flex", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.85rem 2.5rem", borderRadius: "100px", textDecoration: "none", letterSpacing: "0.02em" }}>
-                Start Closing the Gap — Free →
+        {/* ══════════════════════════════════════════════════════════════════════
+            MEET THE CONDUCTORS (Character Dossier)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "rgba(8,6,15,0.2)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+            <div className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
+              <div className="label-caps" style={{ color: "var(--pink)", marginBottom: "0.75rem" }}>Character Files</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2.2rem, 5vw, 3.8rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                Meet the Cast
+              </h2>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", maxWidth: "540px", margin: "1rem auto 0", lineHeight: 1.7 }}>
+                You aren&apos;t reading textbooks. You are playing through their lives, resolving their crises, and mastering their tracks under Felipe Maestro's orchestration.
+              </p>
+            </div>
+
+            <div className="meet-cast-grid">
+              {[
+                {
+                  name: "Felipe Maestro", role: "Campaign Director & Founder", track: "The Maestro Connector (All Games)",
+                  img: "/images/maestroplayer1.png", color: "var(--cyan)",
+                  bg: "/images/bg-bandpractice.png",
+                  blurb: "The orchestrator who connects all tracks. He monitors your prompt accuracy and challenges you to pass final exams.",
+                  skill: "Multi-model orchestration, prompt constraints, global evaluations."
+                },
+                {
+                  name: "Jake", role: "17-year-old guitarist", track: "Track A: Prompting Basics",
+                  img: "/images/guitarplayer1.png", color: "var(--cyan)",
+                  bg: "/images/bg-bedroom.png",
+                  blurb: "Perfecting his signature riff while the music world shifts. He learns to conduct AI like a backing band.",
+                  skill: "Prompt formatting, output boundaries, the 4-step framework."
+                },
+                {
+                  name: "Zoe", role: "21-year-old precision drummer", track: "Track B: Claude Ecosystem",
+                  img: "/images/zoe.png", color: "var(--purple)",
+                  bg: "/images/bg-practiceroom.png",
+                  blurb: "Needs to manage booking contracts for her tour. She discovers Claude's structural logic is just like keeping a 4/4 tempo.",
+                  skill: "Claude Projects, Artifacts, structured templates, code-free automation."
+                },
+                {
+                  name: "Carlos", role: "Bedroom hip-hop producer", track: "Track C: Prompt Battles",
+                  img: "/images/carlos.png", color: "#ffd740",
+                  bg: "/images/bg-bandpractice.png",
+                  blurb: "Obsessed with creating the perfect mashup. He plays ChatGPT against Gemini in real-time battles.",
+                  skill: "Model comparisons, temperature adjusting, creative iteration."
+                },
+                {
+                  name: "Señora Vega", role: "Classical teacher & Mentor", track: "Boss Encounter",
+                  img: "/images/senoravega.png", color: "var(--pink)",
+                  bg: "/images/bg-musicclass.png",
+                  blurb: "Demands strict discipline and authenticity. She rejects generic boilerplate AI outputs instantly.",
+                  skill: "Advanced constraints, anti-pattern checks, final exam boss master."
+                }
+              ].map((c) => (
+                <div 
+                  key={c.name} className="reveal"
+                  style={{
+                    background: "rgba(12,8,22,0.85)", border: "1px solid rgba(255,255,255,0.05)",
+                    borderRadius: "20px", overflow: "hidden", display: "flex", flexDirection: "column",
+                    transition: "transform 0.3s, border-color 0.3s, box-shadow 0.3s"
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = "translateY(-6px)"
+                    e.currentTarget.style.borderColor = `${c.color}66`
+                    e.currentTarget.style.boxShadow = `0 12px 30px ${c.color}18`
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = "translateY(0)"
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"
+                    e.currentTarget.style.boxShadow = "none"
+                  }}
+                >
+                  <div style={{ 
+                    height: "180px", 
+                    overflow: "hidden", 
+                    position: "relative", 
+                    backgroundImage: `url(${c.bg})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center center"
+                  }}>
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(12, 8, 22, 0.42)" }} />
+                    <img 
+                      src={c.img} alt={c.name} 
+                      style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom center", position: "relative", zIndex: 2 }} 
+                    />
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60px", background: "linear-gradient(to top, rgba(12,8,22,1), transparent)", zIndex: 3 }} />
+                  </div>
+                  <div style={{ padding: "0.9rem 1.1rem 1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.58rem", fontWeight: 800, color: c.color, letterSpacing: "0.15em", textTransform: "uppercase" }}>{c.track}</span>
+                    <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.05rem", color: "#fff", margin: "0.25rem 0 0.5rem" }}>{c.name}</h3>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.7rem", color: "rgba(255,255,255,0.4)", marginBottom: "0.75rem" }}>{c.role}</div>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.76rem", color: "rgba(240,238,255,0.7)", lineHeight: 1.5, margin: "0 0 1rem" }}>{c.blurb}</p>
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.65rem", marginTop: "auto" }}>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.58rem", fontWeight: 700, color: "var(--muted)", letterSpacing: "0.05em", marginBottom: "0.25rem" }}>KEY SKILL:</div>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "#fff", lineHeight: 1.4 }}>{c.skill}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            WORLDMAP PATHWAY SHOWCASE
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "#05040a", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+            <div className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
+              <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>The Campaign Map</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                Explore the Westbrook Districts
+              </h2>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", maxWidth: "520px", margin: "1rem auto 0", lineHeight: 1.7 }}>
+                Map your linear narrative journey across five distinct game tracks. Move district by district.
+              </p>
+            </div>
+
+            {/* Campaign map nodes flow */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", position: "relative" }}>
+              
+              {/* Connecting line */}
+              <div aria-hidden="true" style={{ position: "absolute", top: "2rem", bottom: "2rem", left: "2.25rem", width: "2px", background: "linear-gradient(180deg, var(--cyan) 0%, var(--purple) 40%, var(--pink) 80%, transparent)", opacity: 0.28 }} />
+
+              {[
+                { zone: "District 01", name: "Westbrook Heights (Jake's Bedroom)", desc: "AI Fundamentals. Understand what prompting actually is. Discover the Conductor's core methodology.", emoji: "🎸", color: "var(--cyan)" },
+                { zone: "District 02-04", name: "The Music District (Rehearsal Room & Concert Hall)", desc: "Deepening your directive skills. Put prompts into actions. Handle crisis scenarios with real consequences.", emoji: "🥁", color: "var(--cyan)" },
+                { zone: "District 05-07", name: "Downtown (Coffee Shop & Tech Office)", desc: "The Claude Ecosystem. Build structured templates, code-free automations, and manage large-scale data sets.", emoji: "💻", color: "var(--purple)" },
+                { zone: "District 08-12", name: "Campus & Tech Quarter (Home Office & Computer Lab)", desc: "Multi-Model Mastery. Orchestrate ChatGPT, Gemini, and Microsoft Copilot in comparative prompt battles.", emoji: "⚡", color: "#ffd740" },
+                { zone: "District 13-14", name: "The Prompt Lab & Creative Hub (Vera's Studio)", desc: "The Final Exams. Face Señora Vega in a 5-round prompt engineering showdown. Transform into a master Conductor.", emoji: "🎓", color: "var(--pink)" },
+              ].map((node, idx) => (
+                <div 
+                  key={node.zone} className="reveal"
+                  style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", position: "relative", zIndex: 2 }}
+                >
+                  {/* Glowing map node marker */}
+                  <div style={{
+                    width: "46px", height: "46px", borderRadius: "50%", background: "#0c0816",
+                    border: `2px solid ${node.color}`, display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "1.2rem", boxShadow: `0 0 20px ${node.color}33`, flexShrink: 0,
+                    animation: idx === 0 ? "wm-next-pulse 3s infinite ease-in-out" : "none"
+                  }}>
+                    {node.emoji}
+                  </div>
+                  
+                  {/* Node content box */}
+                  <div style={{
+                    flex: 1, background: "rgba(12,8,22,0.5)", border: "1px solid rgba(255,255,255,0.03)",
+                    padding: "1.25rem 1.75rem", borderRadius: "16px"
+                  }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.35rem" }}>
+                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.58rem", fontWeight: 800, color: node.color, letterSpacing: "0.15em", textTransform: "uppercase" }}>{node.zone}</span>
+                      {idx === 0 && <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.55rem", fontWeight: 800, color: "#00e676", background: "rgba(0,230,118,0.12)", padding: "0.15rem 0.45rem", borderRadius: "100px", letterSpacing: "0.05em" }}>START QUEST</span>}
+                    </div>
+                    <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.05rem", color: "#fff", margin: "0 0 0.5rem" }}>{node.name}</h3>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.85rem", color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>{node.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="reveal" style={{ textAlign: "center", marginTop: "3.5rem" }}>
+              <Link 
+                href="/worldmap" 
+                style={{ display: "inline-flex", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.85rem 2.5rem", borderRadius: "100px", textDecoration: "none" }}
+              >
+                Launch Campaign Map →
               </Link>
             </div>
           </div>
         </section>
 
-        {/* ── TOOLS STRIP ─────────────────────────────────────────────────────── */}
-        <section style={{ padding: "3rem 2rem", textAlign: "center" }}>
-          <div className="label-caps" style={{ color: "var(--muted)", marginBottom: "1.5rem" }}>Master the tools your company already uses</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center" }}>
-            {["ChatGPT", "Claude.ai", "Gemini", "Microsoft Copilot", "Midjourney", "Perplexity"].map((tool) => (
-              <span key={tool} style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.8rem", color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", padding: "0.45rem 1.1rem", borderRadius: "100px", letterSpacing: "0.02em", cursor: "default" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,212,240,0.4)"; e.currentTarget.style.color = "#fff" }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(240,238,255,0.7)" }}>
-                {tool}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        {/* ── HOW IT WORKS ────────────────────────────────────────────────────── */}
-        <section style={{ padding:"5rem 2rem", maxWidth:"1000px", margin:"0 auto" }}>
-          <div className="reveal" style={{ textAlign:"center", marginBottom:"3.5rem" }}>
-            <div className="label-caps" style={{ color:"var(--cyan)", marginBottom:"0.75rem" }}>How It Works</div>
-            <h2 style={{ fontFamily:"Cormorant Garamond,serif", fontWeight:700, fontSize:"clamp(2rem,5vw,3rem)", color:"#fff", lineHeight:1.1, margin:0 }}>
-              Learning that actually sticks.
-            </h2>
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))", gap:"1.25rem" }}>
-            {[
-              { step:"01", icon:"🎭", title:"Enter the story", desc:"Each game drops you inside a real professional's crisis. AI concepts aren't explained — they're lived.", color:"var(--cyan)" },
-              { step:"02", icon:"⚡", title:"Make decisions", desc:"Choose responses, craft prompts, direct the AI. Wrong moves have consequences. Right ones earn XP.", color:"var(--purple)" },
-              { step:"03", icon:"🧠", title:"The Maestro intervenes", desc:"After key moments, your conductor reveals why your choice worked — or didn't. The WHY is the lesson.", color:"var(--pink)" },
-              { step:"04", icon:"🎼", title:"Unlock real skills", desc:"Every game ends with a skill you can use at work tomorrow. Not theory — a prompt, a framework, a method.", color:"#f0c040" },
-            ].map((s, i) => (
-              <div key={s.step} className="glass-card reveal" style={{ borderRadius:"16px", padding:"1.75rem 1.5rem", transitionDelay:`${i*0.08}s`, position:"relative", overflow:"hidden" }}>
-                <div style={{ position:"absolute", top:"-0.5rem", right:"0.75rem", fontFamily:"Cormorant Garamond,serif", fontWeight:700, fontSize:"4.5rem", color:"rgba(255,255,255,0.03)", lineHeight:1, userSelect:"none" }}>{s.step}</div>
-                <div style={{ fontSize:"1.8rem", marginBottom:"1rem" }}>{s.icon}</div>
-                <h3 style={{ fontFamily:"Inter,sans-serif", fontWeight:800, fontSize:"0.95rem", color:s.color, marginBottom:"0.65rem", letterSpacing:"-0.01em" }}>{s.title}</h3>
-                <p style={{ fontFamily:"Inter,sans-serif", fontSize:"0.825rem", color:"rgba(240,238,255,0.55)", lineHeight:1.7, margin:0 }}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── GAMES CATALOG ───────────────────────────────────────────────────── */}
-        <section style={{ padding: "5rem 0", overflow: "hidden" }}>
-          <div className="reveal" style={{
-            display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-            padding: "0 max(2rem, calc((100vw - 1400px) / 2 + 2rem))",
-            marginBottom: "2.5rem", flexWrap: "wrap", gap: "1.5rem",
-          }}>
-            <div>
-              <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>The Curriculum</div>
-              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
-                The Method Behind the Music.
+        {/* ══════════════════════════════════════════════════════════════════════
+            THE FOUR MAESTRO PILLARS (Conductor's Codex)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "rgba(8,6,15,0.4)" }}>
+          <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+            <div className="reveal" style={{ textAlign: "center", marginBottom: "4.5rem" }}>
+              <div className="label-caps" style={{ color: "var(--purple)", marginBottom: "0.75rem" }}>The Codex</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                The Conductor&apos;s Codex
               </h2>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", maxWidth: "500px", margin: "1rem auto 0", lineHeight: 1.7 }}>
+                The core four-part framework built into every game. Master these to shape any AI model.
+              </p>
             </div>
-            <div style={{ display: "flex", gap: "0.75rem", paddingBottom: "0.25rem" }}>
-              {(["left", "right"] as const).map(dir => (
-                <button key={dir} onClick={() => scrollCarousel(dir)} style={{ width: "48px", height: "48px", borderRadius: "50%", background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(0,212,240,0.35)", color: "#00d4f0", fontSize: "1.4rem", lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 0.2s ease", fontFamily: "Inter, sans-serif" }}
-                  onMouseEnter={e => { e.currentTarget.style.background="rgba(0,212,240,0.15)"; e.currentTarget.style.borderColor="#00d4f0"; e.currentTarget.style.boxShadow="0 0 16px rgba(0,212,240,0.4)" }}
-                  onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.05)"; e.currentTarget.style.borderColor="rgba(0,212,240,0.35)"; e.currentTarget.style.boxShadow="none" }}
-                  aria-label={dir === "left" ? "Scroll left" : "Scroll right"}>
-                  {dir === "left" ? "‹" : "›"}
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
+              {[
+                { num: "01", title: "The What", desc: "Define the exact output you need. Be specific about the deliverable type, scope, and objective. The melody.", color: "var(--cyan)" },
+                { num: "02", title: "The What Not", desc: "Specify constraints, exclusions, and anti-patterns. Boundaries are as powerful as instructions. The silence.", color: "var(--purple)" },
+                { num: "03", title: "The How", desc: "Specify format, tone, length, structure, and audience. Shape the vessel before filling it. The tempo.", color: "var(--pink)" },
+                { num: "04", title: "The Why", desc: "Give AI the purpose and stakes. Context unlocks relevance. Relevance unlocks quality. The soul.", color: "#ffd740" },
+              ].map((p) => (
+                <div 
+                  key={p.num} className="reveal"
+                  style={{
+                    background: "rgba(12,8,22,0.8)", border: "1px solid rgba(255,255,255,0.05)",
+                    borderRadius: "20px", padding: "2rem 1.75rem", transition: "transform 0.3s, border-color 0.3s",
+                    display: "flex", flexDirection: "column"
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = "translateY(-4px)"
+                    e.currentTarget.style.borderColor = `${p.color}55`
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = "translateY(0)"
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)"
+                  }}
+                >
+                  <div style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 700, fontSize: "3rem", color: `${p.color}22`, lineHeight: 1, marginBottom: "0.75rem" }}>{p.num}</div>
+                  <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.1rem", color: p.color, marginBottom: "0.75rem", letterSpacing: "0.02em" }}>{p.title}</h3>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.85rem", color: "rgba(240,238,255,0.68)", lineHeight: 1.65, margin: 0 }}>{p.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            MASTERPIECE ROADMAP (Interactive tabs)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "#08060f", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div style={{ maxWidth: "960px", margin: "0 auto" }}>
+            
+            <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+              <div className="label-caps" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Future Quest Updates</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3.2rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                Conductor&apos;s Roadmap
+              </h2>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", maxWidth: "480px", margin: "1rem auto 0", lineHeight: 1.65 }}>
+                Track our system updates, completed features, and the development timeline for the future Sims-style career simulator.
+              </p>
+            </div>
+
+            {/* Roadmap Tab selectors */}
+            <div className="reveal" style={{
+              display: "flex", flexWrap: "wrap", background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.08)", borderRadius: "100px", padding: "0.35rem",
+              gap: "0.25rem", justifyContent: "center", marginBottom: "2.5rem"
+            }}>
+              {[
+                { phase: 1, label: "Phase 1: Foundation", status: "Completed ✅" },
+                { phase: 2, label: "Phase 2: Learning Loop", status: "Completed ✅" },
+                { phase: 3, label: "Phase 3: Engagement", status: "In Progress ⚡" },
+                { phase: 4, label: "Phase 4: Polish", status: "In Progress ⚡" },
+                { phase: 5, label: "Phase 5: Content", status: "Planned 📅" },
+                { phase: 6, label: "Phase 6: Simulation", status: "Planned 📅" }
+              ].map(p => (
+                <button
+                  key={p.phase}
+                  onClick={() => { playMockClick(); setActivePhase(p.phase) }}
+                  style={{
+                    background: activePhase === p.phase ? "linear-gradient(90deg, #00d4f0, #e040fb)" : "transparent",
+                    border: "none", borderRadius: "100px", padding: "0.5rem 1.25rem",
+                    color: activePhase === p.phase ? "#08060f" : "rgba(255,255,255,0.5)",
+                    fontFamily: "Inter, sans-serif", fontSize: "0.78rem", fontWeight: 700,
+                    cursor: "pointer", transition: "all 0.28s ease"
+                  }}
+                >
+                  {p.label.split(":")[0]}
                 </button>
               ))}
             </div>
-          </div>
-          <div style={{ position: "relative" }}>
-            <div ref={carouselRef}
-              onMouseEnter={() => { carouselPaused.current = true }}
-              onMouseLeave={() => { carouselPaused.current = false }}
-              style={{ display: "flex", gap: "1.25rem", overflowX: "auto", scrollSnapType: "x mandatory", scrollBehavior: "smooth", WebkitOverflowScrolling: "touch", paddingLeft: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))", paddingRight: "max(2rem, calc((100vw - 1400px) / 2 + 2rem))", paddingBottom: "2rem", msOverflowStyle: "none", scrollbarWidth: "none" } as React.CSSProperties}>
-              {allGames.map((game) => (
-                <div key={game.slug} data-card="true" style={{ flex: "0 0 clamp(280px, 28vw, 355px)", height: "540px", scrollSnapAlign: "start" }}>
-                  <GameCard game={game} />
-                </div>
-              ))}
-            </div>
-            <div style={{ position: "absolute", top: 0, left: 0, bottom: "2rem", width: "5rem", background: "linear-gradient(to right, var(--bg-primary), transparent)", pointerEvents: "none", zIndex: 2 }} />
-            <div style={{ position: "absolute", top: 0, right: 0, bottom: "2rem", width: "5rem", background: "linear-gradient(to left, var(--bg-primary), transparent)", pointerEvents: "none", zIndex: 2 }} />
-          </div>
-        </section>
 
-        {/* ── LIVE DEMO ───────────────────────────────────────────────────────── */}
-        <section style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "3rem", alignItems: "center" }}>
-          <div>
-            <div className="label-caps reveal" style={{ color: "var(--pink)", marginBottom: "1rem" }}>Try It Now</div>
-            <h2 className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 4vw, 3rem)", color: "#fff", lineHeight: 1.1, marginBottom: "1.5rem" }}>
-              Learn by playing,<br /><em>not watching.</em>
-            </h2>
-            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", lineHeight: 1.8, marginBottom: "2rem" }}>
-              Every concept hits harder when you feel the stakes. Real scenarios. Real consequences. Real insight. No video to pause.
-            </p>
-            <div className="reveal">
-              <Link href="/games/welcome-to-ai" style={{ display: "inline-flex", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.75rem 1.8rem", borderRadius: "100px", textDecoration: "none" }}>
-                Start Playing Free →
-              </Link>
-            </div>
-          </div>
-          <div className="reveal"><LiveDemo /></div>
-        </section>
-
-        {/* ── WHO THIS IS FOR ─────────────────────────────────────────────────── */}
-        <section style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <div className="label-caps" style={{ color: "var(--muted)", marginBottom: "0.75rem" }}>Who It&apos;s For</div>
-            <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3rem)", color: "#fff", lineHeight: 1.1 }}>
-              Built for professionals, not developers.
-            </h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem" }}>
-            {[
-              {
-                icon: "📣",
-                role: "Marketing & Content",
-                pain: "You need 5× the output with the same team. Generic AI results aren't cutting it.",
-                gain: "Brief AI like a Creative Director. Consistent, on-brand, publishable output every time.",
-                color: "var(--pink)",
-              },
-              {
-                icon: "⚙️",
-                role: "Operations & Leadership",
-                pain: "Your company is deploying AI tools. You need to lead that — not just manage it.",
-                gain: "Build automations and lead AI strategy without writing a single line of code.",
-                color: "var(--cyan)",
-              },
-              {
-                icon: "👥",
-                role: "HR & People Teams",
-                pain: "You're evaluating, buying, and rolling out AI tools — often without proper training.",
-                gain: "Understand exactly what any AI tool can do. Evaluate, train, and implement with confidence.",
-                color: "var(--purple)",
-              },
-              {
-                icon: "🎯",
-                role: "Sales & Account Teams",
-                pain: "Competitors are personalizing at AI scale. Manual outreach simply can't keep up.",
-                gain: "Master AI-assisted research and outreach without losing your authentic voice.",
-                color: "#f0c040",
-              },
-            ].map((p, i) => (
-              <div key={p.role} className="glass-card gradient-border reveal" style={{ borderRadius: "16px", padding: "1.75rem", transitionDelay: `${i * 0.09}s` }}>
-                <div style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>{p.icon}</div>
-                <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.9rem", color: p.color, letterSpacing: "0.02em", marginBottom: "0.75rem" }}>{p.role}</h3>
-                <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "rgba(240,238,255,0.45)", lineHeight: 1.65, marginBottom: "0.9rem" }}>{p.pain}</p>
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.9rem" }}>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "rgba(240,238,255,0.75)", lineHeight: 1.65, margin: 0 }}>→ {p.gain}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── FOUR PILLARS ────────────────────────────────────────────────────── */}
-        <section style={{ padding: "5rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <div className="label-caps" style={{ color: "var(--muted)", marginBottom: "1rem" }}>The Method</div>
-            <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", lineHeight: 1.1 }}>
-              The Four Maestro Pillars
-            </h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
-            {[
-              { num: "01", title: "The What", desc: "Define the exact output you need. Be specific about deliverable type, scope, and objective.", color: "var(--cyan)" },
-              { num: "02", title: "The What Not", desc: "Name constraints, exclusions, and anti-patterns. Boundaries are as powerful as instructions.", color: "var(--purple)" },
-              { num: "03", title: "The How", desc: "Specify format, tone, length, structure, and audience. Shape the vessel before filling it.", color: "var(--pink)" },
-              { num: "04", title: "The Why", desc: "Give AI the purpose and stakes. Context unlocks relevance. Relevance unlocks quality.", color: "#f0c040" },
-            ].map((pillar, i) => (
-              <div key={pillar.num} className="glass-card gradient-border reveal" style={{ borderRadius: "16px", padding: "2rem", transitionDelay: `${i * 0.1}s` }}>
-                <div style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "4rem", color: "rgba(255,255,255,0.04)", lineHeight: 1, marginBottom: "1rem" }}>{pillar.num}</div>
-                <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem", color: pillar.color, marginBottom: "0.75rem", letterSpacing: "0.02em" }}>{pillar.title}</h3>
-                <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.875rem", color: "var(--muted)", lineHeight: 1.7 }}>{pillar.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── WHAT YOU'LL LEARN ───────────────────────────────────────────────── */}
-        <section style={{ padding:"5rem 2rem", maxWidth:"960px", margin:"0 auto" }}>
-          <div className="reveal" style={{ textAlign:"center", marginBottom:"3rem" }}>
-            <div className="label-caps" style={{ color:"var(--muted)", marginBottom:"0.75rem" }}>What You Walk Away With</div>
-            <h2 style={{ fontFamily:"Cormorant Garamond,serif", fontWeight:700, fontSize:"clamp(2rem,5vw,3rem)", color:"#fff", lineHeight:1.1, margin:0 }}>
-              Skills you&apos;ll use in tomorrow&apos;s meeting.
-            </h2>
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))", gap:"0.9rem" }}>
-            {[
-              "Write prompts that actually work — every time",
-              "Know when to trust AI output and when to challenge it",
-              "Build automation pipelines without touching code",
-              "Use Claude, ChatGPT & Copilot at a professional level",
-              "Explain AI limitations to your team without sounding technical",
-              "Design prompts that get consistent, repeatable results",
-            ].map((skill, i) => (
-              <div key={i} className="reveal" style={{ display:"flex", alignItems:"flex-start", gap:"0.75rem", padding:"1rem 1.25rem", background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.06)", borderRadius:"12px", transitionDelay:`${i*0.06}s` }}>
-                <div style={{ width:"20px", height:"20px", borderRadius:"50%", background:"linear-gradient(135deg,#00d4f0,#e040fb)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:"0.05rem" }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 13L9 17L19 7" stroke="#08060f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <span style={{ fontFamily:"Inter,sans-serif", fontSize:"0.875rem", color:"rgba(240,238,255,0.75)", lineHeight:1.5 }}>{skill}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── ABOUT FELIPE ────────────────────────────────────────────────────── */}
-        <section style={{ padding: "5rem 2rem", maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
-          <div className="reveal" style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ position: "relative" }}>
-              <div style={{ width: "260px", height: "300px", borderRadius: "20px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", padding: "3px" }}>
-                <div style={{ width: "100%", height: "100%", borderRadius: "18px", overflow: "hidden", background: "var(--bg-secondary)" }}>
-                  <img src="/images/maestroplayer1.png" alt="Felipe Maestro" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
-                </div>
-              </div>
-              <div style={{ position: "absolute", bottom: "-1rem", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(90deg,#00d4f0,#e040fb)", borderRadius: "100px", padding: "0.4rem 1.1rem", whiteSpace: "nowrap" }}>
-                <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.72rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#08060f" }}>Meet Your Maestro</span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div className="label-caps reveal" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>AI Interaction Architect & Founder</div>
-            <h2 className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", marginBottom: "1rem", lineHeight: 1.05 }}>Felipe Maestro</h2>
-            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.75)", lineHeight: 1.85, marginBottom: "1rem" }}>
-              Felipe built Maestro Academy around one conviction: <strong style={{ color: "#fff" }}>you don&apos;t need to be a developer to use AI like a professional.</strong> You just need a system.
-            </p>
-            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.6)", lineHeight: 1.85, marginBottom: "2rem" }}>
-              After developing the Maestro Method — a 4-part prompting framework — Felipe set out to teach regular people how to conduct AI with the precision and intentionality of an orchestra conductor.
-            </p>
-            <a className="reveal" href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "rgba(255,255,255,0.9)", padding: "0.6rem 1.4rem", borderRadius: "100px", textDecoration: "none" }}>
-              Learn from Felipe ↗
-            </a>
-          </div>
-        </section>
-
-        {/* ── PRICING ─────────────────────────────────────────────────────────── */}
-        <section style={{ padding: "6rem 2rem", background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <div style={{ maxWidth: "1060px", margin: "0 auto" }}>
-            {/* ── "Everything Free" hero banner ── */}
-            <div className="reveal" style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-              <div className="label-caps" style={{ color: "#00d4f0", marginBottom: "0.75rem" }}>How It Works</div>
-              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3.2rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.75rem" }}>
-                All 14 games. Free. Forever.
-              </h2>
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "rgba(240,238,255,0.55)", lineHeight: 1.7, maxWidth: "560px", margin: "0 auto" }}>
-                No paywalls. No locked content. Play every game, every scene, every character — for free.
-                Boost your experience when you want to go faster.
-              </p>
-            </div>
-
-            {/* ── Free Everything Card ── */}
-            <div className="reveal" style={{ borderRadius: "24px", padding: "2px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", marginBottom: "2rem" }}>
-              <div style={{ borderRadius: "22px", padding: "2.5rem 3rem", background: "rgba(10,7,20,0.97)", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "2rem" }}>
-                <div>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "linear-gradient(90deg,#00d4f0,#e040fb)", borderRadius: "100px", padding: "0.22rem 0.85rem", marginBottom: "1rem" }}>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#08060f" }}>Always Free · No Credit Card</span>
-                  </div>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "clamp(2rem,5vw,3.2rem)", color: "#fff", letterSpacing: "-0.03em", lineHeight: 1, marginBottom: "0.5rem" }}>
-                    $0 <span style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 400, fontSize: "clamp(1.2rem,3vw,2rem)", color: "rgba(240,238,255,0.45)" }}>forever</span>
-                  </div>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "rgba(240,238,255,0.5)", maxWidth: "380px", lineHeight: 1.6 }}>
-                    Start playing in 10 seconds. No account needed for your first game.
-                  </p>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", minWidth: "260px" }}>
-                  {[
-                    "All 14 cinematic games",
-                    "Every scene, every character arc",
-                    "XP + streak + AI Fluency Score",
-                    "Conductor Dashboard",
-                    "FSRS Spaced Repetition reviews",
-                    "LinkedIn Certificates on completion",
-                    "AI Tutor — Socratic Maestro",
-                    "3 lives per day (refills daily)",
-                  ].map((f) => (
-                    <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                      <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "linear-gradient(135deg,#00d4f0,#e040fb)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#08060f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            {/* Active Phase Details Card */}
+            <div className="reveal" style={{
+              background: "rgba(12,8,22,0.6)",
+              border: "1px solid rgba(255,255,255,0.05)",
+              borderRadius: "24px",
+              padding: "2rem 2.5rem"
+            }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePhase}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  {activePhase === 1 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1rem" }}>
+                        <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.4rem", color: "#fff", margin: 0 }}>Phase 1: The Foundation</h3>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800, color: "#00e676", background: "rgba(0,230,118,0.12)", padding: "0.2rem 0.65rem", borderRadius: "100px" }}>COMPLETED</span>
                       </div>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.83rem", color: "rgba(240,238,255,0.85)" }}>{f}</span>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                        We laid the bedrock for user profiles, Stripe payment gates, and streak persistence.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                        {["Persistent Supabase email auth & session cache.", "Streak counter and best streak tracking upsert.", "Lives inventory depletion on incorrect answers.", "Stripe power-up bundle gating for premium story tracks."].map((pt, pi) => (
+                          <div key={pi} style={{ display: "flex", gap: "0.6rem", fontSize: "0.82rem", color: "rgba(240,238,255,0.72)" }}>
+                            <span style={{ color: "var(--cyan)" }}>✓</span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-                <Link href="/games/welcome-to-ai" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.9rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 36px rgba(0,212,240,0.3)", whiteSpace: "nowrap" }}>
-                  Play Free Now →
-                </Link>
-              </div>
+                  )}
+
+                  {activePhase === 2 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1rem" }}>
+                        <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.4rem", color: "#fff", margin: 0 }}>Phase 2: The Learning Engine</h3>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800, color: "#00e676", background: "rgba(0,230,118,0.12)", padding: "0.2rem 0.65rem", borderRadius: "100px" }}>COMPLETED</span>
+                      </div>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                        We focused on the socratic dialogue loops, mastery checks, and spaced repetition concept storage.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                        {["Claude API Elaborative Feedback for incorrect choice branches.", "Socratic Maestro Tutor Bot sidebar for post-scene dialogue.", "FSRS spaced-repetition scheduler card storage.", "80% preceding accuracy requirement before Conductor boss battles."].map((pt, pi) => (
+                          <div key={pi} style={{ display: "flex", gap: "0.6rem", fontSize: "0.82rem", color: "rgba(240,238,255,0.72)" }}>
+                            <span style={{ color: "var(--cyan)" }}>✓</span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activePhase === 3 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1rem" }}>
+                        <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.4rem", color: "#fff", margin: 0 }}>Phase 3: The Engagement Loop</h3>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800, color: "#ffd740", background: "rgba(255,215,64,0.12)", padding: "0.2rem 0.65rem", borderRadius: "100px" }}>IN PROGRESS</span>
+                      </div>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                        Daily habit loops and physical/digital evidence of AI mastery.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                        {["LinkedIn-Shareable Conductor Certificates (Completed).", "Daily practice summons (practicing concept reviews).", "Automated email re-engagement for streak preservation.", "Countdowns and freeze shield activations on dashboard."].map((pt, pi) => (
+                          <div key={pi} style={{ display: "flex", gap: "0.6rem", fontSize: "0.82rem", color: "rgba(240,238,255,0.72)" }}>
+                            <span style={{ color: pi === 0 ? "var(--cyan)" : "#ffd740" }}>{pi === 0 ? "✓" : "✦"}</span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activePhase === 4 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1rem" }}>
+                        <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.4rem", color: "#fff", margin: 0 }}>Phase 4: Animation &amp; Polish</h3>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800, color: "#ffd740", background: "rgba(255,215,64,0.12)", padding: "0.2rem 0.65rem", borderRadius: "100px" }}>IN PROGRESS</span>
+                      </div>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                        Bringing high-fidelity, visual, and percussive game feel to every screen interaction.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                        {["GSAP boss battle overlays and dark flashes.", "Framer Motion dialogue spring offsets (spring bubbles).", "Web Audio API synthesizers and voice blip code.", "Rive character state machines and Spline 3D room objects."].map((pt, pi) => (
+                          <div key={pi} style={{ display: "flex", gap: "0.6rem", fontSize: "0.82rem", color: "rgba(240,238,255,0.72)" }}>
+                            <span style={{ color: pi < 3 ? "var(--cyan)" : "#ffd740" }}>{pi < 3 ? "✓" : "✦"}</span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activePhase === 5 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1rem" }}>
+                        <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.4rem", color: "#fff", margin: 0 }}>Phase 5: Content Expansion</h3>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800, color: "rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.06)", padding: "0.2rem 0.65rem", borderRadius: "100px" }}>PLANNED</span>
+                      </div>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                        Broadening the campaign districts to feature more tracks and complex AI workflows.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                        {["50+ distinct visual novel game chapters.", "Advanced tracks for Solution Architects, CS Graduates, & Leaders.", "Detailed RAG design, Chain-of-Thought variables, and Agents.", "Transformative character sprites representing before/after AI fluency."].map((pt, pi) => (
+                          <div key={pi} style={{ display: "flex", gap: "0.6rem", fontSize: "0.82rem", color: "rgba(240,238,255,0.45)" }}>
+                            <span>•</span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activePhase === 6 && (
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", alignItems: "baseline", marginBottom: "1rem" }}>
+                        <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.4rem", color: "#fff", margin: 0 }}>Phase 6: The Sims-Style Simulation</h3>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", fontWeight: 800, color: "var(--pink)", background: "rgba(224,64,251,0.12)", padding: "0.2rem 0.65rem", borderRadius: "100px" }}>THE MASTERPIECE</span>
+                      </div>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                        A complete professional life simulator where AI skills are learned by living inside a career.
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                        {["Simulated office world at Nexus Corp.", "LLM-powered NPCs (The Mentor, The Skeptic) with memory persistence.", "Performance reviews acting as mastery gates for promotions.", "Daily personalized career scenario generation based on user backgrounds."].map((pt, pi) => (
+                          <div key={pi} style={{ display: "flex", gap: "0.6rem", fontSize: "0.82rem", color: "rgba(224,64,251,0.8)" }}>
+                            <span style={{ color: "var(--pink)" }}>✦</span>
+                            <span>{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            {/* ── Power-ups label ── */}
-            <div className="reveal" style={{ textAlign: "center", marginBottom: "2rem", marginTop: "3.5rem" }}>
-              <div className="label-caps" style={{ color: "var(--muted)", marginBottom: "0.75rem" }}>Optional Boosts</div>
-              <h3 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "#fff", lineHeight: 1.1, marginBottom: "0.5rem" }}>
-                Power-ups — when you want to go faster.
-              </h3>
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.9rem", color: "var(--muted)", lineHeight: 1.6 }}>
-                Never required. Always satisfying.
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            THE SHOP & INVENTORY (Power-Ups Store)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "#05040a", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div style={{ maxWidth: "1060px", margin: "0 auto" }}>
+
+            <div className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
+              <div className="label-caps" style={{ color: "#ffd740", marginBottom: "0.75rem" }}>Inventory &amp; Shop</div>
+              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3.2rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+                Conductor&apos;s Store
+              </h2>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "var(--muted)", lineHeight: 1.7, maxWidth: "480px", margin: "1rem auto 0" }}>
+                Acquire items to protect streaks, buy backup lives, or unlock the absolute Conductor Pass.
               </p>
             </div>
 
-            {/* ── Power-up grid ── */}
-            <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.85rem", marginBottom: "2.5rem" }}>
+            {/* Power-up grid */}
+            <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.8rem", marginBottom: "3rem" }}>
               {[
-                { emoji: "⚡", name: "Double XP",       desc: "2× XP for 30 min",                color: "#ffd740" },
-                { emoji: "🔍", name: "Hint Token",       desc: "Eliminate one wrong answer",      color: "#00d4f0" },
-                { emoji: "🛡️", name: "Streak Shield",    desc: "Protect your streak for 24h",     color: "#4488ff" },
-                { emoji: "🎼", name: "Maestro Mode",     desc: "AI reveals its reasoning",        color: "#e040fb" },
-                { emoji: "💫", name: "Second Chance",    desc: "Retry a wrong answer free",       color: "#00e676" },
-                { emoji: "🔥", name: "Streak Restore",   desc: "Revive a broken streak",          color: "#ff6d00" },
-                { emoji: "🎯", name: "Sure Shot",        desc: "Auto-correct one question",       color: "#00d4f0" },
-                { emoji: "❤️", name: "Life Pack",        desc: "+5 lives, right now",             color: "#ff4b6e" },
-                { emoji: "🌟", name: "XP Jackpot",       desc: "3× XP on next correct answer",   color: "#ffb700" },
-                { emoji: "💡", name: "Deep Insight",     desc: "Unlock full Maestro breakdown",   color: "#7b2fbe" },
-                { emoji: "⏩", name: "Fast Track",       desc: "Skip straight to the boss",       color: "#e040fb" },
-                { emoji: "🏆", name: "Boss Bypass",      desc: "Waive the 80% mastery gate",      color: "#ffb700" },
+                { icon: <SVGXpBolt color="#ffd740" size={24} />, name: "Double XP",     desc: "2× XP for 30 min",               color: "#ffd740" },
+                { icon: <SVGMagnifier color="#00d4f0" />, name: "Hint Token",     desc: "Eliminate one wrong answer",     color: "#00d4f0" },
+                { icon: <SVGShield color="#4488ff" />, name: "Streak Shield",  desc: "Protect your streak for 24h",   color: "#4488ff" },
+                { icon: <SVGMaestroBaton color="#e040fb" />, name: "Maestro Mode",   desc: "AI reveals its reasoning",       color: "#e040fb" },
+                { icon: <SVGCircleArrow color="#00e676" />, name: "Second Chance",  desc: "Retry a wrong answer free",     color: "#00e676" },
+                { icon: <SVGFlame color="#ff6d00" size={24} />, name: "Streak Restore", desc: "Revive a broken streak",        color: "#ff6d00" },
+                { icon: <SVGHeart color="#ff4b6e" />, name: "Life Pack",      desc: "+5 lives, right now",           color: "#ff4b6e" },
+                { icon: <SVGCrown color="#ffb700" />, name: "XP Jackpot",     desc: "3× XP on next correct answer", color: "#ffb700" },
               ].map((pu, i) => (
-                <div key={pu.name} className="reveal" style={{ background: "rgba(10,7,20,0.85)", border: `1px solid ${pu.color}22`, borderRadius: "16px", padding: "1.1rem 1rem", display: "flex", flexDirection: "column", gap: "0.45rem", transitionDelay: `${i * 0.04}s`, transition: "border-color 0.2s, box-shadow 0.2s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = `${pu.color}55`; e.currentTarget.style.boxShadow = `0 0 20px ${pu.color}18` }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = `${pu.color}22`; e.currentTarget.style.boxShadow = "none" }}>
-                  <div style={{ fontSize: "1.6rem", lineHeight: 1 }}>{pu.emoji}</div>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.72rem", color: pu.color }}>{pu.name}</div>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.65rem", color: "rgba(240,238,255,0.4)", lineHeight: 1.45 }}>{pu.desc}</div>
+                <div key={pu.name} className="reveal"
+                  style={{ background: "rgba(12,8,22,0.8)", border: `1px solid ${pu.color}22`, borderRadius: "16px", padding: "1.1rem 1rem", display: "flex", flexDirection: "column", gap: "0.6rem", transition: "border-color 0.2s, box-shadow 0.2s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=`${pu.color}55`; e.currentTarget.style.boxShadow=`0 0 20px ${pu.color}18` }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=`${pu.color}22`; e.currentTarget.style.boxShadow="none" }}>
+                  <div style={{ display: "flex", alignItems: "center", minHeight: "26px" }}>{pu.icon}</div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.72rem", color: pu.color, marginTop: "0.4rem" }}>{pu.name}</div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.63rem", color: "rgba(240,238,255,0.62)", lineHeight: 1.45 }}>{pu.desc}</div>
                 </div>
               ))}
             </div>
 
-            {/* ── Pack tiers ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem", alignItems: "stretch" }}>
-
-              {/* Starter Pack */}
-              <div className="reveal glass-card" style={{ borderRadius: "20px", padding: "2rem", display: "flex", flexDirection: "column" }}>
+            {/* Pack tiers */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", alignItems: "stretch", maxWidth: "720px", margin: "0 auto" }}>
+              {/* Starter */}
+              <div className="reveal glass-card" style={{ borderRadius: "20px", padding: "2rem", display: "flex", flexDirection: "column", background: "rgba(12,8,22,0.5)" }}>
                 <div style={{ marginBottom: "1.5rem" }}>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "0.6rem" }}>Starter Pack</div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "0.6rem" }}>Starter Pack</div>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", marginBottom: "0.4rem" }}>
                     <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.6rem", color: "#fff", letterSpacing: "-0.03em" }}>$2.99</span>
                     <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)" }}>one-time</span>
                   </div>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>Perfect for a focused game session.</p>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>Perfect for a single game weekend.</p>
                 </div>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.75rem" }}>
-                  {["5 extra lives", "3 Hint Tokens", "2 Double XP boosts", "1 Second Chance"].map(f => (
+                  {["5 extra lives","3 Hint Tokens","2 Double XP boosts","1 Second Chance"].map(f => (
                     <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                      <span style={{ color: "#00d4f0", fontSize: "0.75rem", flexShrink: 0 }}>✦</span>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.65)" }}>{f}</span>
+                      <span aria-hidden="true" style={{ color: "#00d4f0", fontSize: "0.75rem" }}>✦</span>
+                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.78)" }}>{f}</span>
                     </div>
                   ))}
                 </div>
-                <button style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "rgba(240,238,255,0.8)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "0.7rem", borderRadius: "100px", cursor: "pointer", transition: "all 0.2s" }}
-                  onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.1)" }}
+                <button
+                  onClick={() => handlePurchase("starter-pack")}
+                  disabled={checkingOut === "starter-pack"}
+                  style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "rgba(240,238,255,0.8)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "0.7rem", borderRadius: "100px", cursor: checkingOut === "starter-pack" ? "wait" : "pointer", transition: "background 0.2s", opacity: checkingOut && checkingOut !== "starter-pack" ? 0.5 : 1 }}
+                  onMouseEnter={e => { if (!checkingOut) e.currentTarget.style.background="rgba(255,255,255,0.1)" }}
                   onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.06)" }}>
-                  Get Starter Pack →
+                  {checkingOut === "starter-pack" ? "Opening checkout…" : "Get Starter Pack →"}
                 </button>
               </div>
 
-              {/* Maestro Bundle — highlighted */}
-              <div className="reveal" style={{ borderRadius: "20px", padding: "2px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", transitionDelay: "0.1s", display: "flex", flexDirection: "column" }}>
-                <div style={{ borderRadius: "18px", padding: "2rem", background: "rgba(10,7,20,0.98)", flex: 1, display: "flex", flexDirection: "column" }}>
+              {/* Maestro Bundle */}
+              <div className="reveal" style={{ borderRadius: "20px", padding: "2px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", display: "flex", flexDirection: "column" }}>
+                <div style={{ borderRadius: "18px", padding: "2rem", background: "rgba(12,8,22,0.98)", flex: 1, display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "linear-gradient(90deg,#00d4f0,#e040fb)", borderRadius: "100px", padding: "0.2rem 0.75rem", marginBottom: "1rem", alignSelf: "flex-start" }}>
                     <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#08060f" }}>Best Value</span>
                   </div>
                   <div style={{ marginBottom: "1.5rem" }}>
-                    <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#00d4f0", marginBottom: "0.6rem" }}>Maestro Bundle</div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#00d4f0", marginBottom: "0.6rem" }}>Maestro Bundle</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", marginBottom: "0.4rem" }}>
                       <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.6rem", color: "#fff", letterSpacing: "-0.03em" }}>$6.99</span>
                       <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)" }}>one-time</span>
                     </div>
-                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>For the serious learner.</p>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>For serious visual novel progression.</p>
                   </div>
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.75rem" }}>
-                    {["15 extra lives", "8 Hint Tokens", "5 Double XP boosts", "3 Streak Shields", "2 Second Chances", "1 Streak Restore", "1 XP Jackpot"].map(f => (
+                    {["15 extra lives","8 Hint Tokens","5 Double XP boosts","3 Streak Shields","2 Second Chances","1 Streak Restore"].map(f => (
                       <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                        <span style={{ color: "#00d4f0", fontSize: "0.75rem", flexShrink: 0 }}>✦</span>
-                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.85)" }}>{f}</span>
+                        <span style={{ color: "#00d4f0", fontSize: "0.75rem" }}>✦</span>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.86)" }}>{f}</span>
                       </div>
                     ))}
                   </div>
-                  <button style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.7rem", borderRadius: "100px", cursor: "pointer", border: "none" }}>
-                    Get Maestro Bundle →
+                  <button
+                    onClick={() => handlePurchase("maestro-bundle")}
+                    disabled={checkingOut === "maestro-bundle"}
+                    style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.7rem", borderRadius: "100px", cursor: checkingOut === "maestro-bundle" ? "wait" : "pointer", border: "none", opacity: checkingOut && checkingOut !== "maestro-bundle" ? 0.5 : 1 }}>
+                    {checkingOut === "maestro-bundle" ? "Opening checkout…" : "Get Maestro Bundle →"}
                   </button>
                 </div>
               </div>
-
-              {/* Conductor Pass */}
-              <div className="reveal glass-card" style={{ borderRadius: "20px", padding: "2rem", display: "flex", flexDirection: "column", transitionDelay: "0.2s", border: "1px solid rgba(123,47,190,0.3)" }}>
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--purple)", marginBottom: "0.6rem" }}>Conductor Pass</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", marginBottom: "0.4rem" }}>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.6rem", color: "#fff", letterSpacing: "-0.03em" }}>$9.99</span>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)" }}>/month</span>
-                  </div>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>Unlimited momentum, every day.</p>
-                </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.75rem" }}>
-                  {["Unlimited daily lives", "10 power-ups per month (your choice)", "Exclusive Conductor badge", "Early access to new games", "Cancel anytime"].map(f => (
-                    <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                      <span style={{ color: "#a78bfa", fontSize: "0.75rem", flexShrink: 0 }}>✦</span>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.65)" }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <button style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "rgba(240,238,255,0.8)", background: "rgba(123,47,190,0.12)", border: "1px solid rgba(123,47,190,0.4)", padding: "0.7rem", borderRadius: "100px", cursor: "pointer", transition: "all 0.2s" }}
-                  onMouseEnter={e => { e.currentTarget.style.background="rgba(123,47,190,0.22)" }}
-                  onMouseLeave={e => { e.currentTarget.style.background="rgba(123,47,190,0.12)" }}>
-                  Get Conductor Pass →
-                </button>
-              </div>
-
             </div>
 
             {/* Teams footnote */}
             <div className="reveal" style={{ textAlign: "center", marginTop: "2.5rem" }}>
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "rgba(240,238,255,0.3)", lineHeight: 1.7 }}>
-                Training a team?{" "}
-                <a href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(240,238,255,0.5)", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-                  Ask us about Team &amp; Enterprise pricing ↗
-                </a>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "rgba(240,238,255,0.5)", lineHeight: 1.7 }}>
+                Training a crew of Conductors? Bulk power-up codes are available for schools and organizations.
               </p>
             </div>
           </div>
         </section>
 
-        {/* ── VISION ──────────────────────────────────────────────────────────── */}
-        <section style={{ position: "relative", minHeight: "55vh", display: "flex", alignItems: "center", overflow: "hidden", margin: "2rem 0" }}>
+        {/* ══════════════════════════════════════════════════════════════════════
+            PLAYER LOGS (Testimonials)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", maxWidth: "1100px", margin: "0 auto" }}>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
+            <div className="label-caps" style={{ color: "var(--muted)", marginBottom: "0.75rem" }}>Conductor Logs</div>
+            <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
+              Feedback from the Field
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+            {[
+              { quote: "Before MaestroPlay I was copying AI outputs and hoping for the best. Now I direct it like a professional backing band.", name: "Sarah K.",  role: "Marketing Conductor",    letter: "S", color: "#e040fb" },
+              { quote: "I went from nodding in AI meetings to actually writing the prompt templates. One week of playing did it.",                 name: "Marcus T.", role: "Operations Lead",         letter: "M", color: "#00d4f0" },
+              { quote: "The most useful thing I've done for my career this year. And I actually looked forward to it every evening.", name: "Priya M.",  role: "HR Conductor",    letter: "P", color: "#ffd740" },
+            ].map((t, i) => (
+              <div key={i} className="glass-card reveal" style={{ borderRadius: "20px", padding: "2.25rem", background: "rgba(12,8,22,0.4)" }}>
+                <div role="img" aria-label="5 out of 5 stars" style={{ display: "flex", gap: "0.25rem", marginBottom: "1.25rem" }}>
+                  {[...Array(5)].map((_, j) => <SVGStar key={j} />)}
+                </div>
+                <p style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 400, fontSize: "1.15rem", color: "rgba(240,238,255,0.92)", lineHeight: 1.65, marginBottom: "1.5rem" }}>
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: `${t.color}18`, border: `1px solid ${t.color}40`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.9rem", color: t.color, flexShrink: 0 }}>{t.letter}</div>
+                  <div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#fff" }}>{t.name}</div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.68rem", color: "rgba(240,238,255,0.60)", letterSpacing: "0.04em" }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            ABOUT THE DIRECTOR (Felipe Maestro)
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ padding: "6rem 2rem", background: "rgba(8,6,15,0.2)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+          <div style={{ maxWidth: "960px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "4rem", alignItems: "center" }}>
+            
+            <div className="reveal" style={{ display: "flex", justifyContent: "center" }}>
+              <div style={{ position: "relative", width: "260px" }}>
+                <div style={{ borderRadius: "24px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", padding: "2px", boxShadow: "0 0 60px rgba(0,212,240,0.12)" }}>
+                  <div style={{ borderRadius: "22px", overflow: "hidden", background: "var(--bg-secondary)", height: "320px" }}>
+                    <img src="/images/maestroplayer1.png" alt="Felipe Maestro" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="label-caps reveal" style={{ color: "var(--cyan)", marginBottom: "0.75rem" }}>Director &amp; Founder</div>
+              <h2 className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem, 5vw, 3rem)", color: "#fff", marginBottom: "1.25rem", lineHeight: 1.05 }}>Felipe Maestro</h2>
+              <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.95rem", color: "rgba(240,238,255,0.82)", lineHeight: 1.9, marginBottom: "1rem" }}>
+                Felipe built Maestro Play on a simple belief: <strong style={{ color: "#fff" }}>the best way to learn is to play through it.</strong> Not watch a lecture. Not read a textbook. Make hard choices, see what breaks, and fix it.
+              </p>
+              <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.92rem", color: "rgba(240,238,255,0.65)", lineHeight: 1.85, marginBottom: "2rem" }}>
+                His Maestro Method prompting system powers every choice and dialogue challenge. What he teaches in corporate bootcamps is now interactive, gamified, and waiting for you.
+              </p>
+              <a className="reveal" href="https://aimaestro.academy" target="_blank" rel="noopener noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "rgba(240,238,255,0.85)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "0.65rem 1.5rem", borderRadius: "100px", textDecoration: "none", transition: "background 0.2s" }}>
+                Visit Maestro Academy ↗
+              </a>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            VISION QUOTE
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ position: "relative", display: "flex", alignItems: "center", overflow: "hidden", margin: "2rem 0" }}>
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #0d0b14 0%, #1a0d2e 40%, #0d0b14 100%)" }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 60% 50%, rgba(123,47,190,0.15) 0%, transparent 60%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 60% 50%, rgba(123,47,190,0.16) 0%, transparent 60%)" }} />
           <div style={{ position: "relative", zIndex: 10, maxWidth: "800px", margin: "0 auto", padding: "5rem 2rem", textAlign: "center" }}>
             <div className="label-caps reveal" style={{ color: "var(--purple)", marginBottom: "1.5rem" }}>The Vision</div>
             <blockquote className="reveal" style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontWeight: 300, fontSize: "clamp(1.8rem, 5vw, 3rem)", color: "#fff", lineHeight: 1.3, marginBottom: "1.5rem" }}>
@@ -681,8 +1442,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── CLOSING CTA ─────────────────────────────────────────────────────── */}
-        <section style={{ position: "relative", minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", padding: "4rem 2rem" }}>
+        {/* ══════════════════════════════════════════════════════════════════════
+            CLOSING CTA
+        ══════════════════════════════════════════════════════════════════════ */}
+        <section style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", padding: "7rem 2rem" }}>
           <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "800px", height: "800px", background: "radial-gradient(circle, rgba(0,212,240,0.07) 0%, rgba(123,47,190,0.1) 30%, transparent 65%)", pointerEvents: "none", animation: "pulse-glow 4s ease-in-out infinite" }} />
           <div style={{ textAlign: "center", position: "relative", zIndex: 10, maxWidth: "700px" }}>
             <div className="label-caps reveal" style={{ color: "var(--muted)", marginBottom: "1.5rem" }}>The orchestra is ready.</div>
@@ -690,17 +1453,23 @@ export default function HomePage() {
               Are you?
             </h2>
             <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "var(--muted)", lineHeight: 1.7, marginBottom: "0.75rem" }}>
-              Start your first game free. No signup. No credit card.
+              Start your first visual novel session free. No signup. No credit card.
             </p>
-            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.85rem", color: "rgba(240,238,255,0.3)", lineHeight: 1.6, marginBottom: "2.5rem" }}>
-              Join the professionals closing the AI gap — one game at a time.
+            <p className="reveal" style={{ fontFamily: "Inter, sans-serif", fontSize: "0.85rem", color: "rgba(240,238,255,0.60)", lineHeight: 1.6, marginBottom: "2.5rem" }}>
+              Join the developers, designers, and creatives closing the AI gap — one choice at a time.
             </p>
             <div className="reveal" style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/games/welcome-to-ai" style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 40px rgba(0,212,240,0.25)" }}>
-                Play Free →
-              </Link>
-              <Link href="/games" style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "1rem", color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", padding: "1rem 2.5rem", borderRadius: "100px", textDecoration: "none" }}>
-                See All 14 Games
+              {hasProgress ? (
+                <Link href="/games/welcome-to-ai" style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 40px rgba(0,212,240,0.25)" }}>
+                  Resume Campaign Track →
+                </Link>
+              ) : (
+                <Link href="/games/welcome-to-ai" style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 40px rgba(0,212,240,0.25)" }}>
+                  Play Campaign Free →
+                </Link>
+              )}
+              <Link href="/worldmap" style={{ fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "1rem", color: "rgba(240,238,255,0.7)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", padding: "1rem 2.5rem", borderRadius: "100px", textDecoration: "none" }}>
+                View Campaign Map
               </Link>
             </div>
           </div>

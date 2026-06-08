@@ -144,6 +144,13 @@ export function useSoundEngine() {
     } catch { /* no AudioContext */ }
   }, [])
 
+  const playHover = useCallback(() => {
+    try {
+      const ctx = getCtx()
+      tone(ctx, ctx.destination, 880, ctx.currentTime, 0.04, 0.015, "sine")
+    } catch { /* no AudioContext */ }
+  }, [])
+
   const playTransition = useCallback(() => {
     try {
       const ctx = getCtx()
@@ -348,6 +355,7 @@ export function useSoundEngine() {
     playWrong,
     playXP,
     playClick,
+    playHover,
     playTransition,
     playRevelation,
     playFireworks,

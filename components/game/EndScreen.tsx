@@ -8,10 +8,22 @@ import GameIcon from "./GameIcon"
 import MaestroTutor from "./MaestroTutor"
 import CinematicVideo from "./CinematicVideo"
 
+// ── Certificate helpers ────────────────────────────────────────────────────
+async function fetchCertificate(gameSlug: string, playerName: string): Promise<{ certificateUrl: string; shareText: string } | null> {
+  try {
+    const res = await fetch(`/api/certificate?game=${encodeURIComponent(gameSlug)}&name=${encodeURIComponent(playerName)}`)
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
+
 type Props = {
   game: Game
   totalXp: number
   streak: number
+  choiceHistory?: {question:string, chosen:string, correct:boolean}[]
 }
 
 // ── Character → Maestro cinematic transformation (works for any game with images)
@@ -143,8 +155,107 @@ const LEVEL_UP_THRESHOLDS = [
   { minXp: 3000, label: "Grand Maestro",         color: "#ff6b35", icon: "🏆" },
 ]
 
+// ── Your Path: compact collapsible section showing top 3 player choices ──────
+function YourPath({
+  choices,
+  accent = "var(--cyan)",
+}: {
+  choices: {question:string, chosen:string, correct:boolean}[]
+  accent?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const top3 = choices.slice(0, 3)
+
+  return (
+    <div style={{
+      borderRadius: "14px", marginBottom: "1.25rem",
+      background: "rgba(255,255,255,0.02)",
+      border: "1px solid rgba(255,255,255,0.09)",
+      overflow: "hidden",
+      animation: "scene-fade-in 0.6s 0.15s ease both",
+    }}>
+      {/* Collapsible header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: "100%", display: "flex", alignItems: "center", gap: "0.5rem",
+          padding: "0.6rem 1rem",
+          background: "none", border: "none", cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <span style={{ fontSize: "0.8rem" }}>🗺️</span>
+        <span style={{
+          fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem",
+          letterSpacing: "0.26em", textTransform: "uppercase",
+          color: "rgba(240,238,255,0.5)", flex: 1,
+        }}>
+          Your path through this game
+        </span>
+        <span style={{
+          fontFamily: "Inter, sans-serif", fontSize: "0.72rem",
+          color: "rgba(240,238,255,0.3)", transition: "transform 0.2s",
+          display: "inline-block",
+          transform: open ? "rotate(180deg)" : "rotate(0deg)",
+        }}>
+          ↓
+        </span>
+      </button>
+
+      {open && (
+        <div style={{
+          padding: "0 1rem 0.85rem",
+          display: "flex", flexDirection: "column", gap: "0.5rem",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+        }}>
+          {top3.map((item, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "flex-start", gap: "0.55rem",
+            }}>
+              {/* Correct/wrong dot */}
+              <div style={{
+                width: "7px", height: "7px", borderRadius: "50%", flexShrink: 0,
+                marginTop: "0.28rem",
+                background: item.correct ? "rgba(0,212,240,0.85)" : "rgba(255,180,0,0.85)",
+                boxShadow: item.correct
+                  ? "0 0 6px rgba(0,212,240,0.5)"
+                  : "0 0 6px rgba(255,180,0,0.4)",
+              }} />
+              <span style={{
+                fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                fontSize: "0.83rem", color: "rgba(240,238,255,0.62)",
+                lineHeight: 1.5,
+              }}>
+                you chose:{" "}
+                <span style={{ color: "rgba(240,238,255,0.88)", fontStyle: "normal" }}>
+                  {item.chosen.length > 45 ? item.chosen.slice(0, 45) + "…" : item.chosen}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Transfer Bridge: fallback prompt generator ────────────────────────────────
+// Used when a game doesn't define mondayPrompt — produces a sensible template
+// based on the Maestro Method (WHAT / WHAT NOT / HOW / WHY)
+function generateFallbackPrompt(title: string, characterName?: string): string {
+  return `You are a [ROLE — e.g. senior developer, marketing manager, analyst].
+
+I need you to [WHAT — describe the specific task from "${title}"].
+
+Do NOT [WHAT NOT — e.g. use jargon, include headers, exceed 200 words].
+
+Format it as [HOW — e.g. a 3-bullet summary, a professional email, a table].
+
+Context: [WHY — e.g. this is for a board presentation, a new hire, a client who almost churned].`
+}
+
 // ── Main EndScreen ────────────────────────────────────────────────────────────
-export default function EndScreen({ game, totalXp, streak }: Props) {
+export default function EndScreen({ game, totalXp, streak, choiceHistory }: Props) {
   const hasMaestro = !!game.maestroImage
   /**
    * If the game has a PixVerse end video, show it FIRST (full-screen,
@@ -171,6 +282,51 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
     } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // ── Certificate state ─────────────────────────────────────────────────────
+  const [certLoading, setCertLoading] = useState(false)
+
+  async function handleGetCertificate() {
+    setCertLoading(true)
+    // Get player name from localStorage if set, otherwise prompt briefly
+    const storedName = (typeof window !== "undefined" && localStorage.getItem("maestro_player_name")) || ""
+    const playerName = storedName || "MaestroPlay Graduate"
+    const result = await fetchCertificate(game.slug, playerName)
+    setCertLoading(false)
+    if (result?.certificateUrl) {
+      window.open(result.certificateUrl, "_blank", "noopener,noreferrer")
+    }
+  }
+
+  // Build LinkedIn URL with certificate if available (computed lazily)
+  const [certLinkedInUrl, setCertLinkedInUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Pre-fetch certificate URL for the LinkedIn button when component mounts
+    const storedName = (typeof window !== "undefined" && localStorage.getItem("maestro_player_name")) || ""
+    const playerName = storedName || "MaestroPlay Graduate"
+    fetchCertificate(game.slug, playerName).then(result => {
+      if (result?.certificateUrl && result?.shareText) {
+        const certPageUrl = `https://maestroplay.app${result.certificateUrl}`
+        const liUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(certPageUrl)}&title=${encodeURIComponent("Certificate of AI Fluency | MaestroPlay")}&summary=${encodeURIComponent(result.shareText)}&source=maestroplay.app`
+        setCertLinkedInUrl(liUrl)
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.slug])
+
+  // ── Dr. Park's Transfer Bridge — "Monday Morning Prompt" ──────────────────
+  // Closes the gap between game-context learning and real-work application.
+  const [promptCopied, setPromptCopied] = useState(false)
+
+  // Fallback Monday Prompt if game doesn't provide one — generated from game context
+  const mondayPrompt = game.mondayPrompt ?? generateFallbackPrompt(game.title, game.characterName)
+
+  function copyPrompt() {
+    navigator.clipboard.writeText(mondayPrompt).catch(() => {})
+    setPromptCopied(true)
+    setTimeout(() => setPromptCopied(false), 2500)
+  }
 
   useEffect(() => {
     if (!showEndVideo || !game.endVideo) return
@@ -229,7 +385,7 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
     ? `Jake's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: maestroplay.app`
     : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: maestroplay.app`
 
-  const twitterUrl  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+  // linkedInUrl is the fallback before certLinkedInUrl is fetched
   const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent("https://maestroplay.app")}&title=${encodeURIComponent("MaestroPlay — AI Literacy Game")}&summary=${encodeURIComponent(shareText)}&source=maestroplay.app`
 
   // ── Cinematic transformation for any game with character images ───────────
@@ -369,26 +525,103 @@ export default function EndScreen({ game, totalXp, streak }: Props) {
           )}
         </div>
 
+        {/* ── Your Path — echo the choices the player actually made ────── */}
+        {choiceHistory && choiceHistory.filter(c => c.question.length > 0).length >= 2 && (
+          <YourPath choices={choiceHistory.filter(c => c.question.length > 0)} accent={accent} />
+        )}
+
+        {/* ── Monday Morning Prompt — Dr. Park's Transfer Bridge ────────── */}
+        {/* "Near transfer requires an explicit bridge between the learning   */}
+        {/*  context and the application context." — Perkins & Salomon, 1988  */}
+        <div style={{
+          borderRadius: "16px", marginBottom: "1.25rem",
+          background: "rgba(0,212,240,0.04)",
+          border: "1px solid rgba(0,212,240,0.2)",
+          overflow: "hidden",
+          animation: "scene-fade-in 0.6s 0.3s ease both",
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: "0.65rem 1rem",
+            borderBottom: "1px solid rgba(0,212,240,0.12)",
+            display: "flex", alignItems: "center", gap: "0.5rem",
+            background: "rgba(0,212,240,0.06)",
+          }}>
+            <span style={{ fontSize: "1rem" }}>☀️</span>
+            <span style={{
+              fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.6rem",
+              letterSpacing: "0.26em", textTransform: "uppercase",
+              color: "rgba(0,212,240,0.85)",
+            }}>
+              Your Monday Morning Prompt
+            </span>
+            <span style={{
+              marginLeft: "auto",
+              fontFamily: "Inter, sans-serif", fontSize: "0.62rem",
+              color: "rgba(240,238,255,0.38)", fontWeight: 500,
+            }}>
+              Copy → use at work tomorrow
+            </span>
+          </div>
+
+          {/* Prompt template */}
+          <div style={{ padding: "0.75rem 1rem 0.5rem", position: "relative" }}>
+            <pre style={{
+              fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+              fontSize: "0.88rem", color: "rgba(240,238,255,0.82)",
+              lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+            }}>
+              {mondayPrompt}
+            </pre>
+          </div>
+
+          {/* Copy button */}
+          <div style={{ padding: "0.4rem 1rem 0.75rem" }}>
+            <button
+              onClick={copyPrompt}
+              style={{
+                fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.78rem",
+                color: promptCopied ? "#58cc02" : "rgba(0,212,240,0.9)",
+                background: promptCopied ? "rgba(88,204,2,0.1)" : "rgba(0,212,240,0.08)",
+                border: `1px solid ${promptCopied ? "rgba(88,204,2,0.4)" : "rgba(0,212,240,0.3)"}`,
+                borderRadius: "100px", padding: "0.38rem 1rem",
+                cursor: "pointer", transition: "all 0.2s",
+                display: "flex", alignItems: "center", gap: "0.4rem",
+              }}
+            >
+              {promptCopied ? "✓ Copied to clipboard!" : "📋 Copy prompt template"}
+            </button>
+          </div>
+        </div>
+
         {/* Share + Next */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <a href={twitterUrl} target="_blank" rel="noopener noreferrer" style={{
-              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
-              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
-              color: "#08060f", background: `linear-gradient(90deg,${accent},#e040fb)`,
-              padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
-            }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.848L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              Share ↗
-            </a>
-            <Link href={"/certificate/" + game.slug} style={{
+            <a href={certLinkedInUrl ?? linkedInUrl} target="_blank" rel="noopener noreferrer" style={{
               flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
               fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
               color: "#fff", background: "#0A66C2",
               padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
             }}>
-              🎓 Get Certificate →
-            </Link>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              Share on LinkedIn
+            </a>
+            <button
+              onClick={handleGetCertificate}
+              disabled={certLoading}
+              style={{
+                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
+                color: certLoading ? "rgba(255,255,255,0.5)" : "#fff",
+                background: certLoading ? "rgba(10,102,194,0.5)" : "#0A66C2",
+                padding: "0.8rem 0.5rem", borderRadius: "100px",
+                border: "none", cursor: certLoading ? "default" : "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              {certLoading ? "⏳ Generating…" : "🎓 Get Certificate →"}
+            </button>
           </div>
 
           {/* Explore Jake's World */}

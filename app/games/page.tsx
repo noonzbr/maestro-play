@@ -1,14 +1,7 @@
-import { allGames } from "@/lib/games"
-import PathwayPage from "@/components/ui/PathwayPage"
-import Nav from "@/components/ui/Nav"
-import Footer from "@/components/ui/Footer"
+"use client"
+
+import WorldMapPage from "@/app/worldmap/page"
 
 export default function GamesPage() {
-  return (
-    <>
-      <Nav />
-      <PathwayPage games={allGames} />
-      <Footer />
-    </>
-  )
+  return <WorldMapPage />
 }

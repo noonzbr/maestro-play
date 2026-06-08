@@ -22,30 +22,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
+  const POWER_UP_PACKS = ["starter-pack", "maestro-bundle", "conductor-pass"]
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session
+    const productSlug = session.metadata?.productSlug || session.metadata?.gameSlug
+    const userId      = session.metadata?.userId || undefined
+    const amount      = session.amount_total || 0
 
-    const gameSlug = session.metadata?.gameSlug
-    const userId = session.metadata?.userId || undefined
-    const amount = session.amount_total || 0
-
-    if (gameSlug) {
-      // Handle bundle — unlock both week 3 and week 4
-      const slugsToUnlock = gameSlug === "bundle"
-        ? ["ai-for-professionals", "the-conductor-test"]
-        : [gameSlug]
-
-      for (const slug of slugsToUnlock) {
+    if (productSlug) {
+      if (POWER_UP_PACKS.includes(productSlug)) {
         try {
-          await recordPurchase({
-            stripeSessionId: session.id,
-            gameSlug: slug,
-            userId,
-            amount,
-          })
+          await recordPurchase({ stripeSessionId: session.id, gameSlug: productSlug, userId, amount })
         } catch (e) {
-          console.error(`Failed to record purchase for ${slug}:`, e)
+          console.error(`Failed to record pack purchase ${productSlug}:`, e)
         }
+      } else {
+        const slugsToUnlock = productSlug === "bundle"
+          ? ["ai-for-professionals", "the-conductor-test"]
+          : [productSlug]
+        for (const slug of slugsToUnlock) {
+          try {
+            await recordPurchase({ stripeSessionId: session.id, gameSlug: slug, userId, amount })
+          } catch (e) {
+            console.error(`Failed to record purchase for ${slug}:`, e)
+          }
+        }
+      }
+    }
+  }
+
+  if (event.type === "invoice.paid") {
+    // Recurring subscription renewal — record pack renewal
+    const invoice = event.data.object as Stripe.Invoice
+    const productSlug = invoice.metadata?.productSlug || invoice.metadata?.gameSlug
+    const userId      = invoice.metadata?.userId || undefined
+    const amount      = invoice.amount_paid || 0
+    if (productSlug && POWER_UP_PACKS.includes(productSlug)) {
+      try {
+        await recordPurchase({ stripeSessionId: invoice.id, gameSlug: productSlug, userId, amount })
+      } catch (e) {
+        console.error(`Failed to record subscription renewal for ${productSlug}:`, e)
       }
     }
   }

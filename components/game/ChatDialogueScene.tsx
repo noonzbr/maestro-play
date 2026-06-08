@@ -7,8 +7,8 @@ import SceneEnvironment from "./SceneEnvironment"
 
 /* ── NPC portrait map ──────────────────────────────────────────────────── */
 const NPC_IMAGES: Record<string, string> = {
-  senora_vega: "/images/senoravega.png",
-  tyler:       "/images/tyler.png",
+  senora_vega: "/images/senoravega.png?v=2",
+  tyler:       "/images/tyler.png?v=2",
   ai:          "",
   default:     "",
 }
@@ -529,10 +529,11 @@ export default function ChatDialogueScene({ scene, onComplete, protagonistImage 
           padding:        "0.42rem 1.2rem 1.1rem",
           display:        "flex",
           alignItems:     "center",
-          justifyContent: "space-between",
+          justifyContent: "center",
           borderTop:      `1px solid ${speakerColor.replace("0.9", "0.11")}`,
+          position:       "relative",
         }}>
-          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+          <div style={{ position: "absolute", left: "1.2rem", display: "flex", gap: "4px", alignItems: "center" }}>
             {lines.map((_, i) => (
               <div key={i} style={{
                 height:      "3px",

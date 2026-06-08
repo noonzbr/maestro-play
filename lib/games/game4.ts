@@ -3,8 +3,7 @@ import { Game } from "./types"
 export const game4: Game = {
   slug: "the-conductor-test",
   week: 4,
-  free: false,
-  price: 4.99,
+  free: true,
   title: "The Conductor Test",
   emoji: "🏆",
   icon: "musicNotes" as const,
@@ -38,6 +37,8 @@ export const game4: Game = {
     teaserLine:   "You've mastered the method — now it's time to go deeper into the actual tool. Jordan is a freelance consultant who discovered what Claude Chat can REALLY do. Hint: most people use 5% of it.",
     previewImage: "/images/jordan.png",
   },
+
+  mondayPrompt: "Role: You are a [precise role]. Task: [one specific deliverable with success criteria]. Constraints: [what NOT to include or do]. Format: [exact structure, length, tone]. Context: [who this is for, what happens after they read it, why it matters today specifically].",
   scenes: [
     {
       id: "w4-s1",
@@ -54,6 +55,7 @@ export const game4: Game = {
           correct: true,
           feedback:
             "Precisely. What: 'something' — no defined output type (email? social post? press release?). What Not: no constraints on tone, jargon, or generic phrases. How: no format, length, or audience specified. Why: no context on the product, launch date, or stakes. The AI had nothing to work with except the word 'product launch.'",
+          leadsTo: "w4-s2",
         },
         {
           label: "B",
@@ -61,6 +63,7 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Format alone wouldn't fix this. Without knowing WHAT type of content, WHO it's for, WHAT to avoid, and WHY it matters, even a beautifully formatted output would still be generic and useless.",
+          leadsTo: "w4-s1-consequence",
         },
         {
           label: "C",
@@ -68,6 +71,7 @@ export const game4: Game = {
           correct: false,
           feedback:
             "AI is exceptional at marketing — some of the most compelling copy being written today is AI-assisted. The issue was always the prompt, not the model. With a structured Maestro prompt, that same AI would produce something publishable.",
+          leadsTo: "w4-s1-consequence",
         },
         {
           label: "D",
@@ -75,10 +79,29 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Specifying the output type (email vs. post vs. press release) would help, but that's one pillar of four. Without constraints, format specs, and purpose, the output would still be generic.",
+          leadsTo: "w4-s1-consequence",
         },
       ],
       xpAward: 200,
     },
+
+    // ─── PATH A — Bad Copy Consequence Detour ─────────────────────────────────
+    {
+      id:              "w4-s1-consequence",
+      type:            "consequence",
+      xpAward:         0,
+      consequenceText: "Aria forwards the AI's generic product copy to the marketing director. Within minutes, she receives a rejection email: 'This sounds like every other SaaS launch from 2021. Where is our actual value proposition? Did you write this in five seconds?' She is forced to go back and rethink the input.",
+    },
+    {
+      id:              "w4-s1-felipe",
+      type:            "felipe",
+      xpAward:         0,
+      felipeCard: {
+        quote:     "A violinist who plays with no expression is just hitting frequencies. If you give the AI a generic sheet of music, don't be surprised when it plays a generic tune. To get nuanced copy, you must give it the specific constraints of our actual voice.",
+        rejoinsAt: "w4-s2",
+      },
+    },
+
     {
       id: "w4-s2",
       type: "scenario",
@@ -92,6 +115,7 @@ export const game4: Game = {
           correct: false,
           feedback:
             "This is Game 1 territory. No audience, no stakes, no constraints, no format. You'll get a template you'll spend an hour editing into something usable.",
+          leadsTo: "w4-s2-consequence",
         },
         {
           label: "B",
@@ -99,6 +123,7 @@ export const game4: Game = {
           correct: true,
           feedback:
             "Maestro Method complete. What: company-wide RTO announcement email. What Not: no corporate jargon, no hollow phrases. How: empathetic tone, specific components, under 350 words. Why: Glassdoor narrative, anxious remote workers. This prompt produces something you can present to your CEO tomorrow.",
+          leadsTo: "w4-s3",
         },
         {
           label: "C",
@@ -106,6 +131,7 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Better than Option A, but still missing the key specifics. No policy details, no tone constraints, no format, no stakes. AI needs the actual context to do real work for you.",
+          leadsTo: "w4-s2-consequence",
         },
         {
           label: "D",
@@ -113,9 +139,27 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Again a search query, not a Maestro prompt. You'd get a generic article about RTO best practices, not a draft email. Know when you want research vs. when you want execution.",
+          leadsTo: "w4-s2-consequence",
         },
       ],
       xpAward: 200,
+    },
+
+    // ─── PATH B — RTO Email Consequence Detour ────────────────────────────────
+    {
+      id:              "w4-s2-consequence",
+      type:            "consequence",
+      xpAward:         0,
+      consequenceText: "Aria uses the simple prompt to write the RTO email. The AI output is cold and overly corporate. Shortly after sending it, an angry remote employee posts the email on Glassdoor, calling the company 'deceptive and toxic.' Two key senior engineers resign by Friday evening due to the lack of empathy.",
+    },
+    {
+      id:              "w4-s2-felipe",
+      type:            "felipe",
+      xpAward:         0,
+      felipeCard: {
+        quote:     "A loud, discordant note in a quiet movement ruins the entire piece. When communicating policy changes, tone is not a cosmetic detail—it is the difference between keeping your section together or watching them walk off the stage. Constraints protect your human relationships.",
+        rejoinsAt: "w4-s3",
+      },
     },
     {
       id: "w4-s3",

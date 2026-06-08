@@ -63,7 +63,14 @@ export default function FloatingNotes({ mood = "normal" }: { mood?: SoundMood })
   const glow = false
 
   return (
-    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 5, overflow: "hidden" }}>
+    // aria-hidden: purely decorative — screen readers must not read musical symbols
+    // No willChange inline style: browser compositor handles animated elements
+    // automatically; promoting all 14 at once was blowing the GPU layer budget.
+    <div
+      aria-hidden="true"
+      role="presentation"
+      style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 5, overflow: "hidden" }}
+    >
       {NOTES.map((n, i) => (
         <div
           key={i}
@@ -75,7 +82,10 @@ export default function FloatingNotes({ mood = "normal" }: { mood?: SoundMood })
             color: COLOR[n.color],
             animation: `fn-${n.dir} ${n.dur * speedMult}s ${n.delay}s ease-in-out infinite`,
             filter: glow ? `drop-shadow(0 0 5px ${COLOR[n.color]})` : "none",
-            willChange: "transform, opacity",
+            // willChange removed — was promoting all 14 elements simultaneously.
+            // CSS animations that use transform/opacity are already composited by
+            // the browser. Explicit willChange only helps when set just before the
+            // animation starts, not statically on every element.
           }}
         >
           {n.sym}

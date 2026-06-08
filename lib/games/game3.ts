@@ -3,8 +3,7 @@ import { Game } from "./types"
 export const game3: Game = {
   slug: "ai-for-professionals",
   week: 3,
-  free: false,
-  price: 4.99,
+  free: true,
   title: "AI for Professionals",
   emoji: "⚡",
   icon: "baton" as const,
@@ -38,6 +37,8 @@ export const game3: Game = {
     teaserLine:   "The Maestro Method is your foundation. But knowing the method and MASTERING it are different things. Aria is a violinist who's about to put everything to the test — and it's not pretty at first.",
     previewImage: "/images/aria.png",
   },
+
+  mondayPrompt: "You are a [ROLE — e.g., senior consultant, project manager]. Task: [WHAT — specific deliverable]. Do NOT include [WHAT NOT — e.g., jargon, headers, filler phrases]. Format: [HOW — bullet list / email / 3-paragraph memo / table]. Context: [WHY — who reads this, what decision it informs, what's at stake].",
   scenes: [
 
     // ── LEARN 1: The Triage Principle ─────────────────────────────────────────
@@ -125,6 +126,7 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Prompt A will produce a generic, forgettable apology that could be from any company to any client. You'll spend 20 minutes editing it into shape. Brevity in prompting is a false economy.",
+          leadsTo: "w3-s2-consequence",
         },
         {
           label: "B",
@@ -132,6 +134,7 @@ export const game3: Game = {
           correct: true,
           feedback:
             "Prompt B is the Maestro Method in action: WHAT (professional apology), WHO (DataSync, enterprise, 3-year), WHAT NOT (no legal admissions), HOW (accountable, calm, under 200 words), WHY (client relationship preservation). The output will be 80% ready to send.",
+          leadsTo: "w3-learn-3",
         },
         {
           label: "C",
@@ -139,6 +142,7 @@ export const game3: Game = {
           correct: false,
           feedback:
             "AI doesn't replace your voice — it amplifies it. With Prompt B, Claude drafts in your direction. You review, adjust tone, and sign. Professionals who write everything from scratch are leaving 3 hours on the table every day.",
+          leadsTo: "w3-s2-consequence",
         },
         {
           label: "D",
@@ -146,9 +150,27 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Constraints are the point. You don't want a creative apology email. You want an accurate, professional, relationship-preserving one. Constraints focus AI on the result you actually need.",
+          leadsTo: "w3-s2-consequence",
         },
       ],
       xpAward: 150,
+    },
+
+    // ─── PATH B — Apology Email Consequence Detour ────────────────────────────
+    {
+      id:              "w3-s2-consequence",
+      type:            "consequence",
+      xpAward:         0,
+      consequenceText: "Carlos drafts a generic apology email using Prompt A. The email is sent to the DataSync CEO, who immediately calls it 'inauthentic corporate boilerplate' and threatens to cancel the contract.",
+    },
+    {
+      id:              "w3-s2-felipe",
+      type:            "felipe",
+      xpAward:         0,
+      felipeCard: {
+        quote:     "A boilerplate apology is like playing a pre-recorded track when the audience is shouting for an encore. You must address the specific room you are in. When the stakes are high, use constraints to speak directly to the relationship, not to the template.",
+        rejoinsAt: "w3-learn-3",
+      },
     },
 
     // ── LEARN 3: Which tasks to automate ─────────────────────────────────────
@@ -315,6 +337,7 @@ export const game3: Game = {
           correct: false,
           feedback:
             "AI is genuinely useful for structuring research, generating hypotheses, and synthesizing information you provide. The problem isn't AI research generally — it's using AI-generated statistics without verification. Numbers, dates, names, and revenue figures always need a primary source.",
+          leadsTo: "w3-s6-consequence",
         },
         {
           label: "B",
@@ -322,6 +345,7 @@ export const game3: Game = {
           correct: true,
           feedback:
             "This is the golden rule of AI-assisted research. AI can draft the framework, suggest what to look for, and synthesize your verified findings. But any specific figure in a high-stakes document needs a primary source. A simple rule: if it has a number, find where that number actually came from.",
+          leadsTo: "w3-revelation",
         },
         {
           label: "C",
@@ -329,6 +353,7 @@ export const game3: Game = {
           correct: false,
           feedback:
             "AI cannot verify its own outputs against real-world data at the time of generation. Asking it to 'double-check' doesn't trigger a database lookup — it just re-generates text that may confirm the original error. Verification is always a human step.",
+          leadsTo: "w3-s6-consequence",
         },
         {
           label: "D",
@@ -336,9 +361,27 @@ export const game3: Game = {
           correct: false,
           feedback:
             "A disclaimer doesn't fix wrong data — it just preemptively apologizes for it. The board still made decisions based on false information. The only real solution is verification before presentation.",
+          leadsTo: "w3-s6-consequence",
         },
       ],
       xpAward: 175,
+    },
+
+    // ─── PATH D — Unverified Data Consequence Detour ──────────────────────────
+    {
+      id:              "w3-s6-consequence",
+      type:            "consequence",
+      xpAward:         0,
+      consequenceText: "Carlos presents the AI-generated 34% YoY competitor growth rate during the board meeting. A board member who happens to be an auditor pulls up the actual SEC filings on their tablet and corrects him: 'DataSync's growth was 11%. Where did you get 34%?' The presentation grinds to a painful halt.",
+    },
+    {
+      id:              "w3-s6-felipe",
+      type:            "felipe",
+      xpAward:         0,
+      felipeCard: {
+        quote:     "Even the finest saxophonist must tune his instrument before stepping on stage. You treated the AI's confident tone as a signature of truth. If there is a number on your slide, verify it yourself—or expect the audience to do it for you.",
+        rejoinsAt: "w3-revelation",
+      },
     },
 
     // ── REVELATION ───────────────────────────────────────────────────────────

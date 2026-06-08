@@ -3,8 +3,7 @@ import { Game } from "./types"
 export const game10: Game = {
   slug: "gemini-cli-unlocked",
   week: 10,
-  free: false,
-  price: 4.99,
+  free: true,
   title: "Gemini CLI — AI for the Command Line",
   emoji: "⚡",
   accentColor: "#f59e0b",
@@ -30,6 +29,7 @@ export const game10: Game = {
     ],
   },
   aiModel:  "gemini" as const,
+  mondayPrompt: "In Gemini CLI: 'I need you to [MULTI-STEP TASK — e.g., scan all .csv files in /data, identify any with missing headers, rename them with a -NEEDS-REVIEW suffix, and generate a summary report as report.md]. Show me each step before executing. Stop and ask me if you encounter anything unexpected. Do not delete or overwrite any file without confirmation.'",
   felipeOutroVideo:   "/videos/felipe-game10.mp4",
   nextGame: {
     slug:         "microsoft-copilot",

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Scene, Choice } from "@/lib/games/types"
 import ChoiceButton from "./ChoiceButton"
+import { useSoundEngine } from "./SoundEngine"
 
 /* ─── helpers ────────────────────────────────────────────── */
 function powerScale(p: number, total: number) {
@@ -79,6 +80,8 @@ type Props = {
   scene:            Scene
   onComplete:       (xpEarned: number) => void
   maestroImage?:    string
+  characterImage?:  string
+  characterName?:   string
   accentColor?:     string
   onPlayCorrect?:   () => void
   onPlayWrong?:     () => void
@@ -87,10 +90,11 @@ type Props = {
 
 export default function BossArena({
   scene, onComplete,
-  maestroImage, accentColor = "#e040fb",
+  maestroImage, characterImage, characterName, accentColor = "#e040fb",
   onPlayCorrect, onPlayWrong, onPlayFireworks,
 }: Props) {
   useEffect(() => { ensureKf() }, [])
+  const sound = useSoundEngine()
 
   // Normalise: prefer bossQuestions array, fall back to single question
   const questions = scene.bossQuestions
@@ -110,26 +114,75 @@ export default function BossArena({
   const [shakeKey,      setShakeKey]      = useState(0)  // trigger shake animation
   const [attempt,       setAttempt]       = useState(1)  // re-challenge counter
 
+  // Rhythm Mini-game States
+  const [tempoActive,   setTempoActive]   = useState(true)
+  const [sliderPos,     setSliderPos]     = useState(0)
+  const [tempoRating,   setTempoRating]   = useState<"perfect" | "good" | "off" | null>(null)
+
   const currentQ = questions[round]
+
+  /* ── Smooth Tempo Indicator Oscillation ──────────────────── */
+  useEffect(() => {
+    if (!tempoActive || phase !== "battle") return
+    let start: number | null = null
+    let animId: number
+    const speed = 0.0034 // Tempo indicator speed
+    const update = (time: number) => {
+      if (!start) start = time
+      const elapsed = time - start
+      // Smooth oscillation between 0 and 100 using sine wave
+      const pos = Math.round(50 + 50 * Math.sin(elapsed * speed))
+      setSliderPos(pos)
+      animId = requestAnimationFrame(update)
+    }
+    animId = requestAnimationFrame(update)
+    return () => cancelAnimationFrame(animId)
+  }, [tempoActive, phase])
+
+  /* ── Strike tempo beat action ────────────────────────────── */
+  const strikeTempo = useCallback(() => {
+    if (!tempoActive) return
+    setTempoActive(false)
+    
+    // Harmony zone checks
+    if (sliderPos >= 43 && sliderPos <= 57) {
+      setTempoRating("perfect")
+      sound.playStreak()
+    } else if (sliderPos >= 25 && sliderPos <= 75) {
+      setTempoRating("good")
+      sound.playClick()
+    } else {
+      setTempoRating("off")
+      sound.playWrong()
+    }
+  }, [tempoActive, sliderPos, sound])
 
   /* ── Answer handler ──────────────────────────────────────── */
   const handleAnswer = useCallback((choice: Choice) => {
     if (answered) return
     setAnswered(true)
     setSelectedLabel(choice.label)
-    const correct = choice.correct
+    const correct = choice.correct ?? false
     setIsCorrect(correct)
-    setFeedbackText(!correct && choice.wrongFeedback ? choice.wrongFeedback : choice.feedback)
+    setFeedbackText(!correct && choice.wrongFeedback ? choice.wrongFeedback : (choice.feedback ?? ""))
+    
     if (correct) {
       onPlayCorrect?.()
-      setPower(p => Math.min(total, p + 1))
+      // Perfect tempo yields double power gain (+2), others yield standard (+1)
+      const powerGain = tempoRating === "perfect" ? 2 : 1
+      setPower(p => Math.min(total, p + powerGain))
       setScore(s => s + 1)
     } else {
       onPlayWrong?.()
-      setPower(p => Math.max(0, p - 1))
+      // Perfect tempo shields from power/health drop
+      if (tempoRating === "perfect") {
+        setFeedbackText(prev => `[Focus Shield Active] Perfect tempo shielded you from losing power! ` + prev)
+      } else {
+        setPower(p => Math.max(0, p - 1))
+      }
       setShakeKey(k => k + 1)
     }
-  }, [answered, total, onPlayCorrect, onPlayWrong])
+  }, [answered, total, onPlayCorrect, onPlayWrong, tempoRating])
 
   /* ── Next round / finish ─────────────────────────────────── */
   const handleNext = useCallback(() => {
@@ -143,6 +196,11 @@ export default function BossArena({
     setSelectedLabel(null)
     setIsCorrect(null)
     setFeedbackText("")
+    
+    // Reset rhythm states for next round
+    setTempoActive(true)
+    setTempoRating(null)
+    setSliderPos(0)
   }, [round, total, score, onPlayFireworks])
 
   const handleFinish = useCallback(() => {
@@ -162,6 +220,11 @@ export default function BossArena({
     setShakeKey(0)
     setAttempt(a => a + 1)
     setPhase("battle")
+    
+    // Reset rhythm states
+    setTempoActive(true)
+    setTempoRating(null)
+    setSliderPos(0)
   }, [])
 
   const won = score >= Math.ceil(total / 2)
@@ -170,33 +233,36 @@ export default function BossArena({
 
   /* ══════════════════════════════════════════════════════════
      DONE SCREEN
-  ══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
   if (phase === "done") {
     return (
       <div style={{
         position: "fixed", inset: 0, zIndex: 20,
         background: "radial-gradient(ellipse at 50% 25%, rgba(40,10,60,0.98) 0%, rgba(8,6,15,0.99) 100%)",
         display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "2rem",
+        alignItems: "center", justifyContent: "flex-start",
+        padding: "1.5rem 1.5rem",
+        overflowY: "auto",
         animation: "ba-done-in 0.6s cubic-bezier(0.34,1.1,0.64,1) both",
       }}>
+        {/* Top spacer to assist vertical centering on tall viewports */}
+        <div style={{ flexGrow: 1, minHeight: "0.5rem" }} />
 
         {/* Result label */}
         <div style={{
           fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.6rem",
           letterSpacing: "0.38em", textTransform: "uppercase",
           color: won ? "rgba(224,64,251,0.85)" : "rgba(255,100,100,0.6)",
-          marginBottom: "0.65rem",
+          marginBottom: "0.4rem",
         }}>
           {won ? "Conductor Awakened" : attempt > 1 ? `Attempt ${attempt} — Keep Fighting` : "Keep Practicing"}
         </div>
 
         {/* Maestro — locked to final power */}
         <div style={{
-          width: "220px", height: "260px", flexShrink: 0,
+          width: "clamp(100px, 16vh, 150px)", height: "clamp(115px, 18.5vh, 175px)", flexShrink: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          marginBottom: "1.5rem",
+          marginBottom: "0.6rem",
           filter: `drop-shadow(${tGlow})`,
           animation: won ? "ba-winner-pulse 2.5s ease-in-out infinite" : "none",
         }}>
@@ -210,17 +276,17 @@ export default function BossArena({
             />
           ) : (
             <div style={{
-              fontSize: "8rem", lineHeight: 1, userSelect: "none",
+              fontSize: "4.5rem", lineHeight: 1, userSelect: "none",
               filter: `grayscale(${powerGrayscale(power, total)}) brightness(${powerBrightness(power, total)})`,
             }}>🎼</div>
           )}
         </div>
 
         {/* Power orbs — final state */}
-        <div style={{ display: "flex", gap: "0.55rem", marginBottom: "1.25rem" }}>
+        <div style={{ display: "flex", gap: "0.4rem", marginBottom: "0.6rem" }}>
           {Array.from({ length: total }).map((_, i) => (
             <div key={i} style={{
-              width: "18px", height: "18px", borderRadius: "50%",
+              width: "16px", height: "16px", borderRadius: "50%",
               background: i < power
                 ? "linear-gradient(135deg,#e040fb,#7b2fbe)"
                 : "rgba(255,255,255,0.08)",
@@ -233,14 +299,14 @@ export default function BossArena({
         {/* Score text */}
         <div style={{
           fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
-          fontSize: "1.45rem", color: "#fff", marginBottom: "0.5rem", textAlign: "center",
+          fontSize: "1.2rem", color: "#fff", marginBottom: "0.3rem", textAlign: "center",
         }}>
           {score} of {total} answered correctly
         </div>
         <p style={{
-          fontFamily: "Inter, sans-serif", fontSize: "0.85rem",
-          color: "rgba(240,238,255,0.45)", marginBottom: "2rem",
-          textAlign: "center", maxWidth: "360px", lineHeight: 1.65,
+          fontFamily: "Inter, sans-serif", fontSize: "0.82rem",
+          color: "rgba(240,238,255,0.45)", marginBottom: "1rem",
+          textAlign: "center", maxWidth: "360px", lineHeight: 1.55,
         }}>
           {won
             ? "The Maestro is fully awakened. Your expertise becomes the orchestra's language."
@@ -249,15 +315,15 @@ export default function BossArena({
             : "Every maestro has faced this moment. The question is — do you rise?"}
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center", width: "100%", maxWidth: "320px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", alignItems: "center", width: "100%", maxWidth: "320px" }}>
           <button
             onClick={handleFinish}
             style={{
               width: "100%",
-              fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem",
+              fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.95rem",
               color: "#08060f",
               background: `linear-gradient(90deg, ${accentColor}, #e040fb)`,
-              padding: "1rem 3rem", borderRadius: "100px", border: "none", cursor: "pointer",
+              padding: "0.65rem 2rem", borderRadius: "100px", border: "none", cursor: "pointer",
               boxShadow: `0 0 40px ${accentColor}44`,
               letterSpacing: "0.01em",
               transition: "transform 0.2s, box-shadow 0.2s",
@@ -274,11 +340,11 @@ export default function BossArena({
               onClick={handleReset}
               style={{
                 width: "100%",
-                fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.9rem",
+                fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.85rem",
                 color: "rgba(240,238,255,0.65)",
                 background: "rgba(255,255,255,0.04)",
                 border: "1px solid rgba(255,255,255,0.12)",
-                padding: "0.85rem 2rem", borderRadius: "100px", cursor: "pointer",
+                padding: "0.58rem 1.8rem", borderRadius: "100px", cursor: "pointer",
                 letterSpacing: "0.01em",
                 transition: "color 0.2s, border-color 0.2s, background 0.2s",
               }}
@@ -297,13 +363,16 @@ export default function BossArena({
             </button>
           )}
         </div>
+
+        {/* Bottom spacer to assist vertical centering on tall viewports */}
+        <div style={{ flexGrow: 1.5, minHeight: "1rem" }} />
       </div>
     )
   }
 
   /* ══════════════════════════════════════════════════════════
      BATTLE SCREEN
-  ══════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════ */
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 20,
@@ -311,19 +380,96 @@ export default function BossArena({
         rgba(${power > (total * 0.6) ? "60,15,80" : "30,10,50"},${0.45 + (power/total)*0.12}) 0%,
         rgba(8,6,15,0.97) 65%)`,
       overflowY: "auto",
-      paddingTop: "4rem", // clear fixed top bar
+      paddingTop: "3.2rem", // clear fixed top bar
     }}>
-      <div style={{ maxWidth: "680px", margin: "0 auto", padding: "1rem 1.5rem 7rem" }}>
+
+      {/* ── Jake's stage — the protagonist watches their own awakening ── */}
+      {characterImage && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "fixed", right: "1%", top: "3rem", bottom: 0,
+            width: "clamp(300px, 36vw, 540px)", zIndex: 2, pointerEvents: "none",
+            display: "flex", alignItems: "flex-end", justifyContent: "center",
+          }}
+        >
+          {/* floor glow tinted by answer state */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: answered
+              ? (isCorrect
+                  ? "radial-gradient(ellipse at 50% 80%, rgba(88,204,2,0.16) 0%, transparent 65%)"
+                  : "radial-gradient(ellipse at 50% 80%, rgba(255,75,75,0.13) 0%, transparent 65%)")
+              : "radial-gradient(ellipse at 50% 80%, rgba(224,64,251,0.16) 0%, transparent 65%)",
+            transition: "background 0.5s ease",
+          }} />
+          <img
+            key={`boss-char-${round}-${answered}`}
+            src={characterImage}
+            alt=""
+            draggable={false}
+            style={{
+              width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom center",
+              maskImage: "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%), linear-gradient(to top, black 0%, black 94%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%), linear-gradient(to top, black 0%, black 94%, transparent 100%)",
+              maskComposite: "intersect", WebkitMaskComposite: "source-in",
+              opacity: answered ? 1 : 0.72,
+              filter: answered
+                ? (isCorrect
+                    ? "drop-shadow(0 0 26px rgba(88,204,2,0.65)) brightness(1.1) saturate(1.2)"
+                    : "drop-shadow(0 0 20px rgba(255,75,75,0.5)) brightness(0.85) saturate(0.7)")
+                : "drop-shadow(0 0 18px rgba(224,64,251,0.5)) brightness(1.0)",
+              animation: answered
+                ? (isCorrect
+                    ? "char-react-correct 0.7s cubic-bezier(0.34,1.56,0.64,1) both"
+                    : "char-react-wrong 0.55s ease-in-out both")
+                : "char-breathe 4s ease-in-out infinite",
+              transformOrigin: "bottom center",
+              transition: "opacity 0.4s ease, filter 0.4s ease",
+            }}
+          />
+          {characterName && (
+            <div style={{
+              position: "absolute", bottom: "1rem", left: "50%", transform: "translateX(-50%)",
+              background: "rgba(8,6,15,0.88)",
+              border: answered
+                ? `1px solid ${isCorrect ? "rgba(88,204,2,0.5)" : "rgba(255,75,75,0.5)"}`
+                : "1px solid rgba(224,64,251,0.5)",
+              borderRadius: "100px", padding: "0.25rem 0.85rem",
+              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem",
+              letterSpacing: "0.2em", textTransform: "uppercase",
+              color: answered ? (isCorrect ? "#7dff6b" : "#ff8080") : "var(--pink)",
+              whiteSpace: "nowrap", boxShadow: "0 0 16px rgba(0,0,0,0.4)",
+            }}>
+              {characterName}{answered ? (isCorrect ? " ✓" : " …") : ""}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div style={characterImage
+        ? {
+            maxWidth: "none",
+            marginLeft: "max(1.5rem, 5vw)",
+            marginRight: "clamp(260px, 30vw, 460px)",
+            padding: "0.5rem 1.5rem 4rem",
+          }
+        : {
+            maxWidth: "680px",
+            margin: "0 auto",
+            padding: "0.5rem 1.5rem 4rem",
+          }
+      }>
 
         {/* ── Header row ── */}
         <div style={{
           display: "flex", alignItems: "center",
-          justifyContent: "space-between", marginBottom: "0.85rem",
+          justifyContent: "space-between", marginBottom: "0.35rem",
         }}>
           <div style={{
             display: "flex", alignItems: "center", gap: "0.5rem",
             background: "rgba(224,64,251,0.1)", border: "1px solid rgba(224,64,251,0.25)",
-            borderRadius: "100px", padding: "0.28rem 0.85rem 0.28rem 0.55rem",
+            borderRadius: "100px", padding: "0.2rem 0.7rem 0.2rem 0.45rem",
           }}>
             <span style={{ fontSize: "1rem" }}>🎼</span>
             <span style={{
@@ -342,7 +488,7 @@ export default function BossArena({
         {/* ── Power orbs ── */}
         <div style={{
           display: "flex", gap: "0.5rem",
-          justifyContent: "center", marginBottom: "0.4rem",
+          justifyContent: "center", marginBottom: "0.25rem",
         }}>
           {Array.from({ length: total }).map((_, i) => (
             <div key={i} style={{
@@ -360,21 +506,21 @@ export default function BossArena({
 
         {/* ── Power label ── */}
         <div key={power} style={{
-          textAlign: "center", marginBottom: "0.65rem",
+          textAlign: "center", marginBottom: "0.3rem",
           fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
-          fontSize: "0.92rem", color: "rgba(224,64,251,0.7)",
+          fontSize: "0.88rem", color: "rgba(224,64,251,0.7)",
           animation: "ba-label-in 0.35s ease both",
         }}>
           {powerLabel(power, total)}
         </div>
 
         {/* ── Maestro visual ── */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.4rem" }}>
           {/* Outer scale spring */}
           <motion.div
             animate={{ scale: tScale }}
             transition={{ type: "spring", stiffness: 240, damping: 20 }}
-            style={{ width: "200px", height: "230px", display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ width: "clamp(75px, 11vh, 105px)", height: "clamp(85px, 12.5vh, 120px)", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {/* Inner shake */}
             <motion.div
@@ -398,7 +544,7 @@ export default function BossArena({
                 />
               ) : (
                 <div style={{
-                  fontSize: "6rem", lineHeight: 1, userSelect: "none",
+                  fontSize: "3.2rem", lineHeight: 1, userSelect: "none",
                   filter: `grayscale(${powerGrayscale(power,total)}) brightness(${powerBrightness(power,total)})`,
                   transition: "filter 0.6s ease",
                 }}>
@@ -407,6 +553,103 @@ export default function BossArena({
               )}
             </motion.div>
           </motion.div>
+        </div>
+
+        {/* ── Tempo Sync Interface (Rhythm Mini-game) ── */}
+        <div style={{
+          background: "rgba(255, 255, 255, 0.02)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
+          padding: "0.55rem 0.8rem",
+          marginBottom: "0.6rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "0.45rem",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", fontSize: "0.75rem", fontFamily: "Inter, sans-serif", fontWeight: 700, color: "rgba(240,238,255,0.4)", letterSpacing: "0.08em" }}>
+            <span>TEMPO SYNCHRONIZER</span>
+            <span>{tempoRating ? "LOCKED" : "OSCILLATING..."}</span>
+          </div>
+
+          {/* Oscillating Bar */}
+          <div style={{
+            position: "relative",
+            width: "100%",
+            height: "12px",
+            background: "rgba(255,255,255,0.05)",
+            border: "1.5px solid rgba(255,255,255,0.12)",
+            borderRadius: "6px",
+            overflow: "hidden",
+          }}>
+            {/* Harmony Zone (Sweet Spot) in center (43% to 57%) */}
+            <div style={{
+              position: "absolute",
+              left: "43%",
+              width: "14%",
+              height: "100%",
+              background: "linear-gradient(90deg, rgba(88,204,2,0.15) 0%, rgba(88,204,2,0.4) 50%, rgba(88,204,2,0.15) 100%)",
+              borderLeft: "1.5px dashed rgba(88,204,2,0.45)",
+              borderRight: "1.5px dashed rgba(88,204,2,0.45)",
+            }} />
+            
+            {/* Moving Indicator */}
+            <div style={{
+              position: "absolute",
+              left: `${sliderPos}%`,
+              top: 0,
+              width: "12px",
+              height: "12px",
+              transform: "translateX(-50%)",
+              background: tempoRating === "perfect" ? "#7dff6b" : tempoRating === "good" ? "var(--cyan)" : tempoRating === "off" ? "#ff4b4b" : "#fff",
+              borderRadius: "50%",
+              boxShadow: tempoRating === "perfect" ? "0 0 14px #7dff6b" : tempoRating === "good" ? "0 0 10px var(--cyan)" : "0 0 8px rgba(255,255,255,0.5)",
+              transition: tempoRating ? "all 0.1s ease" : "none",
+            }} />
+          </div>
+
+          {/* Strike button / Rating feedback */}
+          <div style={{ width: "100%", display: "flex", justifyContent: "center", minHeight: "30px", alignItems: "center" }}>
+            {tempoActive ? (
+              <button
+                onClick={strikeTempo}
+                style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 800,
+                  fontSize: "0.85rem",
+                  color: "#08060f",
+                  background: `linear-gradient(90deg, ${accentColor}, #e040fb)`,
+                  padding: "0.35rem 1.6rem",
+                  borderRadius: "100px",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: `0 0 20px ${accentColor}44`,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {characterName === "Zoe" ? "HIT THE BEAT 🥁" : "STRIKE BATON 🪄"}
+              </button>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                {tempoRating === "perfect" && (
+                  <span style={{ color: "#7dff6b", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem", letterSpacing: "0.05em" }}>
+                    ⚡ PERFECT HARMONY! (+2× Power / Shield Active)
+                  </span>
+                )}
+                {tempoRating === "good" && (
+                  <span style={{ color: "var(--cyan)", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem", letterSpacing: "0.05em" }}>
+                    ♪ ON THE BEAT! (+1× Power)
+                  </span>
+                )}
+                {tempoRating === "off" && (
+                  <span style={{ color: "rgba(255,75,75,0.7)", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem", letterSpacing: "0.05em" }}>
+                    ✗ OFF TEMPO! (No Shield / Normal Power)
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Question + Choices (animated per round) ── */}
@@ -425,12 +668,14 @@ export default function BossArena({
                 border: "1px solid rgba(224,64,251,0.18)",
                 borderLeft: "3px solid var(--pink)",
                 borderRadius: "0 10px 10px 0",
-                padding: "0.6rem 1rem",
-                marginBottom: "0.75rem",
+                padding: "0.35rem 0.75rem",
+                marginBottom: "0.4rem",
+                maxHeight: "65px",
+                overflowY: "auto",
               }}>
                 <p style={{
                   fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
-                  fontSize: "1.05rem", color: "var(--pink)", margin: 0, lineHeight: 1.5,
+                  fontSize: "0.88rem", color: "var(--pink)", margin: 0, lineHeight: 1.45,
                 }}>
                   &ldquo;{currentQ.npcLine}&rdquo;
                 </p>
@@ -439,7 +684,7 @@ export default function BossArena({
 
             {/* Question label */}
             <div style={{
-              display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.32rem",
+              display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.18rem",
             }}>
               <span style={{ fontSize: "0.9rem" }}>🎼</span>
               <span style={{
@@ -450,31 +695,46 @@ export default function BossArena({
 
             <h2 style={{
               fontFamily: "Inter, sans-serif", fontWeight: 700,
-              fontSize: "clamp(0.9rem,2.3vw,1.05rem)",
-              color: "#fff", lineHeight: 1.42, marginBottom: "0.75rem",
+              fontSize: "clamp(0.82rem,1.9vw,0.92rem)",
+              color: "#fff", lineHeight: 1.38, marginBottom: "0.35rem",
             }}>
               {currentQ?.question}
             </h2>
 
-            {/* Choices */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-              {currentQ?.choices.map((choice, i) => (
-                <motion.div
-                  key={choice.label}
-                  initial={{ opacity: 0, x: 18 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ type: "spring", stiffness: 380, damping: 30, delay: 0.07 + i * 0.06 }}
-                >
-                  <ChoiceButton
-                    choice={choice}
-                    index={i}
-                    answered={answered}
-                    selectedLabel={selectedLabel}
-                    onSelect={handleAnswer}
-                  />
-                </motion.div>
-              ))}
-            </div>
+            {/* Choices - Hidden until tempo sync completed */}
+            {!tempoActive ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.22rem" }}>
+                {currentQ?.choices.map((choice, i) => (
+                  <motion.div
+                    key={choice.label}
+                    initial={{ opacity: 0, x: 18 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 30, delay: 0.07 + i * 0.06 }}
+                  >
+                    <ChoiceButton
+                      choice={choice}
+                      index={i}
+                      answered={answered}
+                      selectedLabel={selectedLabel}
+                      onSelect={handleAnswer}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div style={{
+                textAlign: "center",
+                padding: "1.5rem",
+                border: "1.5px dashed rgba(255,255,255,0.06)",
+                borderRadius: "12px",
+                fontFamily: "Inter, sans-serif",
+                fontSize: "0.85rem",
+                color: "rgba(240,238,255,0.3)",
+                background: "rgba(255,255,255,0.01)",
+              }}>
+                Sync the tempo to unlock the options...
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -492,13 +752,13 @@ export default function BossArena({
               : "linear-gradient(180deg,rgba(30,8,8,0.98) 0%,rgba(22,6,6,0.99) 100%)",
             borderTop: `3px solid ${isCorrect ? "#58cc02" : "#ff4b4b"}`,
             backdropFilter: "blur(24px)",
-            padding: "0.9rem 1.5rem 1.1rem",
+            padding: "0.6rem 1.5rem 0.75rem",
             zIndex: 100,
           }}
         >
           <div style={{ maxWidth: "680px", margin: "0 auto" }}>
             {/* Result row */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: feedbackText ? "0.5rem" : "0.85rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: feedbackText ? "0.3rem" : "0.5rem" }}>
               <div style={{
                 width: "32px", height: "32px", borderRadius: "50%", flexShrink: 0,
                 background: isCorrect
@@ -521,8 +781,8 @@ export default function BossArena({
 
             {feedbackText && (
               <p style={{
-                fontFamily: "Inter, sans-serif", fontSize: "0.875rem",
-                color: "rgba(240,238,255,0.75)", lineHeight: 1.65, margin: "0 0 0.85rem",
+                fontFamily: "Inter, sans-serif", fontSize: "0.8rem",
+                color: "rgba(240,238,255,0.75)", lineHeight: 1.45, margin: "0 0 0.5rem",
               }}>
                 {feedbackText}
               </p>
@@ -532,12 +792,12 @@ export default function BossArena({
               onClick={handleNext}
               style={{
                 width: "100%",
-                fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.95rem",
+                fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.9rem",
                 color: "#fff",
                 background: isCorrect
                   ? "linear-gradient(90deg,#58cc02,#33a500)"
                   : "linear-gradient(90deg,#ff4b4b,#c62828)",
-                padding: "0.7rem", borderRadius: "12px", border: "none", cursor: "pointer",
+                padding: "0.5rem", borderRadius: "10px", border: "none", cursor: "pointer",
                 letterSpacing: "0.04em", textTransform: "uppercase",
                 transition: "filter 0.15s ease, transform 0.15s ease",
               }}

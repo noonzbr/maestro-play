@@ -4,30 +4,149 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Scene } from "@/lib/games/types"
 
+/* ── Audio Synthesis Dialogue Voice (Celeste/Animal Crossing style) ────── */
+let audioCtx: AudioContext | null = null
+
+export function playVoiceBlip(speaker: string, char: string) {
+  if (!char || [" ", ".", ",", "!", "?", "-", "\n", '"', "'", "“", "”"].includes(char)) return
+
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    }
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume()
+    }
+
+    const t = audioCtx.currentTime
+    const osc = audioCtx.createOscillator()
+    const gain = audioCtx.createGain()
+
+    osc.connect(gain)
+    gain.connect(audioCtx.destination)
+
+    const name = speaker.toUpperCase()
+    let freq = 260
+    let type: OscillatorType = "sine"
+    let vol = 0.03
+    let dur = 0.045
+
+    if (name.includes("JAKE") || name.includes("CARLOS") || name.includes("ARIA") || name.includes("ZOE") || name.includes("PROTAGONIST") || name.includes("KODA") || name.includes("CODA")) {
+      // Protagonists & Companions
+      if (name.includes("JAKE")) {
+        freq = 210
+        type = "triangle"
+      } else if (name.includes("CARLOS")) {
+        freq = 155 // warm jazz baritone register
+        type = "triangle"
+      } else if (name.includes("ZOE")) {
+        freq = 285 // energetic tempo register
+        type = "sine"
+      } else if (name.includes("ARIA") || name.includes("KODA") || name.includes("CODA")) {
+        freq = 315 // clean violin register
+        type = "sine"
+      } else {
+        freq = 220
+        type = "triangle"
+      }
+      vol = 0.028
+      dur = 0.038
+    } else if (name.includes("FELIPE") || name.includes("MAESTRO")) {
+      // Felipe Conductor baritone cello tone
+      freq = 145
+      type = "triangle"
+      vol = 0.03
+      dur = 0.055
+    } else if (name.includes("TYLER") || name.includes("MARCUS") || name.includes("DIEGO")) {
+      // Male NPCs
+      freq = name.includes("DIEGO") ? 135 : 175
+      type = "triangle"
+      vol = 0.025
+      dur = 0.045
+    } else if (name.includes("VEGA") || name.includes("DIANA") || name.includes("LENA") || name.includes("PRIYA")) {
+      // Female NPCs
+      freq = name.includes("VEGA") ? 335 : 305
+      type = "sine"
+      vol = 0.03
+      dur = 0.04
+    } else if (name.includes("AI") || name.includes("CLAUDE") || name.includes("CHATGPT") || name.includes("GEMINI")) {
+      // Robotic AI Synth
+      freq = 780
+      type = "sawtooth"
+      vol = 0.006 // sawtooth is naturally very bright
+      dur = 0.022
+    } else {
+      // Narrator / Default
+      freq = 230
+      type = "sine"
+      vol = 0.028
+      dur = 0.04
+    }
+
+    // Organic micro-pitch jitter (speech frequency variance)
+    const jitter = (Math.random() - 0.5) * 12
+    osc.frequency.setValueAtTime(freq + jitter, t)
+
+    // Envelope
+    gain.gain.setValueAtTime(0, t)
+    gain.gain.linearRampToValueAtTime(vol, t + 0.006)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+
+    osc.start(t)
+    osc.stop(t + dur + 0.01)
+  } catch (e) {
+    // blocked or not supported
+  }
+}
+
+/* ── Dialogue text sentiment/emotion parser ────────────────────────────── */
+function getLineEmotion(text: string): "neutral" | "excited" | "thinking" | "tense" {
+  const clean = text.toLowerCase()
+  if (clean.includes("!") || clean.includes("awesome") || clean.includes("brilliant") || clean.includes("incredible") || clean.includes("perfect") || clean.includes("exactly") || clean.includes("yes")) {
+    return "excited"
+  }
+  if (clean.includes("?") || clean.includes("...") || clean.includes("how") || clean.includes("why") || clean.includes("maybe") || clean.includes("wonder") || clean.includes("think") || clean.includes("guess")) {
+    return "thinking"
+  }
+  if (clean.includes("unethical") || clean.includes("ruined") || clean.includes("crisis") || clean.includes("disaster") || clean.includes("toxic") || clean.includes("angry") || clean.includes("cost") || clean.includes("replaced") || clean.includes("wrong") || clean.includes("fail") || clean.includes("error") || clean.includes("boilerplate") || clean.includes("boilerplate apology")) {
+    return "tense"
+  }
+  return "neutral"
+}
+
 /* ── Background image map — keyed by location keyword ──────────────────── */
 function getBackgroundImage(location: string): string {
   const loc = location.toUpperCase()
-  if (loc.includes("PRACTICE ROOM")) return "/images/bg-practiceroom.png"
-  if (loc.includes("BAND PRACTICE"))  return "/images/bg-bandpractice.png"
+  if (loc.includes("PRACTICE ROOM") || loc.includes("PRACTICE")) return "/images/bg-practiceroom.png"
+  if (loc.includes("BAND PRACTICE") || loc.includes("BACKSTAGE") || loc.includes("STAGE") || loc.includes("REHEARSAL") || loc.includes("PERFORMANCE") || loc.includes("CONCERT"))  return "/images/bg-bandpractice.png"
   if (loc.includes("SCHOOL HALLWAY") || loc.includes("HALLWAY")) return "/images/bg-hallway.png"
-  if (loc.includes("MUSIC CLASS") || loc.includes("CLASSROOM"))  return "/images/bg-musicclass.png"
-  if (loc.includes("BEDROOM"))        return "/images/bg-bedroom.png"
-  if (loc.includes("COFFEE SHOP") || loc.includes("CAFE"))       return "/images/bg-lobby.png"
-  if (loc.includes("HOME OFFICE") || loc.includes("HOME"))       return "/images/bg-bedroom.png"
-  if (loc.includes("OFFICE") || loc.includes("BOARDROOM") || loc.includes("CORPORATE") || loc.includes("CONFERENCE")) return "/images/bg-hallway.png"
-  if (loc.includes("DESIGN STUDIO") || loc.includes("STUDIO") || loc.includes("CREATIVE")) return "/images/bg-musicclass.png"
+  if (loc.includes("MUSIC CLASS") || loc.includes("CLASSROOM") || loc.includes("LIBRARY") || loc.includes("RESEARCH") || loc.includes("CLASS"))  return "/images/bg-musicclass.png"
+  if (loc.includes("JAKE'S ROOM") || loc.includes("JAKE") || loc.includes("BEDROOM") || loc.includes("HOME") || loc.includes("GREEN ROOM"))       return "/images/bg-bedroom.png"
+  if (loc.includes("COFFEE SHOP") || loc.includes("CAF") || loc.includes("LOBBY") || loc.includes("OFFICE") || loc.includes("BOARDROOM") || loc.includes("CORPORATE") || loc.includes("CONFERENCE") || loc.includes("DESK") || loc.includes("THREAD") || loc.includes("REPLIES") || loc.includes("MEDIA"))        return "/images/bg-lobby.png"
+  if (loc.includes("MUSIC ROOM") || loc.includes("MUSIC CLUB") || loc.includes("DESIGN STUDIO") || loc.includes("STUDIO") || loc.includes("CREATIVE")) return "/images/bg-musicclass.png"
   if (loc.includes("COMPUTER LAB") || loc.includes("LAB") || loc.includes("SERVER ROOM") || loc.includes("TECH")) return "/images/bg-practiceroom.png"
-  if (loc.includes("LIBRARY") || loc.includes("RESEARCH"))       return "/images/bg-musicclass.png"
-  if (loc.includes("CONCERT") || loc.includes("STAGE") || loc.includes("PERFORMANCE")) return "/images/bg-bandpractice.png"
-  if (loc.includes("REHEARSAL"))      return "/images/bg-bandpractice.png"
-  return ""   // truly unrecognised — show ambient gradient
+  if (loc.includes("BRIDGE") || loc.includes("ORION") || loc.includes("SPACESHIP") || loc.includes("SPACE")) return "/images/bg-bridge.png"
+  return "/images/bg-lobby.png"   // default fallback background to avoid plain dark gradient
 }
 
 /* ── NPC portrait map ──────────────────────────────────────────────────── */
 const NPC_IMAGES: Record<string, string> = {
-  senora_vega: "/images/senoravega.png",
-  tyler:       "/images/tyler.png",
-  ai:          "",
+  senora_vega: "/images/senoravega.png?v=2",
+  tyler:       "/images/tyler.png?v=2",
+  ai:          "/images/ai-character.png?v=2",
+  jake:        "/images/guitarplayer1.png?v=2",
+  zoe:         "/images/zoe.png?v=2",
+  carlos:      "/images/carlos.png?v=2",
+  aria:        "/images/aria.png?v=2",
+  jordan:      "/images/jordan.png?v=2",
+  kai:         "/images/kai.png?v=2",
+  priya:       "/images/priya.png?v=2",
+  alex:        "/images/alex.png?v=2",
+  luna:        "/images/luna.png?v=2",
+  sam:         "/images/sam.png?v=2",
+  vera:        "/images/vera.png?v=2",
+  maya:        "/images/maya.png?v=2",
+  nova:        "/images/nova.png?v=2",
   default:     "",
 }
 
@@ -42,24 +161,73 @@ const NPC_CONFIGS: Record<string, NpcCfg> = {
   senora_vega: { color: "rgba(255,180,80,0.9)", initial: "SV" },
   tyler:       { color: "rgba(80,160,255,0.9)", initial: "TY" },
   ai:          { color: "rgba(0,212,240,0.9)",  initial: "AI" },
+  jake:        { color: "rgba(0,212,240,0.9)",  initial: "JK" },
+  zoe:         { color: "rgba(224,64,251,0.9)", initial: "ZO" },
+  carlos:      { color: "rgba(255,100,100,0.9)",initial: "CA" },
+  aria:        { color: "rgba(100,255,100,0.9)",initial: "AR" },
+  jordan:      { color: "rgba(255,200,50,0.9)", initial: "JO" },
+  kai:         { color: "rgba(50,255,200,0.9)", initial: "KA" },
+  priya:       { color: "rgba(200,50,255,0.9)", initial: "PR" },
+  alex:        { color: "rgba(255,50,150,0.9)", initial: "AL" },
+  luna:        { color: "rgba(50,150,255,0.9)", initial: "LU" },
+  sam:         { color: "rgba(150,255,50,0.9)", initial: "SA" },
+  vera:        { color: "rgba(0,212,240,0.9)",  initial: "VE" },
+  maya:        { color: "rgba(255,150,50,0.9)", initial: "MA" },
+  nova:        { color: "rgba(0,212,240,0.9)",  initial: "NV" },
+}
+
+/* Helper to resolve npc keys robustly across all 14 visual novel game characters */
+function resolveNpcKey(keyOrSpeaker: string | undefined): string {
+  if (!keyOrSpeaker) return "default"
+  const clean = keyOrSpeaker.toLowerCase().replace(/[^a-z0-9]/g, "")
+  if (clean.includes("vega")) return "senora_vega"
+  if (clean.includes("tyler")) return "tyler"
+  if (clean.includes("jake")) return "jake"
+  if (clean.includes("zoe")) return "zoe"
+  if (clean.includes("carlos")) return "carlos"
+  if (clean.includes("aria")) return "aria"
+  if (clean.includes("jordan")) return "jordan"
+  if (clean.includes("kai")) return "kai"
+  if (clean.includes("priya")) return "priya"
+  if (clean.includes("alex")) return "alex"
+  if (clean.includes("luna")) return "luna"
+  if (clean.includes("sam")) return "sam"
+  if (clean.includes("vera")) return "vera"
+  if (clean.includes("maya")) return "maya"
+  if (clean.includes("nova")) return "nova"
+  if (clean.includes("ai") || clean.includes("claude") || clean.includes("chatgpt") || clean.includes("gemini")) return "ai"
+  return "default"
 }
 
 /* ── Typewriter hook ────────────────────────────────────────────────────── */
-function useTypewriter(text: string, speed: number) {
+function useTypewriter(text: string, speed: number, speakerName: string, active = true) {
   const [displayed, setDisplayed] = useState("")
   const [done, setDone] = useState(false)
+  
+  const speakerRef = useRef(speakerName)
   useEffect(() => {
+    speakerRef.current = speakerName
+  }, [speakerName])
+
+  useEffect(() => {
+    if (!active) {
+      setDisplayed(text)
+      setDone(true)
+      return
+    }
     setDisplayed("")
     setDone(false)
     if (!text) { setDone(true); return }
     let i = 0
     const t = setInterval(() => {
       i++
+      const char = text[i - 1]
       setDisplayed(text.slice(0, i))
+      playVoiceBlip(speakerRef.current, char)
       if (i >= text.length) { clearInterval(t); setDone(true) }
     }, speed)
     return () => clearInterval(t)
-  }, [text, speed])
+  }, [text, speed, active])
   return { displayed, done }
 }
 
@@ -68,14 +236,25 @@ type Props = {
   onComplete:         () => void
   protagonistVideo?:  string
   protagonistImage?:  string
+  protagonistName?:   string
+  accentColor?:       string
+  fastText?:          boolean
 }
 
-export default function NovelScene({ scene, onComplete, protagonistImage }: Props) {
+export default function NovelScene({ scene, onComplete, protagonistImage, protagonistName, accentColor, fastText = false }: Props) {
   const [lineIndex, setLineIndex] = useState(0)
   const [skip,      setSkip]      = useState(false)
   const [flashKey,  setFlashKey]  = useState(0)
   const bottomRef                 = useRef<HTMLDivElement>(null)
   const advanceRef                = useRef<() => void>(() => {})
+
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   /* ── Keyframes injected once ─────────────────────────────────────────── */
   useEffect(() => {
@@ -119,7 +298,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
   /* Flash on every new line */
   useEffect(() => { setFlashKey(k => k + 1) }, [lineIndex])
 
-  const { displayed, done } = useTypewriter(skip ? "" : line.text, 20)
+  const { displayed, done } = useTypewriter(skip ? "" : line.text, 22, line.speaker, !fastText)
   const visibleText = skip ? line.text : displayed
   const textDone    = skip || done
 
@@ -153,19 +332,84 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
   }, [lineIndex])
 
   /* NPC setup */
-  const sceneNpcKey = lines.find(l => l.avatar !== "jake")?.npcKey ?? "default"
-  const npc         = NPC_CONFIGS[sceneNpcKey] ?? NPC_CONFIGS.default
-  const npcImage    = NPC_IMAGES[sceneNpcKey] ?? ""
+  // Find the active NPC speaker at or before the current line.
+  // If the current line is spoken by an NPC, use that NPC.
+  // Otherwise, use the most recent NPC speaker.
+  // If no NPC has spoken yet, look forward to find the first NPC speaker.
+  const activeNpcLine = lines
+    .slice(0, lineIndex + 1)
+    .reverse()
+    .find(l => l.avatar !== "jake" && l.avatar !== "protagonist")
+    ?? lines.find(l => l.avatar !== "jake" && l.avatar !== "protagonist")
+
+  const sceneNpcKey = resolveNpcKey(activeNpcLine?.npcKey || activeNpcLine?.speaker)
+  const npcSpeakerName = activeNpcLine?.speaker ?? ""
+  const npc            = NPC_CONFIGS[sceneNpcKey] ?? NPC_CONFIGS.default
+  const npcImage       = NPC_IMAGES[sceneNpcKey] ?? ""
+
+  // For the orb fallback: if npcKey is "default" (no portrait), compute initials
+  // from the actual speaker name (e.g. "Mia" → "MI") rather than showing "AI"
+  const npcInitial = (sceneNpcKey === "default" && npcSpeakerName)
+    ? npcSpeakerName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
+    : npc.initial
+
+  // Helper to convert any color (hex, rgb, rgba) to translucent bg color
+  function getTranslucentBg(colorStr: string | undefined, opacity: number = 0.13): string {
+    if (!colorStr) return `rgba(0, 212, 240, ${opacity})`
+    const str = colorStr.trim()
+    if (str.startsWith("rgba")) {
+      return str.replace(/,[\s\d.]+\)$/, `, ${opacity})`)
+    }
+    if (str.startsWith("rgb")) {
+      return str.replace("rgb", "rgba").replace(")", `, ${opacity})`)
+    }
+    if (str.startsWith("#")) {
+      const hex = str.replace("#", "")
+      let r = 0, g = 0, b = 0
+      if (hex.length === 3) {
+        r = parseInt(hex[0] + hex[0], 16)
+        g = parseInt(hex[1] + hex[1], 16)
+        b = parseInt(hex[2] + hex[2], 16)
+      } else if (hex.length === 6) {
+        r = parseInt(hex.substring(0, 2), 16)
+        g = parseInt(hex.substring(2, 4), 16)
+        b = parseInt(hex.substring(4, 6), 16)
+      }
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`
+    }
+    return str
+  }
+
+  const protName = protagonistName ?? "Jake"
+  const protColor = accentColor ?? JAKE_COLOR
+  const protInit = protName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
 
   function cfg(avatar: string) {
-    if (avatar === "jake") return { color: JAKE_COLOR, bg: "rgba(0,212,240,0.13)", init: JAKE_INIT, right: true }
-    return                        { color: npc.color,  bg: npc.color.replace("0.9", "0.13"), init: npc.initial, right: false }
+    if (avatar === "jake" || avatar === "protagonist") {
+      return { 
+        color: protColor, 
+        bg: getTranslucentBg(protColor, 0.13), 
+        init: protInit, 
+        right: true 
+      }
+    }
+    return { 
+      color: npc.color,  
+      bg: getTranslucentBg(npc.color, 0.13), 
+      init: npcInitial, 
+      right: false 
+    }
   }
 
   const activeCfg    = cfg(line.avatar)
   const speakerColor = activeCfg.color
   const npcActive    = !isJake
   const bgImage      = scene.location ? getBackgroundImage(scene.location) : ""
+
+  // Parse the emotional state of the active dialogue line
+  const activeEmotion = getLineEmotion(line.text)
+  const npcEmotion    = npcActive ? activeEmotion : "neutral"
+  const protEmotion   = isJake ? activeEmotion : "neutral"
 
   /* Character mask — visible bottom, fades at the very top */
   const charMask = "linear-gradient(to top, black 0%, black 72%, transparent 100%)"
@@ -262,7 +506,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
         left:          0,
         right:         0,
         top:           "4.8rem",
-        bottom:        "38%",
+        bottom:        isMobile ? "38%" : "18%",
         zIndex:        5,
         pointerEvents: "none",
         overflow:      "hidden",
@@ -270,33 +514,55 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
 
         {/* ── NPC (left side) ── */}
         {npcImage ? (
-          <div style={{
-            position:   "absolute",
-            bottom:     0,
-            left:       "-2%",
-            width:      "50%",
-            height:     "100%",
-            transition: "opacity 0.55s ease, filter 0.55s ease",
-            opacity:    npcActive ? 1 : 0.22,
-            filter:     npcActive ? "none" : "grayscale(0.5) brightness(0.7)",
-          }}>
+          <motion.div
+            animate={{
+              opacity: npcActive ? 1 : (isMobile ? 0.08 : 0.25),
+              scale: npcActive 
+                ? (npcEmotion === "excited" ? 1.04 : npcEmotion === "thinking" ? 1.01 : 1.02) 
+                : 0.96,
+              y: npcActive 
+                ? (npcEmotion === "excited" ? [0, -12, -4, 0] : npcEmotion === "thinking" ? [0, -4, 0] : 0) 
+                : 15,
+              x: npcActive 
+                ? (npcEmotion === "tense" ? [-5, 5, -3, 3, -1.5, 1.5, 0] : 0) 
+                : 0,
+              filter: npcActive ? "none" : "grayscale(0.4) brightness(0.65)",
+            }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 120, 
+              damping: 20,
+              x: { type: "tween", duration: 0.45, ease: "easeInOut" },
+              y: { type: "tween", duration: 0.55, ease: "easeOut" },
+            }}
+            style={{
+              position:   "absolute",
+              bottom:     0,
+              left:       isMobile ? "1%" : "3%",
+              width:      isMobile ? "46%" : "clamp(260px, 32vw, 540px)",
+              height:     "100%",
+              zIndex:     npcActive ? 10 : 2,
+            }}
+          >
             {/* Glow halo behind NPC when speaking */}
             <div style={{
               position:   "absolute",
               bottom:     "8%",
-              left:       "15%",
-              width:      "70%",
+              left:       "10%",
+              width:      "80%",
               height:     "65%",
-              background: `radial-gradient(ellipse at center, ${npc.color.replace("0.9", "0.28")} 0%, transparent 72%)`,
+              background: `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.28)} 0%, transparent 72%)`,
               animation:  npcActive ? "dlg-speaker-glow 2.2s ease-in-out infinite" : "none",
               opacity:    npcActive ? 1 : 0,
               transition: "opacity 0.55s ease",
               zIndex:     0,
             }} />
+            {/* Character image — breathes when inactive, talks when active */}
             <img
               src={npcImage}
               alt=""
               draggable={false}
+              className={npcActive ? "char-talk" : "char-breathe"}
               style={{
                 position:        "absolute",
                 bottom:          0,
@@ -304,68 +570,147 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
                 width:           "100%",
                 height:          "100%",
                 objectFit:       "contain",
-                objectPosition:  "bottom left",
+                objectPosition:  "bottom center",
                 maskImage:       charMask,
                 WebkitMaskImage: charMask,
                 zIndex:          1,
+                transformOrigin: "bottom center",
               } as React.CSSProperties}
             />
-          </div>
+          </motion.div>
         ) : (
-          /* Fallback large avatar orb for AI/no-image NPCs */
-          <div style={{
-            position:      "absolute",
-            bottom:        "18%",
-            left:          "8%",
-            width:         "72px",
-            height:        "72px",
-            borderRadius:  "50%",
-            background:    npc.color.replace("0.9", "0.12"),
-            border:        `2px solid ${npc.color.replace("0.9", "0.45")}`,
-            display:       "flex",
-            alignItems:    "center",
-            justifyContent:"center",
-            fontFamily:    "Inter, sans-serif",
-            fontWeight:    800,
-            fontSize:      "1.1rem",
-            color:         npc.color,
-            opacity:       npcActive ? 1 : 0.25,
-            transition:    "opacity 0.5s ease, box-shadow 0.5s ease",
-            boxShadow:     npcActive ? `0 0 40px ${npc.color.replace("0.9", "0.35")}` : "none",
-          }}>
-            {npc.initial}
-          </div>
+          /* Fallback — large glowing AI orb when no portrait image */
+          <motion.div
+            className={npcActive ? "char-talk" : "char-breathe"}
+            animate={{
+              opacity: npcActive ? 1 : (isMobile ? 0.08 : 0.25),
+              scale: npcActive 
+                ? (npcEmotion === "excited" ? 1.04 : npcEmotion === "thinking" ? 1.01 : 1.02) 
+                : 0.96,
+              y: npcActive 
+                ? (npcEmotion === "excited" ? [0, -12, -4, 0] : npcEmotion === "thinking" ? [0, -4, 0] : 0) 
+                : 15,
+              x: npcActive 
+                ? (npcEmotion === "tense" ? [-5, 5, -3, 3, -1.5, 1.5, 0] : 0) 
+                : 0,
+            }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 120, 
+              damping: 20,
+              x: { type: "tween", duration: 0.45, ease: "easeInOut" },
+              y: { type: "tween", duration: 0.55, ease: "easeOut" },
+            }}
+            style={{
+              position:      "absolute",
+              bottom:        "15%",
+              left:          isMobile ? "3%" : "5%",
+              width:         isMobile ? "40vw" : "clamp(160px, 18vw, 280px)",
+              height:         isMobile ? "40vw" : "clamp(160px, 18vw, 280px)",
+              zIndex:        npcActive ? 10 : 2,
+            }}>
+            {/* Outer ambient pulse */}
+            <div style={{
+              position:      "absolute",
+              inset:         "-30%",
+              borderRadius:  "50%",
+              background:    `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.18)} 0%, transparent 70%)`,
+              animation:     npcActive ? "dlg-speaker-glow 2.4s ease-in-out infinite" : "none",
+            }} />
+            {/* Inner orb body */}
+            <div style={{
+              position:      "absolute",
+              inset:         0,
+              borderRadius:  "50%",
+              background:    `radial-gradient(circle at 38% 35%, ${getTranslucentBg(npc.color, 0.55)} 0%, ${getTranslucentBg(npc.color, 0.18)} 40%, transparent 72%)`,
+              border:        `1.5px solid ${getTranslucentBg(npc.color, 0.45)}`,
+              boxShadow:     npcActive
+                ? `0 0 60px ${getTranslucentBg(npc.color, 0.5)}, inset 0 0 30px ${getTranslucentBg(npc.color, 0.2)}`
+                : "none",
+              transition:    "box-shadow 0.5s ease",
+              backdropFilter:"blur(2px)",
+            }} />
+            {/* Highlight specular */}
+            <div style={{
+              position:    "absolute",
+              top:         "14%",
+              left:        "20%",
+              width:       "40%",
+              height:      "28%",
+              borderRadius:"50%",
+              background:  `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.7)} 0%, transparent 100%)`,
+              filter:      "blur(6px)",
+            }} />
+            {/* Initials label */}
+            <div style={{
+              position:       "absolute",
+              inset:          0,
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              fontFamily:     "Inter, sans-serif",
+              fontWeight:     900,
+              fontSize:       "clamp(1.4rem, 3.5vw, 2.2rem)",
+              color:          npc.color,
+              textShadow:     `0 0 20px ${npc.color}`,
+              letterSpacing:  "0.05em",
+            }}>
+              {npcInitial}
+            </div>
+          </motion.div>
         )}
 
-        {/* ── Jake (right side) ── */}
+        {/* ── Protagonist (right side) ── */}
         {protagonistImage && (
-          <div style={{
-            position:   "absolute",
-            bottom:     0,
-            right:      "-2%",
-            width:      "50%",
-            height:     "100%",
-            transition: "opacity 0.55s ease, filter 0.55s ease",
-            opacity:    isJake ? 1 : 0.22,
-            filter:     isJake ? "none" : "grayscale(0.5) brightness(0.7)",
-          }}>
-            {/* Glow halo behind Jake when speaking */}
+          <motion.div
+            animate={{
+              opacity: isJake ? 1 : (isMobile ? 0.08 : 0.25),
+              scale: isJake 
+                ? (protEmotion === "excited" ? 1.04 : protEmotion === "thinking" ? 1.01 : 1.02) 
+                : 0.96,
+              y: isJake 
+                ? (protEmotion === "excited" ? [0, -12, -4, 0] : protEmotion === "thinking" ? [0, -4, 0] : 0) 
+                : 15,
+              x: isJake 
+                ? (protEmotion === "tense" ? [-5, 5, -3, 3, -1.5, 1.5, 0] : 0) 
+                : 0,
+              filter: isJake ? "none" : "grayscale(0.4) brightness(0.65)",
+            }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 120, 
+              damping: 20,
+              x: { type: "tween", duration: 0.45, ease: "easeInOut" },
+              y: { type: "tween", duration: 0.55, ease: "easeOut" },
+            }}
+            style={{
+              position:   "absolute",
+              bottom:     0,
+              right:      isMobile ? "1%" : "3%",
+              width:      isMobile ? "46%" : "clamp(260px, 32vw, 540px)",
+              height:     "100%",
+              zIndex:     isJake ? 10 : 2,
+            }}
+          >
+            {/* Glow halo behind Protagonist when speaking */}
             <div style={{
               position:   "absolute",
               bottom:     "8%",
-              right:      "15%",
-              width:      "70%",
+              right:      "10%",
+              width:      "80%",
               height:     "65%",
-              background: `radial-gradient(ellipse at center, ${JAKE_COLOR.replace("0.9", "0.28")} 0%, transparent 72%)`,
+              background: `radial-gradient(ellipse at center, ${getTranslucentBg(protColor, 0.28)} 0%, transparent 72%)`,
               animation:  isJake ? "dlg-speaker-glow 2.2s ease-in-out infinite" : "none",
               opacity:    isJake ? 1 : 0,
               transition: "opacity 0.55s ease",
               zIndex:     0,
             }} />
+            {/* Character image — breathes when inactive, talks when active */}
             <img
               src={protagonistImage}
-              alt="Jake"
+              alt={protName}
               draggable={false}
+              className={isJake ? "char-talk" : "char-breathe"}
               style={{
                 position:        "absolute",
                 bottom:          0,
@@ -373,13 +718,14 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
                 width:           "100%",
                 height:          "100%",
                 objectFit:       "contain",
-                objectPosition:  "bottom right",
+                objectPosition:  "bottom center",
                 maskImage:       charMask,
                 WebkitMaskImage: charMask,
                 zIndex:          1,
+                transformOrigin: "bottom center",
               }}
             />
-          </div>
+          </motion.div>
         )}
 
         {/* ── Stage light beams (atmosphere) ──────────────────────────────── */}
@@ -401,7 +747,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
           right:      "20%",
           width:      "2px",
           height:     "45%",
-          background: `linear-gradient(to bottom, ${JAKE_COLOR.replace("0.9", "0.5")}, transparent)`,
+          background: `linear-gradient(to bottom, ${getTranslucentBg(protColor, 0.5)}, transparent)`,
           opacity:    isJake ? 0.6 : 0,
           transition: "opacity 0.7s ease",
           animation:  isJake ? "dlg-light-sweep 3s ease-in-out infinite" : "none",
@@ -484,9 +830,9 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
           <AnimatePresence mode="wait">
             <motion.div
               key={lineIndex}
-              initial={{ opacity: 0, y: 12, scale: 0.96 }}
+              initial={{ opacity: 0, y: 14, scale: 0.94 }}
               animate={{ opacity: 1, y: 0,  scale: 1    }}
-              transition={{ type: "spring", stiffness: 450, damping: 35 }}
+              transition={{ type: "spring", stiffness: 520, damping: 28, mass: 0.8 }}
               style={{
                 display:       "flex",
                 flexDirection: activeCfg.right ? "row-reverse" : "row",
@@ -556,10 +902,11 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
           padding:        "0.42rem 1.2rem 1.1rem",
           display:        "flex",
           alignItems:     "center",
-          justifyContent: "space-between",
+          justifyContent: "center",
           borderTop:      `1px solid ${speakerColor.replace("0.9", "0.11")}`,
+          position:       "relative",
         }}>
-          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+          <div style={{ position: "absolute", left: "1.2rem", display: "flex", gap: "4px", alignItems: "center" }}>
             {lines.map((_, i) => (
               <div key={i} style={{
                 height:      "3px",
@@ -574,18 +921,35 @@ export default function NovelScene({ scene, onComplete, protagonistImage }: Prop
               }} />
             ))}
           </div>
-          <motion.span
-            animate={{ opacity: textDone ? 1 : 0 }}
-            transition={{ duration: 0.28 }}
+          {/* Tap-to-continue — clear pulsing pill so it's never missed */}
+          <motion.div
+            animate={textDone
+              ? { opacity: [0.75, 1, 0.75], scale: [1, 1.03, 1] }
+              : { opacity: 0, scale: 1 }}
+            transition={textDone
+              ? { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+              : { duration: 0.28 }}
             style={{
-              fontFamily:    "Inter, sans-serif",
-              fontSize:      "0.6rem",
-              color:         "rgba(255,255,255,0.32)",
-              letterSpacing: "0.08em",
+              display:        "flex",
+              alignItems:     "center",
+              gap:            "0.4rem",
+              fontFamily:     "Inter, sans-serif",
+              fontSize:       "0.74rem",
+              fontWeight:     700,
+              letterSpacing:  "0.06em",
+              color:          speakerColor,
+              background:     getTranslucentBg(speakerColor, 0.12),
+              border:         `1px solid ${getTranslucentBg(speakerColor, 0.45)}`,
+              borderRadius:   "100px",
+              padding:        "0.4rem 0.95rem",
+              boxShadow:      `0 0 18px ${getTranslucentBg(speakerColor, 0.25)}`,
+              pointerEvents:  "none",
+              whiteSpace:     "nowrap",
             }}
           >
-            tap to continue →
-          </motion.span>
+            Tap anywhere to continue
+            <span style={{ fontSize: "0.95rem" }}>→</span>
+          </motion.div>
         </div>
       </div>
 

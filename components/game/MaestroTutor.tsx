@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
+import { supabaseBrowser, getSession } from "@/lib/supabase-browser"
 
 type Message = { role: "user" | "assistant"; content: string }
 
@@ -86,7 +87,6 @@ function Bubble({ msg, accentColor }: { msg: Message; accentColor: string }) {
           fontFamily:"Inter, sans-serif", fontSize:"0.875rem", lineHeight:1.65,
           color: isUser ? "rgba(240,238,255,0.9)" : "#fff",
           margin: 0,
-          fontStyle: isUser ? "normal" : "normal",
         }}>
           {msg.content}
         </p>
@@ -99,22 +99,89 @@ function Bubble({ msg, accentColor }: { msg: Message; accentColor: string }) {
 export default function MaestroTutor({ game, onClose }: Props) {
   useEffect(() => { ensureKf() }, [])
 
-  const accentColor   = game.accentColor ?? "#00d4f0"
-  const opening       = getOpening(game.slug)
+  const accentColor = game.accentColor ?? "#00d4f0"
+  const opening     = getOpening(game.slug)
 
-  const [messages,    setMessages]    = useState<Message[]>([
-    { role: "assistant", content: opening }
-  ])
+  const [messages,    setMessages]    = useState<Message[]>([{ role: "assistant", content: opening }])
   const [input,       setInput]       = useState("")
   const [loading,     setLoading]     = useState(false)
   const [directLeft,  setDirectLeft]  = useState(MAX_DIRECT)
-  const bottomRef  = useRef<HTMLDivElement | null>(null)
-  const inputRef   = useRef<HTMLTextAreaElement | null>(null)
+  const [userId,      setUserId]      = useState<string | null>(null)
+  const [resumed,     setResumed]     = useState(false)   // true if we loaded saved history
+  const [syncing,     setSyncing]     = useState(false)   // shows "saving…" indicator
 
-  // Scroll to bottom on new messages
+  const bottomRef   = useRef<HTMLDivElement | null>(null)
+  const inputRef    = useRef<HTMLTextAreaElement | null>(null)
+  const saveTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Load user + conversation history on mount ──────────────────────────
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadHistory() {
+      try {
+        const session = await getSession()
+        if (!session?.user || cancelled) return
+
+        const uid = session.user.id
+        setUserId(uid)
+
+        const sb = supabaseBrowser()
+        const { data, error } = await sb
+          .from("tutor_conversations")
+          .select("messages, direct_left")
+          .eq("user_id", uid)
+          .eq("game_slug", game.slug)
+          .maybeSingle()
+
+        if (error || cancelled) return
+
+        if (data && Array.isArray(data.messages) && data.messages.length > 0) {
+          setMessages(data.messages as Message[])
+          setDirectLeft(data.direct_left ?? MAX_DIRECT)
+          setResumed(true)
+        }
+      } catch {
+        // Supabase not configured locally — silent fallback to in-memory
+      }
+    }
+
+    loadHistory()
+    return () => { cancelled = true }
+  }, [game.slug])
+
+  // ── Debounced save to Supabase whenever messages or directLeft change ──
+  const saveConversation = useCallback((msgs: Message[], directL: number, uid: string) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(async () => {
+      setSyncing(true)
+      try {
+        const sb = supabaseBrowser()
+        await sb.from("tutor_conversations").upsert(
+          {
+            user_id:    uid,
+            game_slug:  game.slug,
+            messages:   msgs,
+            direct_left: directL,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,game_slug" }
+        )
+      } catch {
+        // silent — don't interrupt the chat UX
+      } finally {
+        setSyncing(false)
+      }
+    }, 1500) // 1.5s debounce
+  }, [game.slug])
+
+  // ── Scroll to bottom on new messages ────────────────────────────────────
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages, loading])
+    if (userId && messages.length > 1) {
+      saveConversation(messages, directLeft, userId)
+    }
+  }, [messages, loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isDirect = (text: string) =>
     /\b(give me the answer|i need the (direct )?answer|just tell me|direct answer)\b/i.test(text)
@@ -124,7 +191,8 @@ export default function MaestroTutor({ game, onClose }: Props) {
     if (!text || loading) return
 
     const direct = isDirect(text) && directLeft > 0
-    if (direct) setDirectLeft(d => d - 1)
+    const newDirectLeft = direct ? directLeft - 1 : directLeft
+    if (direct) setDirectLeft(newDirectLeft)
 
     const newMessages: Message[] = [...messages, { role: "user" as const, content: text }]
     setMessages(newMessages)
@@ -144,7 +212,9 @@ export default function MaestroTutor({ game, onClose }: Props) {
       })
       const data = await res.json()
       if (data.reply) {
-        setMessages(prev => [...prev, { role: "assistant", content: data.reply }])
+        const withReply: Message[] = [...newMessages, { role: "assistant", content: data.reply }]
+        setMessages(withReply)
+        if (userId) saveConversation(withReply, newDirectLeft, userId)
       }
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "The Maestro has stepped away momentarily. Try again in a moment." }])
@@ -157,13 +227,28 @@ export default function MaestroTutor({ game, onClose }: Props) {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send() }
   }
 
+  const clearHistory = async () => {
+    const fresh: Message[] = [{ role: "assistant", content: opening }]
+    setMessages(fresh)
+    setDirectLeft(MAX_DIRECT)
+    setResumed(false)
+    if (userId) {
+      try {
+        const sb = supabaseBrowser()
+        await sb.from("tutor_conversations").upsert(
+          { user_id: userId, game_slug: game.slug, messages: fresh, direct_left: MAX_DIRECT, updated_at: new Date().toISOString() },
+          { onConflict: "user_id,game_slug" }
+        )
+      } catch { /* silent */ }
+    }
+  }
+
   return (
     <div style={{
       position:      "fixed", inset:0, zIndex:350,
       background:    "rgba(8,6,15,0.92)",
       backdropFilter:"blur(24px)",
       display:       "flex", alignItems:"flex-end", justifyContent:"center",
-      padding:       "0",
     }}>
       <div style={{
         width:"100%", maxWidth:"720px",
@@ -193,23 +278,38 @@ export default function MaestroTutor({ game, onClose }: Props) {
               🎼
             </div>
             <div>
-              <div style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.88rem", color:"#fff" }}>
+              <div style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.88rem", color:"#fff", display:"flex", alignItems:"center", gap:"0.5rem" }}>
                 The Maestro
+                {syncing && <span style={{ fontFamily:"Inter, sans-serif", fontWeight:400, fontSize:"0.6rem", color:"rgba(240,238,255,0.25)", letterSpacing:"0.04em" }}>saving…</span>}
               </div>
-              <div style={{ fontFamily:"Inter, sans-serif", fontSize:"0.62rem", color:"rgba(240,238,255,0.4)", letterSpacing:"0.06em" }}>
-                Socratic AI Tutor · Pro Feature
+              <div style={{ fontFamily:"Inter, sans-serif", fontSize:"0.62rem", color:"rgba(240,238,255,0.4)", letterSpacing:"0.06em", display:"flex", alignItems:"center", gap:"0.4rem" }}>
+                Socratic AI Tutor
+                {resumed && (
+                  <span style={{ color: accentColor, opacity: 0.7 }}>· conversation resumed</span>
+                )}
+                {!userId && (
+                  <span style={{ color:"rgba(240,238,255,0.25)" }}>· sign in to save history</span>
+                )}
               </div>
             </div>
           </div>
-          <div style={{ display:"flex", alignItems:"center", gap:"1rem" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:"0.75rem" }}>
             {/* Direct answer counter */}
-            <div style={{
-              fontFamily:"Inter, sans-serif", fontSize:"0.65rem",
-              color:directLeft > 0 ? "rgba(240,238,255,0.4)" : "rgba(255,80,80,0.5)",
-              letterSpacing:"0.06em",
-            }}>
-              {directLeft}/{MAX_DIRECT} direct answers left
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:"0.65rem", color:directLeft > 0 ? "rgba(240,238,255,0.4)" : "rgba(255,80,80,0.5)", letterSpacing:"0.06em" }}>
+              {directLeft}/{MAX_DIRECT} direct
             </div>
+            {/* Clear history button */}
+            {resumed && (
+              <button
+                onClick={clearHistory}
+                title="Start fresh"
+                style={{ background:"none", border:"none", cursor:"pointer", color:"rgba(240,238,255,0.2)", fontSize:"0.7rem", fontFamily:"Inter, sans-serif", transition:"color 0.2s", padding:"0.2rem 0.4rem", borderRadius:"4px" }}
+                onMouseEnter={e => (e.currentTarget.style.color="rgba(240,238,255,0.55)")}
+                onMouseLeave={e => (e.currentTarget.style.color="rgba(240,238,255,0.2)")}
+              >
+                restart
+              </button>
+            )}
             <button
               onClick={onClose}
               style={{ background:"none", border:"none", cursor:"pointer", color:"rgba(240,238,255,0.35)", fontSize:"1.1rem", lineHeight:1, transition:"color 0.2s", padding:"0.25rem" }}
@@ -230,8 +330,8 @@ export default function MaestroTutor({ game, onClose }: Props) {
             <div style={{ display:"flex", gap:"0.6rem", marginBottom:"0.85rem" }}>
               <div style={{ width:"28px", height:"28px", borderRadius:"50%", flexShrink:0, background:`linear-gradient(135deg, ${accentColor}, #e040fb)`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"0.75rem", alignSelf:"flex-end" }}>🎼</div>
               <div style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:"18px 18px 18px 4px", padding:"0.7rem 1rem", display:"flex", alignItems:"center", gap:"0.35rem" }}>
-                {[0,1,2].map(i => (
-                  <div key={i} style={{ width:"6px", height:"6px", borderRadius:"50%", background:accentColor, animation:`tutor-thinking 1.2s ${i * 0.2}s ease-in-out infinite` }} />
+                {[0,1,2].map(j => (
+                  <div key={j} style={{ width:"6px", height:"6px", borderRadius:"50%", background:accentColor, animation:`tutor-thinking 1.2s ${j * 0.2}s ease-in-out infinite` }} />
                 ))}
               </div>
             </div>
@@ -241,14 +341,11 @@ export default function MaestroTutor({ game, onClose }: Props) {
 
         {/* Hint */}
         <div style={{ padding:"0.4rem 1.25rem 0", fontFamily:"Inter, sans-serif", fontSize:"0.62rem", color:"rgba(240,238,255,0.25)", letterSpacing:"0.06em" }}>
-          Say "give me the answer" to use a direct answer ({directLeft} left)
+          Say &quot;give me the answer&quot; to use a direct answer ({directLeft} left)
         </div>
 
         {/* Input */}
-        <div style={{
-          padding:"0.75rem 1.25rem 1.25rem",
-          display:"flex", gap:"0.6rem", alignItems:"flex-end", flexShrink:0,
-        }}>
+        <div style={{ padding:"0.75rem 1.25rem 1.25rem", display:"flex", gap:"0.6rem", alignItems:"flex-end", flexShrink:0 }}>
           <textarea
             ref={inputRef}
             value={input}

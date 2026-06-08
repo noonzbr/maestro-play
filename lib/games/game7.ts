@@ -3,8 +3,7 @@ import { Game } from "./types"
 export const game7: Game = {
   slug: "claude-for-work",
   week: 7,
-  free: false,
-  price: 4.99,
+  free: true,
   title: "Claude for Work — AI That Knows Your Business",
   emoji: "🏢",
   accentColor: "#818cf8",
@@ -39,6 +38,8 @@ export const game7: Game = {
     teaserLine:   "Priya built the system. Now Alex is going to show you a completely different AI ecosystem — ChatGPT. Custom GPTs, Canvas, Code Interpreter. Most people only ever see the tip of this iceberg.",
     previewImage: "/images/alex.png",
   },
+
+  mondayPrompt: "Create a Claude Project for your team called [TEAM NAME] Knowledge Base. Add these documents: [list your team's key docs]. Write custom instructions: 'You represent [team name]. Always ground answers in the uploaded documents. If a question requires judgment outside the documents, say: This requires human judgment — here is what our documents say about adjacent topics:... Never fabricate policy or procedure. Escalate ambiguous cases to [email/contact].'",
   scenes: [
 
     // ── LEARN 1: Claude Projects — Persistent Context for Teams ──────────────

@@ -44,6 +44,7 @@ export const game13: Game = {
   accentColor:     "#e040fb",
   audioTrack:      "/audio/concrete-riot.mp3",
   aiModel:         "general" as const,
+  mondayPrompt: "ROLE: You are [specific expert role with credentials/context]. CONTEXT: [Who will use this output, what situation prompted the request, what they already know]. TASK: [Precise deliverable — not a vague request but a specific artifact]. CONSTRAINTS: Max [length]. Do NOT [3 specific exclusions]. Format: [exact structure]. PURPOSE: [What decision this output informs, who reads it after you, what failure looks like].",
   felipeOutroVideo:   "/videos/felipe-game13.mp4",
   nextGame: {
     slug:        "welcome-to-ai-v2",

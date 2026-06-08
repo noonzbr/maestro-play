@@ -13,6 +13,8 @@ type Props = {
   accentColor?: string
   /** If true, shows a "Tap to hear" unmute CTA instead of playing muted silently */
   hasAudio?: boolean
+  /** Name shown in the unmute CTA e.g. "Jake", "the Maestro". Defaults to a generic label. */
+  hearLabel?: string
 }
 
 export default function VideoIntro({
@@ -23,6 +25,7 @@ export default function VideoIntro({
   gameEmoji,
   accentColor = "var(--cyan)",
   hasAudio = false,
+  hearLabel,
 }: Props) {
   const musicStarted = useRef(false)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -32,6 +35,7 @@ export default function VideoIntro({
   // Videos with audio start muted (browser autoplay policy) until user taps
   const [videoMuted, setVideoMuted] = useState(true)
   const [unmuteHint, setUnmuteHint] = useState(hasAudio)
+  const [isBuffering, setIsBuffering] = useState(true)
 
   // Inject keyframes for the fallback splash (only once per page)
   useEffect(() => {
@@ -66,9 +70,13 @@ export default function VideoIntro({
         from { opacity:0; transform:translateY(14px) scale(0.94); }
         to   { opacity:1; transform:translateY(0) scale(1); }
       }
+      @keyframes vi-spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
     `
     document.head.appendChild(s)
-  }, [])
+  }, [accentColor])
 
   function triggerMusic() {
     if (!musicStarted.current) {
@@ -83,6 +91,8 @@ export default function VideoIntro({
     onComplete()
   }
 
+
+
   function handleVideoEnded() {
     triggerMusic()
     onComplete()
@@ -90,6 +100,7 @@ export default function VideoIntro({
 
   function handleVideoCanPlay() {
     setVideoReady(true)
+    setIsBuffering(false)
   }
 
   function handleVideoError() {
@@ -118,6 +129,8 @@ export default function VideoIntro({
           muted={videoMuted}
           playsInline
           onCanPlay={handleVideoCanPlay}
+          onWaiting={() => setIsBuffering(true)}
+          onPlaying={() => setIsBuffering(false)}
           onEnded={handleVideoEnded}
           onError={handleVideoError}
           style={{
@@ -125,8 +138,74 @@ export default function VideoIntro({
             height: "100%",
             objectFit: "cover",
             display: "block",
+            pointerEvents: "none",
           }}
         />
+
+        {/* ── Buffering Loading Spinner ── */}
+        {(isBuffering || !videoReady) && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 205,
+            background: "rgba(8,6,15,0.72)", display: "flex",
+            flexDirection: "column", alignItems: "center", justifyContent: "center",
+            gap: "1rem", pointerEvents: "none"
+          }}>
+            <div style={{
+              width: "48px", height: "48px",
+              border: `3px solid rgba(${accentColor === "#00d4f0" ? "0,212,240" : "224,64,251"}, 0.1)`,
+              borderTop: `3px solid ${accentColor}`,
+              borderRadius: "50%",
+              animation: "vi-spin 0.8s linear infinite",
+            }} />
+            <span style={{
+              fontFamily: "Inter, sans-serif", fontSize: "0.68rem",
+              letterSpacing: "0.22em", textTransform: "uppercase",
+              color: "rgba(255,255,255,0.45)", fontWeight: 700
+            }}>
+              Loading Cinema...
+            </span>
+          </div>
+        )}
+
+        {/* ── Explicit Skip Button ── */}
+        <button
+          onClick={e => {
+            e.stopPropagation()
+            handleSkip()
+          }}
+          style={{
+            position: "absolute",
+            top: "1.5rem",
+            right: "1.5rem",
+            zIndex: 210,
+            background: "rgba(8,6,15,0.55)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            borderRadius: "100px",
+            padding: "0.45rem 1.15rem",
+            cursor: "pointer",
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 700,
+            fontSize: "0.7rem",
+            color: "rgba(255,255,255,0.85)",
+            letterSpacing: "0.08em",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.14)"
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.35)"
+            e.currentTarget.style.color = "#fff"
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = "rgba(8,6,15,0.55)"
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"
+            e.currentTarget.style.color = "rgba(255,255,255,0.85)"
+          }}
+        >
+          Skip Intro ✕
+        </button>
+
+
 
         {/* ── Unmute CTA — only for videos with embedded audio ── */}
         {hasAudio && unmuteHint && (
@@ -136,7 +215,7 @@ export default function VideoIntro({
               bottom: "4.5rem",
               left: "50%",
               transform: "translateX(-50%)",
-              zIndex: 10,
+              zIndex: 206,
               animation: "vi-unmute-in 0.55s 0.8s cubic-bezier(0.34,1.1,0.64,1) both",
             }}
           >
@@ -176,7 +255,7 @@ export default function VideoIntro({
               }}
             >
               <span style={{ fontSize: "1rem" }}>🔊</span>
-              Tap to hear Jake
+              {hearLabel ? `Tap to hear ${hearLabel}` : "Tap to enable sound"}
             </button>
           </div>
         )}

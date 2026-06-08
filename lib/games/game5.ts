@@ -38,6 +38,8 @@ export const game5: Game = {
     teaserLine:   "Claude Chat changed the way Jordan thinks. Claude Code changes the way Kai BUILDS. If you've ever stared at an error message for 45 minutes — this one's for you.",
     previewImage: "/images/kai.png",
   },
+
+  mondayPrompt: "Set up a Claude Project for your [CLIENT/PROJECT NAME] work: Upload these documents: [list 3-5 key docs]. Custom instructions: 'You are my thinking partner for [project name]. You know our client is [brief description], our goal is [goal], and our constraints are [constraints]. Before answering, check if the uploaded documents have relevant context. Flag if you are uncertain about any company-specific detail.' Then ask: 'What gaps do you see in the context I have given you?'",
   scenes: [
 
     // ── LEARN 1: Claude vs. ChatGPT — Actually Different Tools ───────────────

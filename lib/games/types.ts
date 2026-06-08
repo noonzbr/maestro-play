@@ -37,8 +37,8 @@ export type AICompareData = {
   context:   string                 // 1-2 sentence intro
   rows:      AICompareRow[]
   verdict:   string                 // closing takeaway sentence
-  question:  string                 // quiz question after the table
-  choices:   Choice[]               // standard choices array
+  question?:  string                 // quiz question after the table
+  choices?:   Choice[]               // standard choices array
 }
 
 export type ChoiceBreakdown = {
@@ -49,10 +49,13 @@ export type ChoiceBreakdown = {
 export type Choice = {
   label: string
   text: string
-  correct: boolean
-  feedback: string
+  /** Omit on decision/skipFeedback scenes — feedback is never shown */
+  correct?: boolean
+  feedback?: string
   wrongFeedback?: string   // optional wrong-answer-specific elaboration (overrides feedback when wrong)
   breakdown?: ChoiceBreakdown[]  // annotated phrases shown after correct reveal
+  /** Scene ID to jump to after this choice is selected (overrides sequential index advance) */
+  leadsTo?: string
 }
 
 export type PromptChallengeData = {
@@ -67,9 +70,39 @@ export type BossQuestion = {
   choices:   Choice[]
 }
 
+/** Data for a consequence scene — shown when a player picks a wrong answer that has leadsTo set */
+export type FelipeCardData = {
+  quote: string
+  /** ID of the scene to jump to after Felipe's card is dismissed */
+  rejoinsAt: string
+}
+
+/** One track option shown in the track-select scene */
+export type TrackOption = {
+  id: "A" | "B" | "C" | "D"
+  emoji: string
+  label: string
+  teaser: string
+  felipeAside: string
+  /** Slug of the first game in this track */
+  nextGameSlug: string
+}
+
+/** One pair in a Matching scene */
+export type MatchPair = { left: string; right: string }
+
+/** One item in an Ordering scene */
+export type OrderItem = { id: string; text: string; correctPosition: number }
+
 export type Scene = {
   id: string
   type: "scenario" | "quiz" | "revelation" | "boss" | "prompt" | "learn" | "predict" | "handoff" | "ai-compare"
+      | "match"          // drag/tap to connect concepts to definitions
+      | "order"          // tap to build a sequence in the correct order
+      | "construct"      // free-form: player writes their own response to a task/prompt challenge
+      | "consequence"    // wrong-answer detour — shows story beat, auto-advances to felipe scene
+      | "felipe"         // Felipe portrait + quote card — player clicks Continue
+      | "track-select"   // 4-card track selection (end of hub game)
   character?: string
   location?: string
   scenarioText?: string
@@ -95,6 +128,45 @@ export type Scene = {
   predictPrompt?: string
   /** AI model comparison data — used when type === "ai-compare" */
   aiCompare?: AICompareData
+  /** Matching pairs — used when type === "match" */
+  matchPairs?: MatchPair[]
+  /** Ordering items — used when type === "order" */
+  orderItems?: OrderItem[]
+  /**
+   * Construct mode — used when type === "construct".
+   *   "self-assess": player submits, model answer (revealText) reveals, player self-rates
+   *   "ai-score":    calls /api/ai-prompt to score the response (same as prompt scenes)
+   */
+  constructMode?: "self-assess" | "ai-score"
+  /**
+   * Felipe card data — used when type === "felipe".
+   * Shows Felipe's portrait + quote, then jumps to rejoinsAt scene ID.
+   */
+  felipeCard?: FelipeCardData
+  /**
+   * Consequence text — used when type === "consequence".
+   * A narrated story beat showing what happens after the wrong choice.
+   * Auto-advances to the next scene in array (which should be the corresponding felipe scene).
+   */
+  consequenceText?: string
+  /**
+   * Track selection options — used when type === "track-select".
+   * Renders Felipe's opening monologue + 4 track navigation cards.
+   */
+  trackOptions?: TrackOption[]
+  /** Felipe's opening monologue for track-select scene */
+  felipeMonologue?: string
+  /**
+   * Skip the feedback panel entirely — choices immediately navigate to leadsTo.
+   * Used for narrative decision scenes where the player makes a STORY CHOICE, not a quiz answer.
+   * No XP, no streak, no lives — just instant scene transition.
+   */
+  skipFeedback?: boolean
+  /**
+   * After the player clicks Continue/Next on this scene, navigate to this scene ID
+   * instead of advancing sequentially. Works on any scene type (revelation, learn, scenario, etc).
+   */
+  nextLeadsTo?: string
 }
 
 export type Game = {
@@ -149,4 +221,14 @@ export type Game = {
     teaserLine:  string     // what the current character says about the next game
     previewImage?: string   // optional image of next character
   }
+  /**
+   * Dr. Park's Transfer Bridge — "Monday Morning Prompt"
+   * A real, copy-paste-ready prompt template shown on the EndScreen.
+   * Closes the gap between game-context learning and real-world application.
+   * If omitted, EndScreen generates a generic one based on game title/concept.
+   * Format: plain text, use [BRACKETS] for player-filled variables.
+   * Example: "Write me a [WHAT] about [TOPIC]. Do NOT include [WHAT_NOT].
+   *           Format it as [HOW]. Context: [WHY]."
+   */
+  mondayPrompt?: string
 }

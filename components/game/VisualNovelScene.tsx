@@ -17,8 +17,8 @@ function getBackgroundImage(location: string): string {
 
 /* ── NPC portrait map ──────────────────────────────────────────────────── */
 const NPC_IMAGES: Record<string, string> = {
-  senora_vega: "/images/senoravega.png",
-  tyler:       "/images/tyler.png",
+  senora_vega: "/images/senoravega.png?v=2",
+  tyler:       "/images/tyler.png?v=2",
   ai:          "",
   default:     "",
 }
@@ -233,7 +233,7 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
         }}>
           <div style={{
             fontFamily:     "Inter, sans-serif",
-            fontSize:       "0.58rem",
+            fontSize:       "0.8rem",
             letterSpacing:  "0.28em",
             textTransform:  "uppercase",
             color:          "rgba(240,238,255,0.55)",
@@ -241,7 +241,7 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
             background:     "rgba(6,4,14,0.65)",
             backdropFilter: "blur(12px)",
             borderRadius:   "100px",
-            padding:        "0.22rem 0.9rem",
+            padding:        "0.32rem 1.1rem",
             border:         "1px solid rgba(255,255,255,0.09)",
           }}>
             {scene.location}
@@ -446,11 +446,11 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
               }}>
                 {/* Mini avatar */}
                 <div style={{
-                  width:"18px", height:"18px", borderRadius:"50%", flexShrink:0,
+                  width:"24px", height:"24px", borderRadius:"50%", flexShrink:0,
                   background: c.color.replace("0.9", "0.15"),
                   border:     `1px solid ${c.color.replace("0.9", "0.3")}`,
                   display:"flex", alignItems:"center", justifyContent:"center",
-                  fontSize:"0.36rem", fontWeight:800, color:c.color,
+                  fontSize:"0.65rem", fontWeight:800, color:c.color,
                   fontFamily:"Inter,sans-serif",
                 }}>
                   {c.init}
@@ -460,13 +460,13 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
                   background:   c.bg,
                   border:       `1px solid ${c.color.replace("0.9", "0.18")}`,
                   borderRadius: c.right ? "9px 2px 9px 9px" : "2px 9px 9px 9px",
-                  padding:      "0.28rem 0.6rem",
+                  padding:      "0.38rem 0.75rem",
                   maxWidth:     "75%",
                 }}>
                   <p style={{
                     fontFamily: "Cormorant Garamond, serif",
                     fontStyle:  "italic",
-                    fontSize:   "clamp(0.76rem, 2vw, 0.86rem)",
+                    fontSize:   "clamp(0.95rem, 2vw, 1.05rem)",
                     color:      "rgba(240,238,255,0.75)",
                     lineHeight: 1.42,
                     margin:     0,
@@ -494,11 +494,11 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
             >
               {/* Avatar badge */}
               <div style={{
-                width:"26px", height:"26px", borderRadius:"50%", flexShrink:0,
+                width:"36px", height:"36px", borderRadius:"50%", flexShrink:0,
                 background:  speakerColor.replace("0.9", "0.18"),
                 border:      `1.5px solid ${speakerColor.replace("0.9", "0.55")}`,
                 display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:"0.48rem", fontWeight:800, color:speakerColor,
+                fontSize:"0.8rem", fontWeight:800, color:speakerColor,
                 fontFamily:"Inter, sans-serif",
                 boxShadow: `0 0 14px ${speakerColor.replace("0.9", "0.3")}`,
               }}>
@@ -516,7 +516,7 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
               }}>
                 <div style={{
                   fontFamily:    "Inter, sans-serif",
-                  fontSize:      "0.44rem",
+                  fontSize:      "0.75rem",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color:         speakerColor,
@@ -529,7 +529,7 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
                 <p style={{
                   fontFamily: "Cormorant Garamond, serif",
                   fontStyle:  "italic",
-                  fontSize:   "clamp(0.92rem, 2.6vw, 1.08rem)",
+                  fontSize:   "clamp(1.15rem, 2.6vw, 1.35rem)",
                   color:      "rgba(240,238,255,0.96)",
                   lineHeight: 1.55,
                   margin:     0,
@@ -554,10 +554,11 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
           padding:        "0.42rem 1.2rem 1.1rem",
           display:        "flex",
           alignItems:     "center",
-          justifyContent: "space-between",
+          justifyContent: "center",
           borderTop:      `1px solid ${speakerColor.replace("0.9", "0.11")}`,
+          position:       "relative",
         }}>
-          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+          <div style={{ position: "absolute", left: "1.2rem", display: "flex", gap: "4px", alignItems: "center" }}>
             {lines.map((_, i) => (
               <div key={i} style={{
                 height:      "3px",
@@ -577,7 +578,7 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
             transition={{ duration: 0.28 }}
             style={{
               fontFamily:    "Inter, sans-serif",
-              fontSize:      "0.6rem",
+              fontSize:      "0.85rem",
               color:         "rgba(255,255,255,0.32)",
               letterSpacing: "0.08em",
             }}

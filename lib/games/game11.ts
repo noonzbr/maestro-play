@@ -31,6 +31,7 @@ export const game11: Game = {
     "Discover how Microsoft Copilot transforms your daily M365 workflow — Word, Excel, Teams, Outlook — turning hours of admin into minutes of flow.",
   tagline: "The AI already in your computer. Most people never unlock it.",
   aiModel:  "copilot" as const,
+  mondayPrompt: "In Microsoft Copilot (Teams or Word): 'Using my recent emails and meeting notes from the last [X days], draft a status update for [STAKEHOLDER]. Include: 1) What was decided, 2) What is in progress, 3) What is blocked and needs input. Keep it under 150 words. Flag if any information seems outdated or contradictory.'",
   felipeOutroVideo:   "/videos/felipe-game11.mp4",
   nextGame: {
     slug:         "copilot-studio",

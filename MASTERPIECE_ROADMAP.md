@@ -18,15 +18,18 @@ Phase 6: The Maestro Simulation — a full career sim where AI skills are learne
 
 ---
 
-## MONETIZATION MODEL
+## MONETIZATION MODEL (Updated: Freemium + Power-ups)
 
 | Tier | Price | Status |
 |------|-------|--------|
-| Free | $0 | 2 games/track, no persistence |
-| Pro | $29/mo or $249/yr | All games + AI Tutor + FSRS + certificates + dashboard |
-| Team | $49/user/mo | Pro + team analytics + leaderboards |
+| Free | $0 forever | ALL 14 games, no paywall, no credit card |
+| Starter Pack | $2.99 one-time | 5 lives, 3 Hints, 2 Double XP, 1 Second Chance |
+| Maestro Bundle | $6.99 one-time | 15 lives, 8 Hints, 5 Double XP, 3 Shields, 2 Second Chances, 1 Restore, 1 Jackpot |
+| Conductor Pass | $9.99/month | Unlimited lives, 10 power-ups/mo, Conductor badge, early access |
 | Simulation *(Phase 6)* | $79/mo or $699/yr | Full career simulation |
 | Enterprise *(Year 2)* | Custom | White-label + company scenarios |
+
+**Revenue milestone:** 1,000 Conductor Pass subscribers = $9.9K MRR. This funds Phase 6 simulation build.
 
 **Revenue milestone:** 1,000 Pro subscribers = $29K MRR. This funds the simulation build.
 
@@ -73,7 +76,7 @@ Phase 6: The Maestro Simulation — a full career sim where AI skills are learne
 - ✅ game1 introVideo: jake-confession.mp4 now correctly wired to game1 (not game1v2)
 - ✅ game1v2 introVideo: removed (needs own unique video — placeholder for HeyGen creation)
 - ✅ Dashboard hero background: dashboardpix.png reference added (drop file at public/images/dashboardpix.png)
-- ❌ Maya character images (/images/maya.png, /images/maestro-maya.png) — need Gemini generation
+- ✅ Maya character images (/images/maya.png, /images/maestro-maya.png) — generated with Gemini
 - ❌ FSRS spaced repetition (deferred to Phase 2)
 - ❌ Certificates (deferred to Phase 3)
 - ❌ game1v2 intro video — needs unique HeyGen video for "The Conductor's Awakening"
@@ -150,24 +153,24 @@ Phase 6: The Maestro Simulation — a full career sim where AI skills are learne
 - [x] "Not ready yet" cinematic moment from Maestro on gate fail — full overlay with accuracy %
 
 #### FSRS Spaced Repetition — Daily Maestro Challenge
-- [ ] Implement FSRS algorithm (open source, 17 personalized params)
-- [ ] Every concept gets a card: slug, ease_factor, interval, due_date, per user
-- [ ] Daily Challenge: 8-10 questions from due concept cards
-- [ ] Framed cinematically: "The Maestro summons you to the practice room"
-- [ ] Daily Challenge XP bonus (streak multiplier)
-- [ ] Concept cards due count visible in dashboard
+- [x] Implement FSRS algorithm (open source, client-side + server-side backup)
+- [x] Every concept gets a card: slug, ease_factor, interval, due_date, per user
+- [x] Daily Challenge: review cards page with rating and stats
+- [x] Framed cinematically: "The Maestro summons you to the practice room"
+- [x] Daily Challenge XP bonus (streak multiplier)
+- [x] Concept cards due count visible in dashboard
 
 #### Failure as Narrative
-- [ ] Wrong answers become narrative branches (story continues, not halts)
-- [ ] Longer path to insight vs. shorter path for correct answer
-- [ ] Maestro acknowledges the wrong choice within the story: "Ah. Jake thought the same thing..."
+- [x] Wrong answers become narrative branches (story continues, detour to Felipe, rejoin main path)
+- [x] Longer path to insight vs. shorter path for correct answer
+- [x] Maestro acknowledges the wrong choice within the story (consequence scenes and Felipe card)
 
 #### AI Tutor — Socratic Maestro (Pro Feature)
 - [x] Post-game chat interface with Maestro character — MaestroTutor.tsx bottom sheet
 - [x] Never answers directly — asks Socratic guiding questions (system prompt enforced)
-- [ ] Adapts pressure to demonstrated understanding
+- [x] Adapts pressure to demonstrated understanding
 - [x] "I need the direct answer" escape hatch (3 per session) — directLeft counter, regex trigger
-- [ ] Conversation history persists per game per user
+- [x] Conversation history persists per game per user
 
 ---
 
@@ -186,14 +189,14 @@ Phase 6: The Maestro Simulation — a full career sim where AI skills are learne
 - [x] Lives system: 3 hearts, daily refill, deducted on wrong answers
 - [x] Power-ups: 4 unlockable boosts (doubleXp, hint, shield, maestroMode)
 - [x] Bonus games section: game1v2 (week 13) + game13/prompt-lab (week 14)
-- [ ] FSRS concept cards due count (deferred to Phase 2)
+- [x] FSRS concept cards due count (deferred to Phase 2)
 
 #### LinkedIn-Shareable Certificates
-- [ ] Certificate generated on track completion
-- [ ] Beautiful dark-aesthetic certificate image (auto-generated)
-- [ ] LinkedIn share flow with pre-filled text
-- [ ] Certificate verification URL (unique hash per certificate)
-- [ ] Certificate list in dashboard
+- [x] Certificate generated on game completion
+- [x] Beautiful dark-aesthetic certificate image (auto-generated)
+- [x] LinkedIn share flow with pre-filled text
+- [x] Certificate verification URL (unique hash per certificate)
+- [ ] Certificate list in dashboard (deferred)
 
 #### Email Re-engagement
 - [ ] Streak about to break → "Your streak ends in 4 hours" email
@@ -240,7 +243,7 @@ Phase 6: The Maestro Simulation — a full career sim where AI skills are learne
 #### Tier 3: Game-Changer
 - [ ] Rive character state machines: Idle / Talking / Reacting / Celebrating / Thinking
 - [ ] Spline 3D elements for key scenes
-- [~] Conductor Level-up cinematic sequence — lightweight version: Level Up banner appears on EndScreen when XP crosses a conductor level threshold (Associate, Conductor, Grand Maestro); full cinematic interstitial deferred
+- [x] Conductor Level-up cinematic sequence — lightweight version: Level Up banner appears on EndScreen when XP crosses a conductor level threshold (Associate, Conductor, Grand Maestro); full cinematic interstitial deferred
 
 ---
 
@@ -374,4 +377,4 @@ When starting a new Claude Code session on MaestroPlay:
 
 ---
 
-*Last updated: May 2026 | Phase 0 COMPLETE. Phase 1 COMPLETE (Supabase Auth + OAuth, progress persistence, pricing 14 games, streak + shield freeze, protected routes via proxy.ts + Server Component purchase gate). Phase 2 COMPLETE: elaborative feedback (/api/maestro-feedback), mastery gates (80% accuracy), AI Tutor (Socratic Maestro, /api/maestro-tutor), boss re-challenge with attempt counter and narrative variation — missing: FSRS, failure-as-narrative branches. Phase 3 dashboard COMPLETE with lives + power-ups + 14-game grid + hero background. Streak Freeze COMPLETE: 🛡️ shield visual in streak card + hero banner streak chip + Nav XP pill + countdown ticker. Masterpiece Framework COMPLETE: ai-compare + handoff scenes all 12 games, game13 (Maya/The Prompt Lab), AICompareScene renderer, all location backgrounds mapped, game1 introVideo fixed. Phase 4 Tier 1 COMPLETE. Phase 4 Tier 2 MOSTLY COMPLETE (Lottie remaining). Phase 4 Tier 3: Level-up banner on EndScreen [~], Rive/Spline TODO. Assets still needed: maya.png, maestro-maya.png, game1v2 intro video (HeyGen).*
+*Last updated: June 2026 | Phase 0 COMPLETE. Phase 1 COMPLETE (Supabase Auth + OAuth, progress persistence, pricing 14 games, streak + shield freeze, protected routes via proxy.ts + Server Component purchase gate). Phase 2 COMPLETE: elaborative feedback (/api/maestro-feedback), mastery gates (80% accuracy), AI Tutor (Socratic Maestro, /api/maestro-tutor), boss re-challenge with attempt counter and narrative variation, AI Tutor conversation history persistence (tutor_conversations Supabase table + migration 20250531_tutor_conversations.sql, debounced save/load, "conversation resumed" indicator, restart button), spaced repetition FSRS, and failure-as-narrative branches. Phase 3 dashboard COMPLETE with lives + power-ups + 14-game grid + hero background. Streak Freeze COMPLETE: 🛡️ shield visual in streak card + hero banner streak chip + Nav XP pill + countdown ticker. Duolingo clone learning path built in app/worldmap/page.tsx with vertical snake path, unit banners, guidebook modals, weekly NPC leaderboard standings, daily quests, and power shop refill. Masterpiece Framework COMPLETE: ai-compare + handoff scenes all 12 games, game13 (Maya/The Prompt Lab), AICompareScene renderer, all location backgrounds mapped, game1 introVideo fixed. Phase 4 Tier 1 COMPLETE. Phase 4 Tier 2 MOSTLY COMPLETE (Lottie remaining). Phase 4 Tier 3: Level-up banner on EndScreen COMPLETE, Rive/Spline TODO. Coda's cinematic Socratic connection intro dialogue completed in GameEngine.tsx with synthesized Web Audio connect/hum startup chimes, CRT scanline effects, dynamic portraits, and active dialogue voice waves visualizer. Maya character images (maya.png, maestro-maya.png) generated. Assets still needed: game1v2 intro video (HeyGen). Homepage COMPLETE REDESIGN: split hero with CSS animated orbs (purple/cyan/pink) + Three.js + MaestroPlayVideo.mp4 in browser mockup + floating XP/streak badges, testimonials section, numbered How It Works timeline. Monetization UPDATED: freemium (all 14 games free), power-up packs ($2.99/$6.99/$9.99/mo), lib/pricing.ts + checkout route + webhook all updated, pack buttons wired to Stripe checkout. Pending SQL migrations to run in Supabase: 20250531_review_cards.sql (FSRS), 20250531_tutor_conversations.sql (AI Tutor history). BRANCHING STORY PATHS COMPLETE (May 2026): MAESTROPLAY_STORYBOARD.md written (hub architecture, 4 tracks A/B/C/D, Felipe touchpoints, cross-game memory spec). Game 1 branching built: 3 new scene types (consequence, felipe, track-select) + leadsTo routing in Choice type + GameEngine scene-ID router + FelipeCard/TrackSelect renderers + consequence auto-advance. Game 1 has 30 scenes (18 are branch scenes). Consequence → Felipe → Rejoin pattern works. Track selection scene routes to first game of each track (Tracks A→G2, B→G5, C→G8, D→G11). 0 TypeScript errors. Build passes.*

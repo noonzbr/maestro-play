@@ -83,6 +83,7 @@ export default function CinematicVideo({
       style={{
         ...style,
         objectFit: objectFit as React.CSSProperties["objectFit"],
+        pointerEvents: "none",
       }}
     />
   )

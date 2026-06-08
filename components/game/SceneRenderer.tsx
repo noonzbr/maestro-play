@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState, useMemo, useRef } from "react"
 import { motion } from "framer-motion"
@@ -8,6 +8,10 @@ import GameIcon from "./GameIcon"
 import CinematicVideo from "./CinematicVideo"
 import PredictScene from "./PredictScene"
 import AICompareScene from "./AICompareScene"
+import MatchingScene from "./MatchingScene"
+import OrderingScene from "./OrderingScene"
+import ConstructScene from "./ConstructScene"
+import { playVoiceBlip } from "./NovelScene"
 
 /* ── keyframes ─────────────────────────────────────────────────────────── */
 const SCENE_KF_ID = "scene-renderer-kf"
@@ -187,20 +191,112 @@ function MaestroInsight({ elaboration }: { elaboration: string | null | undefine
 
 /* ── Feedback panel ────────────────────────────────────────────────────── */
 function FeedbackPanel({
-  correct, feedbackText, streakCount, onNext, aiElaboration
+  correct, feedbackText, streakCount, onNext, aiElaboration, branching
 }: {
   correct:        boolean
   feedbackText:   string
   streakCount:    number
   onNext:         () => void
   aiElaboration?: string | null
+  branching?:     boolean
 }) {
   const [btnReady, setBtnReady] = useState(false)
   useEffect(() => {
-    // brief delay so player must see the explanation before continuing
+    // brief delay so player must sit with the consequence before continuing
     const t = setTimeout(() => setBtnReady(true), correct ? 0 : 500)
     return () => clearTimeout(t)
   }, [correct])
+
+  /* ── BRANCHING: Consequence (no pass/fail verdict — the choice plays out) ──
+       Both strong and weak choices show "what happens"; the weaker path simply
+       leads somewhere rougher + the Maestro offers a note. Learning via outcome. */
+  if (branching) {
+    // cyan = the path opened smoothly; amber = it took a harder turn (NOT red/wrong)
+    const tone = correct ? "#00d4f0" : "#ffb347"
+    const toneRgb = correct ? "0,212,240" : "255,179,71"
+    return (
+      <div style={{
+        position: "fixed", bottom: 0, left: 0, right: 0,
+        background: `linear-gradient(180deg, rgba(8,10,20,0.97) 0%, rgba(6,7,16,0.99) 100%)`,
+        borderTop: `3px solid ${tone}`,
+        backdropFilter: "blur(24px)",
+        padding: "1rem 1.5rem 1.25rem",
+        zIndex: 90,
+        animation: "feedback-slide-up 0.42s cubic-bezier(0.34,1.1,0.64,1) both",
+      }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+          {/* Header — neutral, story-framed */}
+          <div style={{ display:"flex", alignItems:"flex-start", gap:"0.8rem", marginBottom:"0.8rem" }}>
+            <div style={{
+              width:"40px", height:"40px", borderRadius:"50%", flexShrink:0,
+              background:`rgba(${toneRgb},0.14)`, border:`1px solid rgba(${toneRgb},0.4)`,
+              display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem",
+              animation:"feedback-icon-pop 0.55s 0.04s cubic-bezier(0.34,1.56,0.64,1) both",
+            }}>
+              {correct ? "🎼" : "🌀"}
+            </div>
+            <div>
+              <div style={{
+                fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.72rem",
+                letterSpacing:"0.3em", textTransform:"uppercase",
+                color:`rgba(${toneRgb},0.75)`, marginBottom:"0.22rem",
+                animation:"feedback-text-in 0.3s 0.1s ease both",
+              }}>
+                What happens
+              </div>
+              <div style={{
+                fontFamily:"Cormorant Garamond, serif", fontStyle:"italic",
+                fontWeight:600, fontSize:"1.32rem", color:"rgba(240,238,255,0.95)", lineHeight:1.3,
+                animation:"maestro-line-in 0.45s 0.18s cubic-bezier(0.34,1.1,0.64,1) both",
+              }}>
+                {correct
+                  ? (streakCount >= 3 ? "Your instinct lands — again." : "Your instinct lands.")
+                  : "The path takes a harder turn."}
+              </div>
+            </div>
+          </div>
+
+          {/* Consequence text */}
+          {feedbackText && (
+            <div style={{
+              background:`rgba(${toneRgb},0.06)`,
+              border:`1px solid rgba(${toneRgb},0.18)`,
+              borderLeft:`3px solid ${tone}`,
+              borderRadius:"0 12px 12px 0",
+              padding:"0.75rem 1rem 0.8rem", marginBottom:"0.8rem",
+              animation:"feedback-text-in 0.4s 0.28s ease both",
+            }}>
+              <p style={{ fontFamily:"Inter, sans-serif", fontSize:"1.15rem", color:"rgba(240,238,255,0.88)", lineHeight:1.75, margin:0 }}>
+                {feedbackText}
+              </p>
+            </div>
+          )}
+
+          {/* Maestro's note — only on the rougher path */}
+          {!correct && <MaestroInsight elaboration={aiElaboration} />}
+
+          {/* Continue — neutral, story-forward */}
+          <button
+            onClick={btnReady ? onNext : undefined}
+            style={{
+              width:"100%", fontFamily:"Inter, sans-serif", fontWeight:800,
+              fontSize:"0.95rem", color:"#08060f",
+              background: btnReady ? `linear-gradient(90deg, ${tone}, #e040fb)` : `rgba(${toneRgb},0.28)`,
+              padding:"0.78rem", borderRadius:"12px", border:"none",
+              cursor: btnReady ? "pointer" : "default",
+              letterSpacing:"0.02em", opacity: btnReady ? 1 : 0.6,
+              transition:"opacity 0.35s ease, background 0.35s ease, filter 0.15s, transform 0.15s",
+              animation:"continue-btn-in 0.4s 0.35s cubic-bezier(0.34,1.3,0.64,1) both",
+            }}
+            onMouseEnter={e => { if (btnReady) { e.currentTarget.style.filter="brightness(1.1)"; e.currentTarget.style.transform="translateY(-1px)" } }}
+            onMouseLeave={e => { e.currentTarget.style.filter=""; e.currentTarget.style.transform="" }}
+          >
+            {btnReady ? "See where it leads →" : "…"}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   /* ── WRONG: Maestro Intervenes ──────────────────────────────────────── */
   if (!correct) {
@@ -217,6 +313,20 @@ function FeedbackPanel({
       }}>
         <div style={{ maxWidth:"680px", margin:"0 auto" }}>
 
+          {/* ── Dr. Cole's "Failure as Narrative" — story beat before the lesson ── */}
+          {/* "Wrong answers must branch into a consequence scene. The world pushes back." */}
+          <div style={{
+            fontFamily:"Cormorant Garamond, serif", fontStyle:"italic",
+            fontSize:"0.95rem", color:"rgba(255,180,180,0.72)",
+            lineHeight:1.55, marginBottom:"0.85rem",
+            padding:"0.6rem 0", borderBottom:"1px solid rgba(255,75,75,0.15)",
+            animation:"feedback-text-in 0.4s ease both",
+          }}>
+            {streakCount === 0
+              ? "Something shifts. The room gets quieter. That wasn't the right move."
+              : "A beat of silence. Even the best conductors have moments like this."}
+          </div>
+
           {/* ── Maestro header row ──── */}
           <div style={{ display:"flex", alignItems:"flex-start", gap:"0.8rem", marginBottom:"0.85rem" }}>
             {/* Conductor icon */}
@@ -232,7 +342,7 @@ function FeedbackPanel({
             {/* Label + italic line */}
             <div>
               <div style={{
-                fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.55rem",
+                fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.72rem",
                 letterSpacing:"0.3em", textTransform:"uppercase",
                 color:"rgba(255,75,75,0.65)", marginBottom:"0.22rem",
                 animation:"feedback-text-in 0.3s 0.1s ease both",
@@ -241,7 +351,7 @@ function FeedbackPanel({
               </div>
               <div style={{
                 fontFamily:"Cormorant Garamond, serif", fontStyle:"italic",
-                fontWeight:600, fontSize:"1.12rem", color:"rgba(255,200,200,0.95)",
+                fontWeight:600, fontSize:"1.32rem", color:"rgba(255,200,200,0.95)",
                 lineHeight:1.3,
                 animation:"maestro-line-in 0.45s 0.18s cubic-bezier(0.34,1.1,0.64,1) both",
               }}>
@@ -264,7 +374,7 @@ function FeedbackPanel({
               animation:"feedback-text-in 0.4s 0.28s ease both",
             }}>
               <p style={{
-                fontFamily:"Inter, sans-serif", fontSize:"0.9rem",
+                fontFamily:"Inter, sans-serif", fontSize:"1.15rem",
                 color:"rgba(240,238,255,0.88)", lineHeight:1.75, margin:0,
               }}>
                 {feedbackText}
@@ -314,7 +424,18 @@ function FeedbackPanel({
       zIndex:        90,
       animation:     "feedback-slide-up 0.38s cubic-bezier(0.34,1.15,0.64,1) both",
     }}>
-      <div style={{ maxWidth:"680px", margin:"0 auto" }}>
+      <div style={{ maxWidth:"680px", margin:"0 auto", position:"relative" }}>
+
+        {/* ── XP spark particles — 7-directional burst on correct answer ── */}
+        {[1,2,3,4,5,6,7].map(i => (
+          <div key={i} aria-hidden="true" style={{
+            position:"absolute", top:"1rem", left:"1.2rem",
+            width:"6px", height:"6px", borderRadius:"50%",
+            background: i % 3 === 0 ? "#58cc02" : i % 3 === 1 ? "#00d4f0" : "#ffeb3b",
+            animation: `xp-spark-${i} 0.55s ${0.04 + i * 0.04}s cubic-bezier(0.25,0.46,0.45,0.94) both`,
+            pointerEvents:"none",
+          }} />
+        ))}
 
         {/* header row */}
         <div style={{ display:"flex", alignItems:"center", gap:"0.6rem", marginBottom:"0.4rem" }}>
@@ -389,16 +510,24 @@ function FeedbackPanel({
 }
 
 /* ── Typewriter hook ───────────────────────────────────────────────────── */
-function useTypewriter(text: string, speed = 28, active = true) {
+function useTypewriter(text: string, speed = 28, active = true, speakerName = "AI") {
   const [displayed, setDisplayed] = useState("")
   const [done,      setDone]      = useState(false)
+  
+  const speakerRef = useRef(speakerName)
+  useEffect(() => {
+    speakerRef.current = speakerName
+  }, [speakerName])
+
   useEffect(() => {
     if (!active) { setDisplayed(text); setDone(true); return }
     setDisplayed(""); setDone(false)
     let i = 0
     const iv = setInterval(() => {
       i++
+      const char = text[i - 1]
       setDisplayed(text.slice(0, i))
+      playVoiceBlip(speakerRef.current, char)
       if (i >= text.length) { clearInterval(iv); setDone(true) }
     }, speed)
     return () => clearInterval(iv)
@@ -407,7 +536,7 @@ function useTypewriter(text: string, speed = 28, active = true) {
 }
 
 /* ── Revelation scene ─────────────────────────────────────────────────── */
-function RevelationScene({ scene, onNext, playFireworks }: { scene:Scene; onNext:()=>void; playFireworks?:()=>void }) {
+function RevelationScene({ scene, onNext, playFireworks, fastText }: { scene:Scene; onNext:()=>void; playFireworks?:()=>void; fastText?:boolean }) {
   const text = scene.revealText || ""
 
   /**
@@ -468,12 +597,12 @@ function RevelationScene({ scene, onNext, playFireworks }: { scene:Scene; onNext
   }
 
   /* ── Text phase (existing typewriter experience) ───────────────────── */
-  return <RevelationText scene={scene} onNext={onNext} playFireworks={playFireworks} />
+  return <RevelationText scene={scene} onNext={onNext} playFireworks={playFireworks} fastText={fastText} />
 }
 
-function RevelationText({ scene, onNext, playFireworks }: { scene:Scene; onNext:()=>void; playFireworks?:()=>void }) {
+function RevelationText({ scene, onNext, playFireworks, fastText }: { scene:Scene; onNext:()=>void; playFireworks?:()=>void; fastText?:boolean }) {
   const text = scene.revealText || ""
-  const { displayed, done } = useTypewriter(text, 22)
+  const { displayed, done } = useTypewriter(text, 22, !fastText)
   const [showButton,    setShowButton]    = useState(false)
   const [showFireworks, setShowFireworks] = useState(false)
 
@@ -482,37 +611,66 @@ function RevelationText({ scene, onNext, playFireworks }: { scene:Scene; onNext:
     if (!done) return
     playFireworks?.()
     setShowFireworks(true)
-    const t  = setTimeout(() => setShowButton(true), 800)
+    const t  = setTimeout(() => setShowButton(true), fastText ? 0 : 800)
     const t2 = setTimeout(() => setShowFireworks(false), 3000)
     return () => { clearTimeout(t); clearTimeout(t2) }
-  }, [done, playFireworks])
+  }, [done, playFireworks, fastText])
+
+  // Determine dynamic font sizes based on character length to ensure readability
+  const fontStyle = () => {
+    if (text.length > 320) {
+      return {
+        fontSize: "clamp(0.85rem, 2.1vw, 1.05rem)",
+        lineHeight: 1.4,
+        maxHeight: "180px",
+      }
+    }
+    if (text.length > 160) {
+      return {
+        fontSize: "clamp(0.98rem, 2.4vw, 1.2rem)",
+        lineHeight: 1.48,
+        maxHeight: "220px",
+      }
+    }
+    return {
+      fontSize: "clamp(1.15rem, 2.8vw, 1.4rem)",
+      lineHeight: 1.55,
+      maxHeight: "260px",
+    }
+  }
+
+  const { fontSize, lineHeight, maxHeight } = fontStyle()
 
   return (
-    <div style={{ textAlign:"center", padding:"1rem 1rem 1.5rem", position:"relative" }}>
+    <div style={{ textAlign:"center", padding:"0.5rem 0.5rem 1rem", position:"relative" }}>
       {showFireworks && <Fireworks />}
       <div style={{
         position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)",
-        width:"400px", height:"400px",
-        background:"radial-gradient(circle, rgba(0,212,240,0.07) 0%, rgba(123,47,190,0.08) 40%, transparent 70%)",
+        width:"300px", height:"300px",
+        background:"radial-gradient(circle, rgba(0,212,240,0.06) 0%, rgba(123,47,190,0.06) 40%, transparent 70%)",
         pointerEvents:"none",
         animation:"revelation-glow 4s ease-in-out infinite",
       }} />
-      <div style={{ fontSize:"2.5rem", marginBottom:"1rem", filter:"drop-shadow(0 0 20px rgba(0,212,240,0.6))", animation:"float 5s ease-in-out infinite", display:"inline-block" }}>♪</div>
+      <div style={{ fontSize:"1.8rem", marginBottom:"0.5rem", filter:"drop-shadow(0 0 15px rgba(0,212,240,0.5))", animation:"float 5s ease-in-out infinite", display:"inline-block" }}>♪</div>
+      
       <blockquote style={{
         fontFamily:"Cormorant Garamond, serif", fontStyle:"italic", fontWeight:300,
-        fontSize:"clamp(1rem, 2.6vw, 1.35rem)", color:"#fff", lineHeight:1.5,
-        maxWidth:"560px", margin:"0 auto 1.25rem", position:"relative", zIndex:1,
+        fontSize, lineHeight, color:"#fff",
+        maxWidth:"560px", margin:"0 auto 0.75rem", position:"relative", zIndex:1,
+        maxHeight, overflowY:"auto", paddingRight:"4px",
       }}>
         &ldquo;{displayed}
         {!done && <span style={{ animation:"pulse-glow 0.7s ease-in-out infinite", color:"var(--cyan)" }}>|</span>}
         {done && <>&rdquo;</>}
       </blockquote>
-      {done && (
-        <div style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"rgba(0,212,240,0.08)", border:"1px solid rgba(0,212,240,0.2)", borderRadius:"100px", padding:"0.4rem 1rem", marginBottom:"1.25rem", animation:"section-enter 0.5s ease both" }}>
-          <span style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.95rem", color:"var(--cyan)" }}>+{scene.xpAward} XP</span>
-          <span style={{ fontFamily:"Inter, sans-serif", fontSize:"0.75rem", color:"var(--muted)" }}>revelation bonus</span>
+
+      {done && scene.xpAward > 0 && (
+        <div style={{ display:"inline-flex", alignItems:"center", gap:"0.4rem", background:"rgba(0,212,240,0.08)", border:"1px solid rgba(0,212,240,0.2)", borderRadius:"100px", padding:"0.25rem 0.8rem", marginBottom:"0.75rem", animation:"section-enter 0.5s ease both" }}>
+          <span style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.88rem", color:"var(--cyan)" }}>+{scene.xpAward} XP</span>
+          <span style={{ fontFamily:"Inter, sans-serif", fontSize:"0.7rem", color:"var(--muted)" }}>revelation bonus</span>
         </div>
       )}
+
       {showButton && (
         <div style={{ animation:"section-enter 0.5s ease both" }}>
           <button onClick={onNext} style={{
@@ -554,11 +712,11 @@ function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
         >
           <div style={{ display:"inline-flex", alignItems:"center", gap:"0.5rem", background:"rgba(0,212,240,0.08)", border:"1px solid rgba(0,212,240,0.28)", borderRadius:"100px", padding:"0.28rem 0.9rem", marginBottom:"0.85rem" }}>
             <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:"var(--cyan)", boxShadow:"0 0 8px var(--cyan)", flexShrink:0 }} />
-            <span style={{ fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.6rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"var(--cyan)" }}>
+            <span style={{ fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.8rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"var(--cyan)" }}>
               {scene.concept.title}
             </span>
           </div>
-          <p style={{ fontFamily:"Inter, sans-serif", fontSize:"0.92rem", color:"rgba(240,238,255,0.72)", lineHeight:1.75, margin:0 }}>
+          <p style={{ fontFamily:"Inter, sans-serif", fontSize:"1.2rem", color:"rgba(240,238,255,0.72)", lineHeight:1.75, margin:0 }}>
             {scene.concept.body}
           </p>
         </motion.div>
@@ -571,7 +729,7 @@ function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
           style={{ display:"flex", gap:"0.75rem", alignItems:"flex-start", marginBottom:"1.1rem" }}
         >
           <div style={{ width:"3px", minHeight:"100%", flexShrink:0, alignSelf:"stretch", background:"linear-gradient(180deg, var(--cyan), #e040fb)", borderRadius:"2px", marginTop:"2px" }} />
-          <p style={{ fontFamily:"Cormorant Garamond, serif", fontStyle:"italic", fontSize:"1.05rem", color:"rgba(240,238,255,0.9)", lineHeight:1.6, margin:0 }}>
+          <p style={{ fontFamily:"Cormorant Garamond, serif", fontStyle:"italic", fontSize:"1.25rem", color:"rgba(240,238,255,0.9)", lineHeight:1.6, margin:0 }}>
             &ldquo;{hook}&rdquo;
           </p>
         </motion.div>
@@ -584,10 +742,10 @@ function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
           style={{ background:"linear-gradient(135deg, rgba(0,212,240,0.06) 0%, rgba(224,64,251,0.06) 100%)", border:"1px solid rgba(0,212,240,0.22)", borderRadius:"16px", padding:"1.1rem 1.25rem", marginBottom:"1.75rem", position:"relative", overflow:"hidden" }}
         >
           <div style={{ position:"absolute", top:0, right:0, width:"100px", height:"100px", background:"radial-gradient(circle at top right, rgba(224,64,251,0.12), transparent 70%)", pointerEvents:"none" }} />
-          <div style={{ fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.58rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"var(--cyan)", marginBottom:"0.5rem", opacity:0.8 }}>
+          <div style={{ fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.8rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"var(--cyan)", marginBottom:"0.5rem", opacity:0.8 }}>
             Key Insight
           </div>
-          <p style={{ fontFamily:"Cormorant Garamond, serif", fontStyle:"italic", fontWeight:600, fontSize:"1.18rem", color:"#fff", lineHeight:1.45, margin:0 }}>
+          <p style={{ fontFamily:"Cormorant Garamond, serif", fontStyle:"italic", fontWeight:600, fontSize:"1.38rem", color:"#fff", lineHeight:1.45, margin:0 }}>
             {scene.learnHighlight}
           </p>
         </motion.div>
@@ -619,21 +777,77 @@ function LearnScene({ scene, onNext }: { scene: Scene; onNext: () => void }) {
 
 /* ── Main renderer ────────────────────────────────────────────────────── */
 type Props = {
-  scene:           Scene
-  answered:        boolean
-  selectedLabel:   string | null
-  onAnswer:        (choice: Choice) => void
-  onNext:          () => void
-  streakCount?:    number
-  playFireworks?:  () => void
-  aiElaboration?:  string | null
+  scene:              Scene
+  answered:           boolean
+  selectedLabel:      string | null
+  onAnswer:           (choice: Choice) => void
+  onNext:             () => void
+  streakCount?:       number
+  playFireworks?:     () => void
+  aiElaboration?:     string | null
+  /** When true, reveals the Continue button on no-choices narrative scenes */
+  dialogueDone?:      boolean
+  /** Character portrait — kept visible during scenarios for emotional embodiment */
+  characterImage?:    string
+  /** Name shown on the character presence panel */
+  characterName?:     string
+  /** Game accent colour — used for character glow */
+  accentColor?:       string
+  /** Whether the last answer was correct — drives character emotional state */
+  lastAnswerCorrect?: boolean | null
+  fastText?:          boolean
 }
 
-export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer, onNext, streakCount=0, playFireworks, aiElaboration }: Props) {
+export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer, onNext, streakCount=0, playFireworks, aiElaboration, dialogueDone, characterName, accentColor, fastText = false }: Props) {
   useEffect(() => { ensureSceneKeyframes() }, [])
 
+  // ── Dr. Park's "Think Pause" — choices hidden until player actively chooses to see them
+  // This forces construction mindset before passive selection (Gee Principle #14)
+  const [choicesUnlocked, setChoicesUnlocked] = useState(answered) // pre-unlocked if already answered
+  const [playerReflection, setPlayerReflection] = useState("")
+  const [reflectionSaved,  setReflectionSaved]  = useState(false)
+
+  // When scene changes (new question), reset the unlock gate
+  const sceneId = scene.id ?? scene.question ?? ""
+  const prevSceneId = useRef(sceneId)
+  useEffect(() => {
+    if (prevSceneId.current !== sceneId) {
+      prevSceneId.current = sceneId
+      setChoicesUnlocked(false)
+      setPlayerReflection("")
+      setReflectionSaved(false)
+    }
+  }, [sceneId])
+
+  // Auto-unlock if player is returning to an already-answered scene
+  useEffect(() => {
+    if (answered) setChoicesUnlocked(true)
+  }, [answered])
+
+  // Single forward action: silently save the instinct (if any) THEN reveal choices.
+  // No competing buttons — one clear path so the player always knows what to do.
+  function revealChoices() {
+    if (playerReflection.trim()) saveReflection()
+    setChoicesUnlocked(true)
+  }
+
+  function saveReflection() {
+    if (!playerReflection.trim()) return
+    try {
+      const existing = JSON.parse(localStorage.getItem("maestro_reflections") ?? "[]") as string[]
+      const entry = `[${new Date().toLocaleDateString()}] ${scene.question ?? ""}: ${playerReflection}`
+      localStorage.setItem("maestro_reflections", JSON.stringify([entry, ...existing].slice(0, 50)))
+    } catch {}
+    setReflectionSaved(true)
+  }
+
   // Typewriter for NPC quote — called before early returns (React hook rules)
-  const { displayed: npcDisplayed, done: npcDone } = useTypewriter(scene.npcLine || "", 26)
+  const { displayed: npcDisplayed, done: npcDone } = useTypewriter(
+    scene.npcLine || "",
+    26,
+    !fastText,
+    scene.character ?? characterName ?? "AI"
+  )
 
   if (scene.type === "predict") {
     return (
@@ -667,10 +881,37 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
     return null
   }
   if (scene.type === "revelation") {
-    return <RevelationScene scene={scene} onNext={onNext} playFireworks={playFireworks} />
+    return <RevelationScene scene={scene} onNext={onNext} playFireworks={playFireworks} fastText={fastText} />
   }
   if (scene.type === "learn") {
     return <LearnScene scene={scene} onNext={onNext} />
+  }
+  if (scene.type === "match") {
+    return (
+      <MatchingScene
+        scene={scene}
+        onComplete={onNext}
+        accentColor={accentColor}
+      />
+    )
+  }
+  if (scene.type === "order") {
+    return (
+      <OrderingScene
+        scene={scene}
+        onComplete={onNext}
+        accentColor={accentColor}
+      />
+    )
+  }
+  if (scene.type === "construct") {
+    return (
+      <ConstructScene
+        scene={scene}
+        onComplete={onNext}
+        accentColor={accentColor}
+      />
+    )
   }
 
   const isBoss      = scene.type === "boss"
@@ -681,17 +922,21 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
     : null
   const correct      = selectedChoice?.correct ?? false
   // Wrong answers can have a dedicated wrongFeedback string; fall back to feedback
-  const feedbackText = selectedChoice
+  const feedbackText: string = selectedChoice
     ? (!selectedChoice.correct && selectedChoice.wrongFeedback)
       ? selectedChoice.wrongFeedback
-      : selectedChoice.feedback
+      : (selectedChoice.feedback ?? "")
     : ""
 
   /* spring preset reused across elements */
   const spring = { type: "spring" as const, stiffness: 380, damping: 30 }
 
+  // NOTE: The persistent character presence panel now lives in GameEngine
+  // (CharacterStage) so it appears consistently across ALL scene types —
+  // quiz, scenario, learn, revelation, ai-compare, predict — not just here.
+
   return (
-    <div>
+    <div style={{ position: "relative" }}>
 
       {/* ── Character / location header ─────────────────────────────── */}
       {(scene.character || scene.location) && (
@@ -722,25 +967,38 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
         </motion.div>
       )}
 
-      {/* ── Scenario card ───────────────────────────────────────────── */}
-      {!hasDialogue && (scene.scenarioText || scene.npcLine) && (
+      {/* ── Unified Storytelling Panel ────────────────────────────── */}
+      {!hasDialogue && (scene.scenarioText || scene.npcLine || scene.concept) && (
         <motion.div
-          initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
+          initial={{ opacity:0, y:12 }}
+          animate={{ opacity:1, y:0 }}
           transition={{ ...spring, delay:0.04 }}
           style={{
-            background: isBoss ? "rgba(224,64,251,0.04)" : "rgba(0,212,240,0.04)",
-            borderTop:    `1px solid ${isBoss ? "rgba(224,64,251,0.2)" : "rgba(0,212,240,0.15)"}`,
-            borderRight:  `1px solid ${isBoss ? "rgba(224,64,251,0.2)" : "rgba(0,212,240,0.15)"}`,
-            borderBottom: `1px solid ${isBoss ? "rgba(224,64,251,0.2)" : "rgba(0,212,240,0.15)"}`,
-            borderLeft:   `3px solid ${isBoss ? "var(--pink)" : "var(--cyan)"}`,
-            borderRadius: "0 12px 12px 0",
-            padding: "0.75rem 1.1rem",
-            marginBottom: "0.75rem",
+            background: "rgba(255, 255, 255, 0.03)",
+            backdropFilter: "blur(16px)",
+            border: `1px solid ${isBoss ? "rgba(224,64,251,0.18)" : "rgba(255, 255, 255, 0.08)"}`,
+            borderLeft: `4px solid ${isBoss ? "var(--pink)" : "var(--cyan)"}`,
+            borderRadius: "0 20px 20px 0",
+            padding: "1.1rem 1.4rem",
+            marginBottom: "0.95rem",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.8rem",
+            maxHeight: "220px",
+            overflowY: "auto",
           }}
         >
-          {/* NPC quote — typewriter reveal, cursor before closing quote */}
+          {/* NPC line (typewriter speaker quote) */}
           {scene.npcLine && (
-            <p style={{ fontFamily:"Cormorant Garamond, serif", fontStyle:"italic", fontSize:"1.1rem", color:isBoss?"var(--pink)":"var(--cyan)", marginBottom:scene.scenarioText?"0.75rem":0, lineHeight:1.5 }}>
+            <p style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontStyle: "italic",
+              fontSize: "1.2rem",
+              color: isBoss ? "var(--pink)" : "var(--cyan)",
+              lineHeight: 1.55,
+              margin: 0
+            }}>
               &ldquo;{npcDisplayed}
               {!npcDone && (
                 <span style={{ animation:"npc-cursor-blink 0.75s ease-in-out infinite", color:isBoss?"var(--pink)":"var(--cyan)", fontStyle:"normal", marginLeft:"1px" }}>|</span>
@@ -748,57 +1006,65 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
               {npcDone && <>&rdquo;</>}
             </p>
           )}
+
+          {/* Scenario Text */}
           {scene.scenarioText && (
-            <p style={{ fontFamily:"Inter, sans-serif", fontSize:"0.925rem", color:"rgba(240,238,255,0.85)", lineHeight:1.75 }}>
+            <p style={{
+              fontFamily: "Inter, sans-serif",
+              fontSize: "0.98rem",
+              color: "rgba(240,238,255,0.92)",
+              lineHeight: 1.6,
+              margin: 0
+            }}>
               {scene.scenarioText}
             </p>
+          )}
+
+          {/* Divider if concept exists along with text */}
+          {scene.concept && (scene.scenarioText || scene.npcLine) && (
+            <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.08)", width: "100%" }} />
+          )}
+
+          {/* Concept Note */}
+          {scene.concept && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
+                <GameIcon name="tuningFork" size={20} />
+                <span style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.72rem", letterSpacing:"0.22em", textTransform:"uppercase", color:"rgba(255,255,255,0.5)" }}>
+                  {scene.concept.title}
+                </span>
+              </div>
+              <p style={{ fontFamily:"Inter, sans-serif", fontSize: "0.9rem", color:"rgba(240,238,255,0.75)", lineHeight:1.5, margin:0 }}>
+                {scene.concept.body}
+              </p>
+            </div>
           )}
         </motion.div>
       )}
 
-      {/* ── Concept card ────────────────────────────────────────────── */}
-      {!hasDialogue && scene.concept && (
-        <motion.div
-          initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
-          transition={{ ...spring, delay:0.09 }}
-          style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:"14px", padding:"0.7rem 1rem", marginBottom:"0.75rem" }}
-        >
-          <div style={{ display:"flex", alignItems:"center", gap:"0.5rem", marginBottom:"0.5rem" }}>
-            <GameIcon name="tuningFork" size={18} />
-            <span style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.62rem", letterSpacing:"0.22em", textTransform:"uppercase", color:"rgba(255,255,255,0.45)" }}>
-              {scene.concept.title}
-            </span>
-          </div>
-          <p style={{ fontFamily:"Inter, sans-serif", fontSize:"0.9rem", color:"rgba(240,238,255,0.7)", lineHeight:1.7, margin:0 }}>
-            {scene.concept.body}
-          </p>
-        </motion.div>
-      )}
-
-      {/* ── Question ────────────────────────────────────────────────── */}
+      {/* ── Question Header (Clean, bold, Duolingo-like) ────────────────── */}
       {scene.question && (
-        <>
-          <motion.div
-            initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-            transition={{ ...spring, delay:0.14 }}
-            style={{ display:"flex", alignItems:"center", gap:"0.5rem", marginBottom:"0.4rem" }}
-          >
-            <GameIcon name={isBoss?"baton":"headphones"} size={16} />
-            <span style={{ fontFamily:"Inter, sans-serif", fontWeight:800, fontSize:"0.6rem", letterSpacing:"0.25em", textTransform:"uppercase", color:isBoss?"var(--pink)":"rgba(0,212,240,0.6)" }}>
-              {isBoss ? "Final Challenge" : "Your Turn"}
-            </span>
-          </motion.div>
-          <motion.h2
-            initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}
-            transition={{ ...spring, delay:0.18 }}
-            style={{ fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"clamp(0.9rem, 2.3vw, 1.05rem)", color:"#fff", lineHeight:1.4, marginBottom:"0.5rem", letterSpacing:"-0.01em" }}
-          >
-            {scene.question}
-          </motion.h2>
-        </>
+        <motion.h2
+          initial={{ opacity:0, y:8 }}
+          animate={{ opacity:1, y:0 }}
+          transition={{ ...spring, delay:0.18 }}
+          style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(1.1rem, 2.5vw, 1.25rem)",
+            color: "#fff",
+            lineHeight: 1.35,
+            marginBottom: "0.85rem",
+            letterSpacing: "-0.01em"
+          }}
+        >
+          {scene.question}
+        </motion.h2>
       )}
 
-      {/* ── Choices — staggered spring entrance ─────────────────────── */}
+      {/* ── Decisions — each option is a PATH the player commits to, not a
+           quiz answer. No "type your hunch" pre-step, no right/wrong framing.
+           The consequence of the choice (below) is where the learning lives. ── */}
       {scene.choices && (
         <div style={{ display:"flex", flexDirection:"column", gap:"0.38rem", marginBottom:"0.5rem" }}>
           {scene.choices.map((choice, i) => (
@@ -806,7 +1072,7 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
               key={choice.label}
               initial={{ opacity:0, x:16 }}
               animate={{ opacity:1, x:0 }}
-              transition={{ ...spring, delay: 0.22 + i * 0.06 }}
+              transition={{ ...spring, delay: !answered ? 0.22 + i * 0.07 : 0 }}
             >
               <ChoiceButton
                 choice={choice}
@@ -814,20 +1080,47 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
                 answered={answered}
                 selectedLabel={selectedLabel}
                 onSelect={onAnswer}
+                branching
               />
             </motion.div>
           ))}
         </div>
       )}
 
-      {/* ── Feedback panel ──────────────────────────────────────────── */}
+      {/* ── Narrative Continue — story scenes with no choices, dialogue done ── */}
+      {!scene.choices && !answered && dialogueDone && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          style={{ marginTop: "0.75rem" }}
+        >
+          <button
+            onClick={onNext}
+            style={{
+              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
+              color: "#08060f", background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+              padding: "0.8rem 2.25rem", borderRadius: "100px", border: "none",
+              cursor: "pointer", boxShadow: "0 0 20px rgba(0,212,240,0.25)",
+              transition: "transform 0.2s, box-shadow 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.45)" }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 0 20px rgba(0,212,240,0.25)" }}
+          >
+            Continue →
+          </button>
+        </motion.div>
+      )}
+
+      {/* ── Consequence panel — branching framing (no pass/fail verdict) ── */}
       {answered && selectedChoice && (
         <FeedbackPanel
-          correct={correct}
+          correct={!!correct}
           feedbackText={feedbackText}
           streakCount={streakCount}
           onNext={onNext}
           aiElaboration={correct ? undefined : aiElaboration}
+          branching
         />
       )}
     </div>

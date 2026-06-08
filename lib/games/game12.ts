@@ -3,8 +3,7 @@ import { Game } from "./types"
 export const game12: Game = {
   slug: "copilot-studio",
   week: 12,
-  free: false,
-  price: 4.99,
+  free: true,
   title: "Copilot Studio — Build Your Own AI Agent",
   emoji: "🏗️",
   accentColor: "#8764b8",
@@ -35,6 +34,7 @@ export const game12: Game = {
     "Learn how Microsoft Copilot Studio lets anyone build custom AI agents — with a knowledge base, personality, and real integrations — without writing code.",
   tagline: "You don't need to code to build AI. You need to think clearly.",
   aiModel:  "copilot" as const,
+  mondayPrompt: "In Copilot Studio, create an agent for [USE CASE]. Write these system instructions: 'You are [Agent Name], the [team/company] assistant. You answer questions about [SCOPE]. You always: [3 behaviors]. You never: [3 hard limits — especially never guess on [SENSITIVE TOPICS]]. When you do not know something, say: I am not certain — please contact [PERSON/EMAIL]. Your tone is: [warm/professional/technical].'",
   felipeOutroVideo:   "/videos/felipe-game12.mp4",
   nextGame: {
     slug:         "prompt-lab",

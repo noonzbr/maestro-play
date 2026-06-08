@@ -6,7 +6,6 @@ import { Float } from "@react-three/drei"
 import * as THREE from "three"
 import ParticleField from "./ParticleField"
 import BatonStream from "./BatonStream"
-import PostProcessing from "./PostProcessing"
 
 function BackgroundNebula() {
   const meshRef = useRef<THREE.Mesh>(null)
@@ -152,7 +151,7 @@ export default function HeroScene() {
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 75 }}
-      style={{ position: "absolute", inset: 0 }}
+      style={{ position: "absolute", inset: 0, zIndex: 1 }}
       gl={{ antialias: true, alpha: false }}
       dpr={[1, 1.5]}
     >
@@ -166,7 +165,6 @@ export default function HeroScene() {
         <BatonStream count={200} />
         <Conductor />
         <CameraRig mouse={mouse} />
-        <PostProcessing />
       </Suspense>
     </Canvas>
   )

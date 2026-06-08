@@ -67,56 +67,73 @@ building to a point, slower on the questions.
 
 
 ────────────────────────────────────────────────────────────────────────────────
-GAME 2 — ZOE: "Why Does It Always Rhyme Heart with Apart?"
-Character: Zoe, 19-year-old drummer and songwriter
+GAME 2 — ZOE: "Signal vs. Noise" — "Marcus Didn't Need Me Anymore"
+Character: Zoe Chen, 19-year-old session drummer
+Game concept: What is AI — and what is NOT?
 ────────────────────────────────────────────────────────────────────────────────
 
 SETTING:
-Recording studio — small, personal. Drum kit partially visible behind her.
-Zoe is sitting on a stool in front of a bare wall, notepad in hand with
-what looks like crossed-out lyrics. Studio-quality lighting but casual setup.
+Recording studio — lived-in, late afternoon. Drum kit behind her, phone on
+the stool beside her. She's not playing — she's thinking. The kind of room
+where she's spent thousands of hours. But today she's sitting still.
 
 APPEARANCE:
-19, natural energy, headphones around her neck. Looks like she's been
-in here for hours. Direct, slightly amused expression.
+19, natural confidence, headphones around her neck — but not wearing them.
+Looks like she just got off a call she wasn't expecting. Slightly unsettled
+but working through it. Direct, clear-eyed.
 
 SCRIPT:
-"I asked AI to write me twelve different songs.
+"Marcus called me Tuesday.
 [PAUSE]
-Twelve different prompts. Twelve different moods. Twelve different genres.
+We've worked together for three years. He always books me first.
 
-Every single one had 'heart' and 'apart' in it.
-Every one.
-
-So I got annoyed, and I typed: 'Why do you keep rhyming heart with apart?'
+He said — 'Label loved the track. They think the drummer is incredible.
+Very human. Very real.'
 [PAUSE]
-And it told me.
+'Great,' I said.
 
-It actually explained — look, I don't KNOW what rhymes feel right.
-I predict what word is most likely to come next, based on every song
-I've ever been trained on. And in millions of songs, 'apart' follows
-'heart' more than almost any other word.
+'Yeah,' he said. 'The thing is — I used a plugin. $8 a month.
+They couldn't tell the difference.'
+[PAUSE — lets that land]
 
-So it's not being lazy.
-It's being... statistical.
+So I had two options. I could panic. Or I could actually figure out
+what's going on.
+
+Because here's the thing nobody tells you about AI —
+everyone is afraid of the wrong version of it.
+
+They're afraid of the AI that thinks like a human.
+Feels like a human. Wants things.
 [PAUSE]
-That answer broke my brain a little.
+That AI doesn't exist.
 
-Because it means AI doesn't hear music. It doesn't FEEL a lyric.
-It's reading the pattern of what humans write when they feel something —
-and reflecting it back.
+What actually exists is a prediction machine.
+It calculates what word — or note, or beat — is most likely to come next,
+based on everything it was trained on.
+No feelings. No understanding. No awareness.
+Just... pattern completion. At a scale we can barely imagine.
 
-Which means the question isn't 'how do I get AI to be more creative?'
-The question is — how do I give it something to reflect that's actually
-mine?
+Which means the $8 plugin isn't creative. It's statistical.
+And the question isn't 'will AI replace me.'
+
+[PAUSE — leans slightly forward]
+
+The question is: 'Do I understand what I'm actually up against —
+well enough to stay ahead of it?'
+
+Because the people who understand what AI IS
+are not afraid of it.
+
+They're using it to do things nobody else can do yet.
 
 [PAUSE]
-I think I've been asking the wrong thing this whole time."
+I'm going to be one of those people."
 
 VOICE DIRECTION:
-Bright, analytical, a little performative in a natural way — like she's
-actually working this out as she speaks. Genuine "aha" energy without
-over-acting it. Rhythmic cadence (she's a drummer — she thinks in beats).
+Grounded, direct, thinking-out-loud quality. Not dramatic — she's a
+session musician, she's pragmatic. The energy shifts from slightly shaken
+(opening) to clear and determined (closing). Think in beats — she naturally
+pauses where the rhythm lands. Under 90 seconds.
 
 ================================================================================
 
@@ -728,6 +745,77 @@ about his own capabilities. But ground it — this should feel like
 real excitement from a 17-year-old who just discovered something
 about himself, not a product demo. The "I built something" line
 should hit with quiet weight before the energy returns.
+
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+GAME 14 — VERA: "Pixel Perfect"
+Character: Vera Chen, 29-year-old Senior Frontend Developer
+────────────────────────────────────────────────────────────────────────────────
+
+SETTING:
+Clean, minimal design studio. Dual monitors behind her — one showing a
+Figma workspace, one showing a live site in a browser. Good lighting — the
+kind of setup where people make things that look deliberate. It's daytime.
+She is very much in her element.
+
+APPEARANCE:
+29, East Asian, professional but not corporate. The kind of person who
+chose her chair carefully. T-shirt or minimalist top. Hair tied back or
+clean. She looks like someone who takes her work seriously and takes
+herself lightly.
+
+SCRIPT:
+"When the AI design tools launched, my first reaction was panic.
+
+Figma AI could generate a hero section in four seconds.
+v0.dev could produce a full React component from a sentence.
+[PAUSE]
+Eight years of craft. Made suddenly... faster.
+
+But I had this client call about three months in.
+They showed me an AI-generated site and said:
+'I don't know why it feels wrong. Can you fix it?'
+
+[PAUSE]
+
+I looked at it. Immediately.
+
+The body text was twelve pixels. The CTA button had a contrast ratio
+of 1.8 to 1 — that's legally inaccessible. The navigation had eleven
+items. There was no visual hierarchy — everything was the same
+importance, which is the same as nothing being important.
+
+The AI had generated all of it perfectly.
+[PAUSE]
+Every element, correct. No judgment.
+
+That was the day I understood what my job actually is.
+
+The AI generates options at machine speed.
+It doesn't know WCAG contrast ratios matter.
+It doesn't know Hick's Law — that eleven navigation items means
+your visitor will freeze, choose nothing, and leave.
+It doesn't know that twelve-pixel body text is invisible
+to forty percent of users over forty.
+
+[PAUSE]
+I fixed that site. Forty-seven percent conversion increase.
+
+The AI didn't do that.
+[PAUSE — slight smile]
+The decisions did."
+
+VOICE DIRECTION:
+Pragmatic, precise, quietly confident. This is not arrogance — it's the
+calm of someone who has made peace with what their expertise actually is.
+The "panic" opener should be genuine — she really did panic. The pivot
+to "that was the day I understood" should feel like a real intellectual
+shift, not a rehearsed insight. The final line — "The decisions did" —
+should land with quiet authority. No flourish. Let it sit.
+Pace: grounded and rhythmic. She thinks in well-formed sentences.
+Under 90 seconds.
 
 ================================================================================
 

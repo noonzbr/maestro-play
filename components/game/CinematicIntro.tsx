@@ -17,10 +17,15 @@ const DEFAULT_INTRO: GameIntro = {
 
 const FLOAT_NOTES = ["♪", "♫", "♩", "♬", "♪", "♩"]
 
-function useTypewriter(text: string, speed: number) {
+function useTypewriter(text: string, speed: number, fastText = false) {
   const [displayed, setDisplayed] = useState("")
   const [done, setDone] = useState(false)
   useEffect(() => {
+    if (fastText) {
+      setDisplayed(text)
+      setDone(true)
+      return
+    }
     setDisplayed("")
     setDone(false)
     if (!text) { setDone(true); return }
@@ -31,7 +36,7 @@ function useTypewriter(text: string, speed: number) {
       if (i >= text.length) { clearInterval(timer); setDone(true) }
     }, speed)
     return () => clearInterval(timer)
-  }, [text, speed])
+  }, [text, speed, fastText])
   return { displayed, done }
 }
 
@@ -39,9 +44,10 @@ type Props = {
   onComplete: () => void
   startMusic: () => void
   intro?: GameIntro
+  fastText?: boolean
 }
 
-export default function CinematicIntro({ onComplete, startMusic, intro }: Props) {
+export default function CinematicIntro({ onComplete, startMusic, intro, fastText = false }: Props) {
   const data   = intro ?? DEFAULT_INTRO
   const beats  = data.beats
   const origin = data.noteOrigin ?? { bottom: "38%", left: "50%" }
@@ -74,7 +80,7 @@ export default function CinematicIntro({ onComplete, startMusic, intro }: Props)
   const isLast = beatIndex >= beats.length - 1
   const speed  = beat.type === "location" ? 0 : 30
 
-  const { displayed, done } = useTypewriter(skip ? "" : beat.text, speed)
+  const { displayed, done } = useTypewriter(skip ? "" : beat.text, speed, fastText)
   const visibleText = skip ? beat.text : displayed
   const textDone    = skip || done
 

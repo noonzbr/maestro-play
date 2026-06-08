@@ -126,7 +126,7 @@ export default function PredictScene({
           style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", marginBottom: "0.5rem" }}
         >
           <div style={{
-            fontFamily: "Inter, sans-serif", fontSize: "0.62rem", fontWeight: 600,
+            fontFamily: "Inter, sans-serif", fontSize: "0.8rem", fontWeight: 600,
             color: "rgba(240,238,255,0.35)", letterSpacing: "0.12em", textTransform: "uppercase",
             marginBottom: "0.3rem",
           }}>
@@ -136,10 +136,10 @@ export default function PredictScene({
             background: "linear-gradient(135deg, rgba(0,212,240,0.12) 0%, rgba(0,180,220,0.08) 100%)",
             border: "1px solid rgba(0,212,240,0.22)",
             borderRadius: "18px 18px 4px 18px",
-            padding: "0.55rem 0.9rem",
+            padding: "0.75rem 1.1rem",
             maxWidth: "88%",
             fontFamily: "'Courier New', Courier, monospace",
-            fontSize: "0.78rem",
+            fontSize: "1.05rem",
             fontWeight: 400,
             color: "rgba(240,238,255,0.9)",
             lineHeight: 1.55,
@@ -162,7 +162,7 @@ export default function PredictScene({
       >
         <p style={{
           fontFamily: "Inter, sans-serif", fontWeight: 700,
-          fontSize: "clamp(0.85rem, 2vw, 0.95rem)",
+          fontSize: "clamp(1.15rem, 2.8vw, 1.4rem)",
           color: "rgba(240,238,255,0.65)", lineHeight: 1.45, margin: 0,
         }}>
           {scene.question ?? "Which response did he actually get?"}
@@ -219,14 +219,14 @@ export default function PredictScene({
                 <div style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
                   {/* AI avatar dot */}
                   <div style={{
-                    width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0,
+                    width: "34px", height: "34px", borderRadius: "50%", flexShrink: 0,
                     background: showResult && isCorrect
                       ? "linear-gradient(135deg,#58cc02,#33a500)"
                       : showResult && isSelected
                       ? "linear-gradient(135deg,#ff4b4b,#c62828)"
                       : "linear-gradient(135deg,rgba(123,47,190,0.6),rgba(0,212,240,0.4))",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "0.7rem", fontWeight: 900, color: "#fff",
+                    fontSize: "0.85rem", fontWeight: 900, color: "#fff",
                     marginTop: "2px",
                     transition: "background 0.3s ease",
                   }}>
@@ -244,7 +244,7 @@ export default function PredictScene({
                   }}>
                     {/* Option label */}
                     <div style={{
-                      fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem",
+                      fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.75rem",
                       letterSpacing: "0.15em", textTransform: "uppercase",
                       color: showResult && isCorrect
                         ? "rgba(88,204,2,0.8)"
@@ -260,7 +260,7 @@ export default function PredictScene({
                     {/* Output text — formatted like real AI response */}
                     <p style={{
                       fontFamily: "'Courier New', Courier, monospace",
-                      fontSize: "0.74rem", color: "rgba(240,238,255,0.85)",
+                      fontSize: "1.05rem", color: "rgba(240,238,255,0.85)",
                       lineHeight: 1.55, margin: 0,
                       whiteSpace: "pre-line",
                     }}>
@@ -310,7 +310,7 @@ export default function PredictScene({
 
             {feedbackText && (
               <p style={{
-                fontFamily: "Inter, sans-serif", fontSize: "0.875rem",
+                fontFamily: "Inter, sans-serif", fontSize: "1.15rem",
                 color: "rgba(240,238,255,0.75)", lineHeight: 1.65, margin: "0 0 0.85rem",
               }}>
                 {feedbackText}
@@ -327,7 +327,7 @@ export default function PredictScene({
                 marginBottom: "0.85rem",
               }}>
                 <div style={{
-                  fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem",
+                  fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.75rem",
                   letterSpacing: "0.22em", textTransform: "uppercase",
                   color: "rgba(88,204,2,0.65)", marginBottom: "0.55rem",
                 }}>
@@ -338,7 +338,7 @@ export default function PredictScene({
                     <div key={i} style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start" }}>
                       <div style={{ flexShrink: 0, marginTop: "2px" }}>
                         <span style={{
-                          fontFamily: "'Courier New', monospace", fontSize: "0.68rem",
+                          fontFamily: "'Courier New', monospace", fontSize: "0.95rem",
                           color: "rgba(255,200,80,0.9)",
                           background: "rgba(255,200,80,0.08)",
                           border: "1px solid rgba(255,200,80,0.2)",
@@ -349,7 +349,7 @@ export default function PredictScene({
                         </span>
                       </div>
                       <p style={{
-                        fontFamily: "Inter, sans-serif", fontSize: "0.72rem",
+                        fontFamily: "Inter, sans-serif", fontSize: "0.95rem",
                         color: "rgba(240,238,255,0.58)", lineHeight: 1.5, margin: 0,
                       }}>
                         {item.note}
@@ -364,7 +364,7 @@ export default function PredictScene({
             {aiElaboration && (
               <p style={{
                 fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
-                fontSize: "1rem", color: "rgba(255,210,210,0.82)", lineHeight: 1.7, margin: "0 0 0.85rem",
+                fontSize: "1.25rem", color: "rgba(255,210,210,0.82)", lineHeight: 1.7, margin: "0 0 0.85rem",
               }}>
                 {aiElaboration}
               </p>

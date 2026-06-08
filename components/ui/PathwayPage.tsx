@@ -57,50 +57,74 @@ const HOOKS: Record<number, string> = {
   10: "Sam built complex systems by hand for 15 years. AI prototypes them in hours now. The builder who becomes the architect is the one who survives.",
   11: "Copilot appeared in Jake's Office 365 toolbar. His manager now expects an AI productivity report. He has 48 hours to figure out what it actually does.",
   12: "Jake wants to build AI tools without writing code. Copilot Studio promises no-code agents. The gap between promise and reality is exactly where this game lives.",
+  13: "Jake hits the wall again. Before you learn the principles, you must experience the impasse. The Conductor Principle, remastered.",
+  14: "Maya teaches the craft of prompting — the one skill that makes EVERY AI tool in your toolkit 10x more powerful.",
+  15: "Vera Chen knows design isn't about taste — it's about decisions you can defend. Align typographies, grids, and accessibility with the help of AI.",
+  16: "A solar flare scrambled the navigation computer. Help Commander Nova repair Orion station using the Antigravity CLI and specialized subagents.",
 }
 
 // ─── Track definitions ────────────────────────────────────────────────────────
 
 const TRACKS = [
   {
-    number: "01",
-    name: "AI Fundamentals",
+    number: "00",
+    name: "Hub Proximity",
     color: "#00d4f0",
     bg: "rgba(0,212,240,0.06)",
-    weeks: [1, 2, 3, 4],
+    weeks: [1, 13],
+    tagline: "Enter the orchestra. Awaken the Conductor within.",
+    cert: "Hub Apprentice",
+    icon: "🎬",
+  },
+  {
+    number: "01",
+    name: "Track A - AI Fundamentals",
+    color: "#00e676",
+    bg: "rgba(0,230,118,0.06)",
+    weeks: [2, 3, 4],
     tagline: "Before you can conduct, you have to hear the music.",
     cert: "AI Foundations",
     icon: "🎵",
   },
   {
     number: "02",
-    name: "Claude & Prompt Mastery",
-    color: "#e040fb",
-    bg: "rgba(224,64,251,0.06)",
-    weeks: [5, 6, 7, 8],
+    name: "Track B - Claude Ecosystem",
+    color: "#ff9100",
+    bg: "rgba(255,145,0,0.06)",
+    weeks: [5, 6, 7],
     tagline: "Stop describing. Start conducting.",
     cert: "Claude Expert",
     icon: "🎼",
   },
   {
     number: "03",
-    name: "The AI Toolkit",
-    color: "#00e676",
-    bg: "rgba(0,230,118,0.06)",
-    weeks: [9, 10],
+    name: "Track C - ChatGPT + Gemini",
+    color: "#e040fb",
+    bg: "rgba(224,64,251,0.06)",
+    weeks: [8, 9, 10],
     tagline: "Every instrument matters. Know which one to pick.",
     cert: "AI Explorer",
     icon: "🛠️",
   },
   {
     number: "04",
-    name: "Microsoft AI",
+    name: "Track D - Microsoft Copilot",
     color: "#4488ff",
     bg: "rgba(68,136,255,0.06)",
     weeks: [11, 12],
     tagline: "The AI is already in your tools. Start using it.",
     cert: "Microsoft AI",
     icon: "💼",
+  },
+  {
+    number: "05",
+    name: "Convergence - Prompt Lab & Design",
+    color: "#ff1744",
+    bg: "rgba(255,23,68,0.06)",
+    weeks: [14, 15, 16],
+    tagline: "Unite the tools. Forge the masterpiece.",
+    cert: "Grand Maestro",
+    icon: "👑",
   },
 ]
 
@@ -585,6 +609,34 @@ export default function PathwayPage({ games }: Props) {
   // Determine first incomplete game across all tracks (the "next" game)
   const firstIncompleteWeek = games.find(g => !progress[g.week] || progress[g.week] === 0)?.week ?? -1
 
+  const isGameLocked = (game: Game, gi: number, trackGames: Game[]) => {
+    if (!mounted) return true
+
+    // 1. Game 1 is always unlocked
+    if (game.week === 1) return false
+
+    // 2. All other games require Game 1 to be completed
+    const game1Completed = (progress[1] ?? 0) > 0
+    if (!game1Completed) return true
+
+    // 3. For Convergence track start (Week 14)
+    if (game.week === 14) {
+      const trackACompleted = (progress[4] ?? 0) > 0
+      const trackBCompleted = (progress[7] ?? 0) > 0
+      const trackCCompleted = (progress[10] ?? 0) > 0
+      const trackDCompleted = (progress[12] ?? 0) > 0
+      return !(trackACompleted || trackBCompleted || trackCCompleted || trackDCompleted)
+    }
+
+    // 4. Sequential check within the track
+    const firstIncompleteIdx = trackGames.findIndex(g => (progress[g.week] ?? 0) === 0)
+    if (firstIncompleteIdx !== -1 && gi > firstIncompleteIdx) {
+      return true
+    }
+
+    return false
+  }
+
   return (
     <div style={{ background:"var(--bg-primary)", minHeight:"100vh", overflowX:"hidden", position:"relative" }}>
       {/* Ambient floating musical notes — same system used in game scenes */}
@@ -631,7 +683,7 @@ export default function PathwayPage({ games }: Props) {
         <div style={{ display:"flex", gap:"1.5rem", justifyContent:"center", flexWrap:"wrap", marginBottom:"2.5rem" }}>
           {[
             { stat:"12", label:"Characters. 12 real situations." },
-            { stat:"4",  label:"Tracks. One complete method." },
+            { stat:"6",  label:"Tracks. One complete method." },
             { stat:"0",  label:"Code required. Ever." },
           ].map(({ stat, label }) => (
             <div key={stat} style={{ textAlign:"center" }}>
@@ -775,9 +827,7 @@ export default function PathwayPage({ games }: Props) {
                 {trackGames.map((game, gi) => {
                   const earnedXp   = mounted ? (progress[game.week] ?? 0) : 0
                   const isNext     = mounted && game.week === firstIncompleteWeek
-                  // Lock logic: lock everything after the first incomplete game in the track
-                  const trackFirstIncomplete = trackGames.findIndex(g => (progress[g.week] ?? 0) === 0)
-                  const isLocked   = mounted && trackFirstIncomplete !== -1 && gi > trackFirstIncomplete + 1 && earnedXp === 0
+                  const isLocked   = isGameLocked(game, gi, trackGames)
 
                   return (
                     <GameCard

@@ -27,6 +27,17 @@ function lsSet(key: string, val: string) {
 }
 function getGameXp(week: number): number { return lsGet(`maestro_game_${week}_xp`) }
 
+function simpleHash(input: string): string {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  const unsigned = (hash >>> 0).toString(36);
+  return "mp" + unsigned.padStart(8, "0");
+}
+
 /* ─── Level system ──────────────────────────────────────────────────────── */
 const LEVELS = [
   { label: "Apprentice",    minXp: 0,    maxXp: 499,  color: "#00d4f0", icon: "🎵" },
@@ -494,10 +505,19 @@ export default function DashboardPage() {
     }
     setLives(curLives)
 
-    // Game XPs (weeks 1-14)
+    // Game XPs (weeks 1-16)
     const xps: Record<number, number> = {}
-    for (let w = 1; w <= 14; w++) xps[w] = getGameXp(w)
+    for (let w = 1; w <= 16; w++) xps[w] = getGameXp(w)
     setGameXps(xps)
+
+    // FSRS Local due count fallback
+    try {
+      const localCardsJson = localStorage.getItem("maestro_review_cards") || "[]"
+      const localCards: any[] = JSON.parse(localCardsJson)
+      const now = new Date()
+      const dueCards = localCards.filter(c => new Date(c.due) <= now)
+      setDueCount(dueCards.length)
+    } catch {}
 
     // Power-up unlock states (computed, not stored — derived from stats)
     // Active states stored in localStorage
@@ -564,7 +584,7 @@ export default function DashboardPage() {
   const bonusGames     = allGames.filter(g => g.week > 12)
   const completedWeeks = Object.entries(gameXps).filter(([, xp]) => xp > 0).map(([w]) => Number(w))
   const completedCount = completedWeeks.length
-  const fluency        = Math.min(100, Math.round((completedCount / 14) * 60) + Math.min(40, Math.round(totalXp / 75)))
+  const fluency        = Math.min(100, Math.round((completedCount / allGames.length) * 60) + Math.min(40, Math.round(totalXp / 75)))
 
   const completedTracks = TRACKS.filter(t => t.weeks.every(w => (gameXps[w] ?? 0) > 0)).length
 
@@ -715,7 +735,7 @@ export default function DashboardPage() {
                 color:      "rgba(240,238,255,0.55)",
                 margin:     "0 0 1.25rem",
               }}>
-                {level.icon} {level.label} · {completedCount} of 14 games complete · {totalXp.toLocaleString()} XP total
+                {level.icon} {level.label} · {completedCount} of {allGames.length} games complete · {totalXp.toLocaleString()} XP total
               </p>
 
               {/* Quick stat chips */}
@@ -861,6 +881,37 @@ export default function DashboardPage() {
                   </span>
                 </div>
               )}
+              {user && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch("/api/email/streak-warning", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: user.id, streakDays: streak })
+                      });
+                      const data = await res.json();
+                      if (data.sent) {
+                        alert("Preservation test email triggered! Check your inbox.");
+                      } else {
+                        alert("Rate-limit active: " + (data.reason || "already sent today"));
+                      }
+                    } catch (e) {
+                      alert("Error triggering email: " + e);
+                    }
+                  }}
+                  style={{
+                    background: "rgba(255,152,0,0.08)", border: "1px solid rgba(255,152,0,0.3)",
+                    borderRadius: "100px", padding: "0.25rem 0.6rem",
+                    color: "#ff9800", fontFamily: "Inter, sans-serif", fontSize: "0.55rem",
+                    fontWeight: 700, cursor: "pointer", marginTop: "0.4rem", transition: "background 0.2s"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,152,0,0.18)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,152,0,0.08)"}
+                >
+                  🔔 Test Streak Alert
+                </button>
+              )}
             </div>
 
           </div>
@@ -891,7 +942,7 @@ export default function DashboardPage() {
                 }} />
               </div>
               <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.68rem", color: "var(--muted)" }}>
-                {completedCount} of 14 games complete · {completedTracks} track{completedTracks !== 1 ? "s" : ""} finished
+                {completedCount} of {allGames.length} games complete · {completedTracks} track{completedTracks !== 1 ? "s" : ""} finished
               </div>
             </div>
 
@@ -1061,9 +1112,86 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* ══ CERTIFICATE GALLERY ══════════════════════════════════════════ */}
+          <div style={{ marginBottom: "2.5rem", animation: "dash-up 0.45s 0.48s ease both" }}>
+            <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "1rem" }}>
+              Conductor Certificates
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
+              {allGames.map(game => {
+                const completed = (gameXps[game.week] ?? 0) > 0;
+                const pName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "Player";
+                const vHash = simpleHash(`${game.slug}::${pName.trim().slice(0, 80)}::maestroplay2025`);
+                const certLink = `/certificate/${game.slug}?name=${encodeURIComponent(pName)}&v=${vHash}`;
+
+                return (
+                  <div key={game.slug} style={{
+                    background: completed ? "rgba(10,7,20,0.95)" : "rgba(255,255,255,0.01)",
+                    border: completed ? "1px solid rgba(0,212,240,0.28)" : "1px dashed rgba(255,255,255,0.08)",
+                    borderRadius: "18px", padding: "1.25rem 1.4rem",
+                    display: "flex", flexDirection: "column", justifyContent: "space-between",
+                    minHeight: "160px", opacity: completed ? 1 : 0.45,
+                    boxShadow: completed ? "0 0 20px rgba(0,212,240,0.06)" : "none",
+                    transition: "all 0.3s ease"
+                  }}
+                  onMouseEnter={e => {
+                    if (completed) {
+                      e.currentTarget.style.borderColor = "var(--cyan)";
+                      e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.12)";
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (completed) {
+                      e.currentTarget.style.borderColor = "rgba(0,212,240,0.28)";
+                      e.currentTarget.style.boxShadow = "0 0 20px rgba(0,212,240,0.06)";
+                    }
+                  }}
+                  >
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.55rem", fontWeight: 800, color: completed ? "var(--cyan)" : "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                          {completed ? "🏆 Verified Cert" : "🔒 Locked"}
+                        </span>
+                        {completed && <span style={{ fontSize: "1.1rem" }}>🎓</span>}
+                      </div>
+                      <h4 style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.85rem", color: "#fff", margin: "0 0 0.25rem" }}>
+                        {game.title.split(":")[0]}
+                      </h4>
+                      <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.68rem", color: "var(--muted)", margin: 0 }}>
+                        {game.characterName} ({game.characterRole})
+                      </p>
+                    </div>
+                    
+                    <div style={{ marginTop: "1rem" }}>
+                      {completed ? (
+                        <Link href={certLink} target="_blank" style={{ textDecoration: "none", display: "block" }}>
+                          <div style={{
+                            textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.72rem",
+                            color: "#08060f", background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                            padding: "0.45rem 1rem", borderRadius: "100px", cursor: "pointer"
+                          }}>
+                            View Certificate ↗
+                          </div>
+                        </Link>
+                      ) : (
+                        <div style={{
+                          textAlign: "center", fontFamily: "Inter, sans-serif", fontSize: "0.72rem",
+                          color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.06)",
+                          padding: "0.45rem 1rem", borderRadius: "100px"
+                        }}>
+                          Play to Unlock
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* ══ FOOTER CTA ══════════════════════════════════════════════════ */}
           <div style={{ textAlign: "center", animation: "dash-up 0.45s 0.5s ease both" }}>
-            {completedCount < 14 ? (
+            {completedCount < allGames.length ? (
               <Link href="/games" style={{ textDecoration: "none" }}>
                 <button style={{
                   fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.95rem",
@@ -1076,13 +1204,13 @@ export default function DashboardPage() {
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 48px rgba(0,212,240,0.4)" }}
                 onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 0 32px rgba(0,212,240,0.22)" }}
                 >
-                  {completedCount === 0 ? "Begin your first game →" : `Continue — ${14 - completedCount} game${14 - completedCount !== 1 ? "s" : ""} left →`}
+                  {completedCount === 0 ? "Begin your first game →" : `Continue — ${allGames.length - completedCount} game${allGames.length - completedCount !== 1 ? "s" : ""} left →`}
                 </button>
               </Link>
             ) : (
               <div>
                 <div style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.5rem", color: "#ffb700", marginBottom: "0.5rem" }}>
-                  🏆 All 14 games complete. The symphony is yours.
+                  🏆 All {allGames.length} games complete. The symphony is yours.
                 </div>
                 <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.78rem", color: "var(--muted)" }}>
                   The Maestro Simulation and new tracks are coming. You&apos;re ready.

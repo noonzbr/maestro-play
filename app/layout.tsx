@@ -1,8 +1,18 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import PWARegister, { PWAInstallBanner } from "@/components/PWARegister"
 import { AuthProvider } from "@/context/AuthContext"
 import AuthModal from "@/components/ui/AuthModal"
+
+// Next.js 16: viewport + themeColor belong in the dedicated `viewport` export.
+// Putting <meta name="viewport"> manually in <head> produces a DUPLICATE tag
+// because the framework auto-injects one. This export is the single source.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#00d4f0",
+}
 
 export const metadata: Metadata = {
   title: "MaestroPlay — Master AI Without Code | Cinematic Learning Games",
@@ -39,19 +49,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
+      {/* Skip-to-content: WCAG 2.4.1 — keyboard users bypass nav */}
+      {/* Rendered as first focusable element in the DOM */}
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        {/* viewport + theme-color are handled by the `viewport` export above —
+            do NOT add <meta name="viewport"> here or it duplicates. */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#00d4f0" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="MaestroPlay" />
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        {/* fetchpriority=high: icon.svg is the LCP element — hint browser to load eagerly */}
         <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+        <link rel="preload" href="/icons/icon.svg" as="image" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className="min-h-full flex flex-col">
+        <a href="#main-content" className="skip-to-content">Skip to main content</a>
         <AuthProvider>
           {children}
           <AuthModal />

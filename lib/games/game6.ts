@@ -38,6 +38,8 @@ export const game6: Game = {
     teaserLine:   "Kai made Claude work on his code. Priya made it work for her ENTIRE team. Claude Projects changed how her whole operations department functions — and she's going to show you exactly how.",
     previewImage: "/images/priya.png",
   },
+
+  mondayPrompt: "In Claude Code terminal, run this task: 'Read all [FILE TYPE] files in [DIRECTORY]. For each file: [WHAT TO DO — e.g., extract the date, rename with ISO date prefix, move to /archive/YYYY-MM/]. Show me a plan before executing. List any files you are unsure about rather than guessing.'",
   scenes: [
     // ── Scene 1 ── Meet Kai ────────────────────────────────────────────────
     {

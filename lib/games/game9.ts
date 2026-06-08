@@ -29,6 +29,7 @@ export const game9: Game = {
     ],
   },
   aiModel:  "gemini" as const,
+  mondayPrompt: "In Gemini (with Google Workspace access), upload [2-5 documents from Drive]. Then ask: 'Read all these documents. I need you to: 1) Identify the 3 most important themes across all documents, 2) Find any contradictions or gaps between them, 3) Tell me what is missing that I should find before making a decision about [SPECIFIC DECISION]. Be specific about which document each finding comes from.'",
   felipeOutroVideo:   "/videos/felipe-game9.mp4",
   nextGame: {
     slug:         "gemini-cli-unlocked",

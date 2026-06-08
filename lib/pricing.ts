@@ -1,27 +1,69 @@
 /**
  * MaestroPlay Pricing Registry
  *
- * Free tier  → 2 games per track + all bonus games, no purchase needed
- * Pro tier   → remaining games, $4.99 each OR $29/mo subscription (all games)
+ * Freemium model — ALL 14 games are free forever.
+ * Monetisation is entirely through optional power-up packs.
  *
- * Track 01 AI Fundamentals   (weeks 1–4):  free 1,2        | pro 3,4
- * Track 02 Claude & Prompts  (weeks 5–8):  free 5,6        | pro 7,8
- * Track 03 The AI Toolkit    (weeks 9–10): free 9          | pro 10
- * Track 04 Microsoft AI      (weeks 11–12):free 11         | pro 12
- * Bonus     Remastered        (week 13):   free (game1v2)  — "Welcome to AI v2"
- * Bonus     The Prompt Lab    (week 14):   free (game13)   — Maya, prompt engineering
+ * Power-up packs:
+ *   Starter Pack      → $2.99 one-time  (5 lives, 3 Hints, 2 Double XP, 1 Second Chance)
+ *   Maestro Bundle    → $6.99 one-time  (15 lives, 8 Hints, 5 Double XP, 3 Shields, 2 Second Chances, 1 Restore, 1 Jackpot)
+ *   Conductor Pass    → $9.99/month     (unlimited lives, 10 power-ups/mo, Conductor badge, early access)
+ *
+ * Legacy individual game purchases kept for backward compat (all games now free: true).
  */
 
 export type PricingEntry = {
-  amount:  number   // in cents (USD)
-  name:    string
-  priceId: string   // Stripe Price ID
-  mode?:   "payment" | "subscription"
+  amount:   number   // in cents (USD)
+  name:     string
+  priceId:  string   // Stripe Price ID
+  mode?:    "payment" | "subscription"
+  interval?: "month" | "year"  // for subscriptions
+  contents?: string[]          // human-readable contents list
 }
 
 export const PRICING: Record<string, PricingEntry> = {
 
-  /* ─── Individual game unlocks ──────────────────────────────────────────── */
+  /* ─── Power-up packs (primary revenue) ────────────────────────────────── */
+  "starter-pack": {
+    amount:   299,
+    name:     "MaestroPlay — Starter Pack",
+    priceId:  process.env.STRIPE_PRICE_STARTER || "price_starter_placeholder",
+    mode:     "payment",
+    contents: ["5 extra lives","3 Hint Tokens","2 Double XP boosts","1 Second Chance"],
+  },
+  "maestro-bundle": {
+    amount:   699,
+    name:     "MaestroPlay — Maestro Bundle",
+    priceId:  process.env.STRIPE_PRICE_BUNDLE || "price_bundle_placeholder",
+    mode:     "payment",
+    contents: ["15 extra lives","8 Hint Tokens","5 Double XP boosts","3 Streak Shields","2 Second Chances","1 Streak Restore","1 XP Jackpot"],
+  },
+  "conductor-pass": {
+    amount:   699,
+    name:     "MaestroPlay — Conductor Pass (Monthly)",
+    priceId:  process.env.STRIPE_PRICE_CONDUCTOR_PASS || "price_conductor_pass_placeholder",
+    mode:     "subscription",
+    interval: "month",
+    contents: ["Unlimited daily lives","10 power-ups per month (your choice)","Exclusive Conductor badge","Early access to new games"],
+  },
+  "conductor-pass-annual": {
+    amount:   4799,
+    name:     "MaestroPlay — Conductor Pass (Annual)",
+    priceId:  process.env.STRIPE_PRICE_CONDUCTOR_PASS_ANNUAL || "price_conductor_pass_annual_placeholder",
+    mode:     "subscription",
+    interval: "year",
+    contents: ["Unlimited daily lives","10 power-ups per month (your choice)","Exclusive Conductor badge","Early access to new games"],
+  },
+  "conductor-pass-family": {
+    amount:   7999,
+    name:     "MaestroPlay — Conductor Pass (Family Plan)",
+    priceId:  process.env.STRIPE_PRICE_CONDUCTOR_PASS_FAMILY || "price_conductor_pass_family_placeholder",
+    mode:     "subscription",
+    interval: "year",
+    contents: ["Unlimited daily lives for up to 6 members","10 power-ups per month (your choice)","Exclusive Conductor badge","Early access to new games"],
+  },
+
+  /* ─── Legacy individual game unlocks (kept for backward compat) ────────── */
   "ai-for-professionals": {
     amount:  499,
     name:    "AI for Professionals — Game 3",
@@ -53,25 +95,20 @@ export const PRICING: Record<string, PricingEntry> = {
     priceId: process.env.STRIPE_PRICE_WEEK12 || "price_week12_placeholder",
   },
 
-  /* ─── Bundle (all 14 games, one-time) ─────────────────────────────────── */
-  bundle: {
-    amount:  1999,
-    name:    "MaestroPlay — Full Bundle (All 14 Games)",
-    priceId: process.env.STRIPE_PRICE_BUNDLE || "price_bundle_placeholder",
-  },
-
-  /* ─── Pro subscription ─────────────────────────────────────────────────── */
+  /* ─── Legacy Pro subscription ──────────────────────────────────────────── */
   "pro-monthly": {
-    amount:  2900,
-    name:    "MaestroPlay Pro — Monthly ($29/mo, all 14 games)",
+    amount:  699,
+    name:    "MaestroPlay Pro — Monthly ($6.99/mo)",
     priceId: process.env.STRIPE_PRICE_PRO_MONTHLY || "price_pro_monthly_placeholder",
     mode:    "subscription",
+    interval: "month",
   },
   "pro-annual": {
-    amount:  24900,
-    name:    "MaestroPlay Pro — Annual ($249/yr, save $99, all 14 games)",
-    priceId: process.env.STRIPE_PRICE_PRO_ANNUAL  || "price_pro_annual_placeholder",
+    amount:  4799,
+    name:    "MaestroPlay Pro — Annual ($47.99/yr)",
+    priceId: process.env.STRIPE_PRICE_PRO_ANNUAL || "price_pro_annual_placeholder",
     mode:    "subscription",
+    interval: "year",
   },
 }
 
@@ -79,15 +116,7 @@ export function getPricing(slug: string): PricingEntry | null {
   return PRICING[slug] ?? null
 }
 
-/** Returns true if this game slug requires a purchase (i.e. it's in PRICING) */
-export function isProGame(slug: string): boolean {
-  const individualSlugs = [
-    "ai-for-professionals",
-    "the-conductor-test",
-    "claude-for-work",
-    "chatgpt-mastery",
-    "gemini-cli-unlocked",
-    "copilot-studio",
-  ]
-  return individualSlugs.includes(slug)
+/** Returns true if this game slug requires a purchase (legacy — all games now free) */
+export function isProGame(_slug: string): boolean {
+  return false
 }

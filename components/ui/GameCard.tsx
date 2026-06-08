@@ -40,6 +40,7 @@ const IMAGE_CROP: Record<string, string> = {
   "/images/luna.png":          "center 8%",
   "/images/sam.png":           "center 8%",
   "/images/maya.png":          "center 10%",
+  "/images/vera.png":          "center 5%",
 }
 
 // Strip "N-year-old" prefix, uppercase the role label

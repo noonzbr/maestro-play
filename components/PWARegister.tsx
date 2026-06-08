@@ -84,8 +84,11 @@ export function PWAInstallBanner() {
 }
 
 // Service worker registration (silent, no UI)
+// Skipped in development: Turbopack chunks change on every restart and
+// a caching SW causes stale-chunk errors ("module factory not available").
 export default function PWARegister() {
   useEffect(() => {
+    if (process.env.NODE_ENV === "development") return
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
