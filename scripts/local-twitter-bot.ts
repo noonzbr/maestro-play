@@ -95,19 +95,31 @@ async function run() {
   console.log("🤖 Generating post copy via Claude...")
   const anthropic = new Anthropic({ apiKey })
   
-  const systemPrompt = `You are the voice of Maestro Academy. Confident, warm, punchy, slightly theatrical. You believe AI literacy is the great equalizer. Short declarative sentences. You describe realistic, relatable AI struggles, misconceptions, and learning failures. Your tone is educational and thought-provoking. DO NOT include any links, URLs, or promotional calls-to-action to MaestroPlay yet. Keep the output under 260 characters.`
+  const systemPrompt = `You are the voice of Maestro Academy. Confident, warm, punchy, slightly theatrical. You believe AI literacy is the great equalizer.
+Your writing style is heavily optimized for X/Twitter virality (SuperX/Tweet Hunter style):
+- Start with a strong, scroll-stopping hook (a mistake, a contrarian opinion, or a painful struggle).
+- Write in short, declarative, single-sentence paragraphs.
+- Use double line breaks between sentences to create plenty of white space.
+- Keep the tone authoritative, educational, and slightly philosophical.
+- NO hashtags. Emojis only if highly relevant (max 1).
+- DO NOT include any links, URLs, or promotional calls-to-action to MaestroPlay yet.
+- Keep the output under 260 characters.`
 
-  let userPrompt = `Write a single, highly engaging X/Twitter post about a struggle people face when trying to use or learn AI, inspired by the theme: "${game.description}" (from Chapter ${game.week}: "${game.title}").
+  let userPrompt = `Write a single, highly engaging viral-style X/Twitter post about an AI learning struggle or misconception, inspired by the theme: "${game.description}" (from Chapter ${game.week}: "${game.title}").
 
-Instructions:
-1. Time Context: ${timeContext.promptContext}
-2. Start with a relatable, real-world AI struggle, misunderstanding, or prompt failure related to the theme, tailored to this time of day.
-3. Share a punchy educational insight about why this happens or how to think about it differently.
-4. CRITICAL: Do NOT include any links, URLs, prices, or calls-to-action to play or visit MaestroPlay yet.
-5. The generated text MUST be under 260 characters total.`
+Follow this SuperX layout:
+1. Hook (Line 1): Start with a short, painful, or counter-intuitive statement. Tailor it to the time context: ${timeContext.promptContext}
+2. Pivot (Line 2): Point out why this happens (e.g. "That's not an AI limit. That's a system limit.").
+3. The Shift (Line 3): Give them a new way to think about it (e.g. the conductor metaphor).
+4. Takeaway (Line 4): A short, punchy summary sentence that people will want to bookmark.
+
+CRITICAL constraints:
+- Must use double line breaks between lines.
+- No links, no promos.
+- Must be under 260 characters.`
 
   if (state.lastPostText) {
-    userPrompt += `\n\n6. CONTINUITY: Your previous post was:\n"${state.lastPostText}"\nMake sure this new post builds naturally upon or flows conceptually from the previous one, continuing the serial narrative of learning AI step-by-step without repeating the same phrasing.`
+    userPrompt += `\n\n5. CONTINUITY: Your previous post was:\n"${state.lastPostText}"\nMake sure this new post builds naturally upon or flows conceptually from the previous one, continuing the serial narrative of learning AI step-by-step without repeating the same phrasing.`
   }
 
   const message = await anthropic.messages.create({
