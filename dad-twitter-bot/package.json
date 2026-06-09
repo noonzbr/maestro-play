@@ -1,0 +1,14 @@
+{
+  "name": "dad-twitter-bot",
+  "version": "1.0.0",
+  "description": "Standalone automated Twitter bot",
+  "main": "local-twitter-bot.js",
+  "scripts": {
+    "post-tweet": "node local-twitter-bot.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.42.1"
+  }
+}
