@@ -3,6 +3,7 @@ import path from "path"
 import fs from "fs"
 import { loadEnvConfig } from "@next/env"
 import Anthropic from "@anthropic-ai/sdk"
+import { BskyAgent } from "@atproto/api"
 import { allGames } from "../lib/games"
 
 // Load env variables from .env.local
@@ -179,7 +180,27 @@ CRITICAL constraints:
 
     console.log("✅ Success! Tweet posted successfully.")
 
-    // 6. Save State
+    // 6. Cross-post to Bluesky if configured
+    const bskyId = process.env.BLUESKY_IDENTIFIER
+    const bskyPassword = process.env.BLUESKY_PASSWORD
+    if (bskyId && bskyPassword) {
+      console.log("🦋 Cross-posting to Bluesky...")
+      try {
+        const agent = new BskyAgent({ service: "https://bsky.social" })
+        await agent.login({ identifier: bskyId, password: bskyPassword })
+        await agent.post({
+          text: tweetText,
+          createdAt: new Date().toISOString()
+        })
+        console.log("✅ Success! Posted to Bluesky successfully.")
+      } catch (bskyError: any) {
+        console.error("⚠️ Warning: Failed to post to Bluesky:", bskyError.message || bskyError)
+      }
+    } else {
+      console.log("ℹ️ Bluesky credentials not configured. Skipping Bluesky cross-post.")
+    }
+
+    // 7. Save State
     state.lastChapterIndex = nextIndex
     state.lastPostText = tweetText
     state.postCount += 1
