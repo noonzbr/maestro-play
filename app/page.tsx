@@ -468,7 +468,7 @@ export default function HomePage() {
                     style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "1.1rem 2.5rem", borderRadius: "100px", textDecoration: "none", boxShadow: "0 0 40px rgba(0,212,240,0.45), 0 4px 24px rgba(0,0,0,0.3)", letterSpacing: "-0.01em", transition: "transform 0.2s" }}
                     onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
                     onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
-                    Play Game 1 — Free →
+                    Play Chapter 1 — Free →
                   </Link>
                 )}
                 <Link href="#portal"
@@ -723,7 +723,7 @@ export default function HomePage() {
                 Enter the Campaign Lobby
               </h2>
               <p style={{ fontFamily: "Inter, sans-serif", fontSize: "1rem", color: "var(--muted)", maxWidth: "540px", margin: "0 auto 2.5rem", lineHeight: 1.75 }}>
-                No split tracks, no scattered entries. Launch into Game 1 and map your way linearly through the districts of Westbrook.
+                No split tracks, no scattered entries. Launch into Chapter 1 and map your way linearly through the districts of Westbrook.
               </p>
             </div>
 
@@ -746,7 +746,7 @@ export default function HomePage() {
                 <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--cyan)" }}>District 01: Jake&apos;s Bedroom</span>
               </div>
 
-              <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.5rem", color: "#fff", margin: "0 0 0.5rem" }}>Game 1: Welcome to the Exciting World of AI</h3>
+              <h3 style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "1.5rem", color: "#fff", margin: "0 0 0.5rem" }}>Chapter 1: Welcome to the Exciting World of AI</h3>
               <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.88rem", color: "rgba(240,238,255,0.72)", maxWidth: "580px", margin: "0 0 2rem", lineHeight: 1.6 }}>
                 Follow Jake, a 17-year-old guitarist, as he discovers that mastering AI is just like conducting an orchestra — and his musical instincts are his greatest weapon.
               </p>

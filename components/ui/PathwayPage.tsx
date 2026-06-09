@@ -398,7 +398,7 @@ function GameCard({
             padding:      "0.18rem 0.55rem",
           }}>
             <span style={{ fontFamily:"Inter,sans-serif", fontWeight:700, fontSize:"0.58rem", letterSpacing:"0.22em", textTransform:"uppercase", color }}>
-              Game {game.week}
+              Chapter {game.week}
             </span>
           </div>
 
@@ -878,7 +878,7 @@ export default function PathwayPage({ games }: Props) {
           The orchestra is ready.
         </div>
         <p style={{ fontFamily:"Inter,sans-serif", fontSize:"0.9rem", color:"rgba(240,238,255,0.4)", marginBottom:"2rem" }}>
-          Game 1 is free. No signup. Start in thirty seconds.
+          Chapter 1 is free. No signup. Start in thirty seconds.
         </p>
         <Link
           href="/games/welcome-to-ai"
@@ -888,7 +888,7 @@ export default function PathwayPage({ games }: Props) {
             padding:"0.9rem 2.5rem", borderRadius:"100px", textDecoration:"none",
           }}
         >
-          Play Game 1 Free →
+          Play Chapter 1 Free →
         </Link>
       </section>
     </div>
