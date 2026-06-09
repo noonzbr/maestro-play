@@ -39,17 +39,15 @@ async function run() {
   // 4. Generate Tweet Copy with Claude
   console.log("🤖 Generating post copy via Claude...")
   const anthropic = new Anthropic({ apiKey })
-  const systemPrompt = `You are the voice of Maestro Academy. Confident, warm, punchy, slightly theatrical. You believe AI literacy is the great equalizer. Short declarative sentences. You describe realistic, relatable AI problems and failures, then invite readers to learn how to solve them. End posts with a call to action and the link. Your copy must be extremely short (under 180 characters).`
+  const systemPrompt = `You are the voice of Maestro Academy. Confident, warm, punchy, slightly theatrical. You believe AI literacy is the great equalizer. Short declarative sentences. You describe realistic, relatable AI struggles, misconceptions, and learning failures. Your tone is educational and thought-provoking. DO NOT include any links, URLs, or promotional calls-to-action to MaestroPlay yet. Keep the output under 260 characters.`
 
-  const userPrompt = `Write a single, highly engaging X/Twitter post about Chapter ${game.week} of MaestroPlay: "${game.title}".
-Theme: "${game.description}".
+  const userPrompt = `Write a single, highly engaging X/Twitter post about a struggle people face when trying to use or learn AI, inspired by the theme: "${game.description}" (from Chapter ${game.week}: "${game.title}").
 
 Instructions:
-1. Start with a relatable, real-world AI problem or failure (e.g., hallucinating fake stats, generic corporate boilerplate, copy-paste errors, lack of context, or bad instructions) related to the theme.
-2. Pose a quick challenge or question to the reader about how to solve it.
-3. Pitch the simulation: "Learn to solve it in Chapter ${game.week} free:"
-4. Append the URL: https://maestro-play-production.up.railway.app/games/${game.slug}
-5. The generated text MUST be under 230 characters TOTAL (including the URL) to fit on X/Twitter without truncation.`
+1. Start with a relatable, real-world AI struggle, misunderstanding, or prompt failure (e.g., getting generic corporate boilerplate, hallucination frustration, treating AI like a search engine instead of conducting it, or feeling overwhelmed by learning).
+2. Share a punchy educational insight about why this happens or how to think about it differently.
+3. CRITICAL: Do NOT include any links, URLs, prices, or calls-to-action to play or visit MaestroPlay yet.
+4. The generated text MUST be under 260 characters total.`
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
@@ -96,8 +94,8 @@ Instructions:
     
     console.log("⌨️ Typing the post...")
     await textbox.focus()
-    // Type out the tweet text
-    await textbox.fill(tweetText)
+    // Type out the tweet text sequentially to trigger keyboard events and enable the Post button
+    await textbox.type(tweetText, { delay: 10 })
     
     // Give it a tiny pause to look organic
     await page.waitForTimeout(1000)
