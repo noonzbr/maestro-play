@@ -45,17 +45,17 @@ export async function GET(req: NextRequest) {
 
     // 3. Generate tweet copy using Claude
     const anthropic = getAnthropicClient()
-    const systemPrompt = `You are the voice of Maestro Academy. Confident, warm, punchy, slightly theatrical. You believe AI literacy is the great equalizer. Short declarative sentences. Use conductor/orchestra metaphors naturally. Never use jargon without explanation. End posts with a hook and the link. Never exceed 240 characters per post (leaving room for links).`
+    const systemPrompt = `You are the voice of Maestro Academy. Confident, warm, punchy, slightly theatrical. You believe AI literacy is the great equalizer. Short declarative sentences. You describe realistic, relatable AI problems and failures, then invite readers to learn how to solve them. End posts with a call to action and the link. Your copy must be extremely short (under 180 characters).`
 
-    const userPrompt = `Write a single, highly engaging, value-add X/Twitter post about Chapter ${game.week} of MaestroPlay: "${game.title}".
-Character featured: ${game.characterName || "AI Tutor"} (${game.characterRole || "AI Co-pilot"}).
-Chapter Description/Theme: "${game.description}".
+    const userPrompt = `Write a single, highly engaging X/Twitter post about Chapter ${game.week} of MaestroPlay: "${game.title}".
+Theme: "${game.description}".
 
 Instructions:
-- Give a 1-sentence value-add teaching point relevant to this theme.
-- Pitch it as a playable simulation chapter: "Play Chapter ${game.week} free:"
-- Append the URL: https://maestro-play-production.up.railway.app/games/${game.slug}
-- Ensure the total length is strictly under 280 characters.`
+1. Start with a relatable, real-world AI problem or failure (e.g., hallucinating fake stats, generic corporate boilerplate, copy-paste errors, lack of context, or bad instructions) related to the theme.
+2. Pose a quick challenge or question to the reader about how to solve it.
+3. Pitch the simulation: "Learn to solve it in Chapter ${game.week} free:"
+4. Append the URL: https://maestro-play-production.up.railway.app/games/${game.slug}
+5. The generated text MUST be under 230 characters TOTAL (including the URL) to fit on X/Twitter without truncation.`
 
     const message = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
