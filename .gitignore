@@ -53,3 +53,5 @@ dev-server.log
 # Playwright credentials
 auth.json
 
+# Bot state tracking
+scripts/bot-state.json
