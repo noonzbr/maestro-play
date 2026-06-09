@@ -9,7 +9,8 @@
     "dev": "next dev",
     "preview": "next dev -p 3002",
     "build": "next build",
-    "start": "next start -H 0.0.0.0"
+    "start": "next start -H 0.0.0.0",
+    "post-tweet": "npx tsx scripts/local-twitter-bot.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.97.1",
@@ -36,6 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "ffmpeg-static": "^5.3.0",
+    "playwright": "^1.60.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

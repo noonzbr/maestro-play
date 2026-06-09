@@ -49,3 +49,7 @@ dev-server.log
 /*.png
 /*.mp3
 /*.mp4
+
+# Playwright credentials
+auth.json
+
