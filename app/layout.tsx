@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   keywords: ["AI literacy", "learn AI", "prompt engineering", "AI for professionals", "AI training", "ChatGPT course", "Claude AI", "gamified learning", "AI skills", "no code AI"],
   authors: [{ name: "Felipe Maestro", url: "https://aimaestro.academy" }],
   creator: "Maestro Academy",
-  metadataBase: new URL("https://maestro-play.vercel.app"),
+  metadataBase: new URL("https://play.aimaestro.academy"),
   openGraph: {
     title: "MaestroPlay — Master AI Without Code",
     description: "14 cinematic games that teach you to use ChatGPT, Claude & Gemini like a professional. Story-driven. No code. Start free.",

@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
 
   const mastery = getMasteryPhrase(game.title, game.description)
 
-  const shareText = `I just earned a Certificate of AI Fluency from @MaestroPlay! 🎼\n\nCompleted "${game.title}" and demonstrated mastery of ${mastery}.\n\nFree AI literacy games: maestroplay.app`
+  const shareText = `I just earned a Certificate of AI Fluency from @MaestroPlay! 🎼\n\nCompleted "${game.title}" and demonstrated mastery of ${mastery}.\n\nFree AI literacy games: play.aimaestro.academy`
 
   // Use the existing /certificate/[slug] page — pass player name as query param
   // The [slug] page already renders a beautiful certificate with the game data

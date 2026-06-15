@@ -56,7 +56,7 @@ export default async function CertificatePage({
   const expectedHash = name ? simpleHash(`${slug}::${name.trim().slice(0, 80)}::maestroplay2025`) : ""
   const isVerified = !!(name && v && v === expectedHash)
 
-  const certSharedUrl = `https://maestroplay.app/certificate/${game.slug}` + (name ? `?name=${encodeURIComponent(name)}&v=${v || ""}` : "")
+  const certSharedUrl = `https://play.aimaestro.academy/certificate/${game.slug}` + (name ? `?name=${encodeURIComponent(name)}&v=${v || ""}` : "")
 
   const linkedInUrl =
     `https://www.linkedin.com/profile/add` +

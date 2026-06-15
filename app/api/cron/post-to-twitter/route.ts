@@ -54,7 +54,7 @@ Instructions:
 1. Start with a relatable, real-world AI problem or failure (e.g., hallucinating fake stats, generic corporate boilerplate, copy-paste errors, lack of context, or bad instructions) related to the theme.
 2. Pose a quick challenge or question to the reader about how to solve it.
 3. Pitch the simulation: "Learn to solve it in Chapter ${game.week} free:"
-4. Append the URL: https://maestro-play-production.up.railway.app/games/${game.slug}
+4. Append the URL: https://play.aimaestro.academy/games/${game.slug}
 5. The generated text MUST be under 230 characters TOTAL (including the URL) to fit on X/Twitter without truncation.`
 
     const message = await anthropic.messages.create({

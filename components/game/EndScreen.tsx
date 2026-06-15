@@ -307,8 +307,8 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
     const playerName = storedName || "MaestroPlay Graduate"
     fetchCertificate(game.slug, playerName).then(result => {
       if (result?.certificateUrl && result?.shareText) {
-        const certPageUrl = `https://maestroplay.app${result.certificateUrl}`
-        const liUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(certPageUrl)}&title=${encodeURIComponent("Certificate of AI Fluency | MaestroPlay")}&summary=${encodeURIComponent(result.shareText)}&source=maestroplay.app`
+        const certPageUrl = `https://play.aimaestro.academy${result.certificateUrl}`
+        const liUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(certPageUrl)}&title=${encodeURIComponent("Certificate of AI Fluency | MaestroPlay")}&summary=${encodeURIComponent(result.shareText)}&source=play.aimaestro.academy`
         setCertLinkedInUrl(liUrl)
       }
     })
@@ -380,13 +380,13 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
   const accent = game.accentColor ?? "var(--cyan)"
 
   const shareText = isFinalGame
-    ? `I just earned Maestro Conductor status on @MaestroPlay! 🎼 ${allGames.length} games. No code required. ${totalXp} XP earned. Try it free: maestroplay.app`
+    ? `I just earned Maestro Conductor status on @MaestroPlay! 🎼 ${allGames.length} games. No code required. ${totalXp} XP earned. Try it free: play.aimaestro.academy`
     : game.week === 1
-    ? `Jake's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: maestroplay.app`
-    : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: maestroplay.app`
+    ? `Jake's story just began mine. 🎸→🎼 Completed "${game.title}" on @MaestroPlay — ${totalXp} XP earned. The Maestro has arrived. Try it free: play.aimaestro.academy`
+    : `Just completed "${game.title}" on @MaestroPlay! 🎵 ${totalXp} XP earned. Learning AI without coding. Try it free: play.aimaestro.academy`
 
   // linkedInUrl is the fallback before certLinkedInUrl is fetched
-  const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent("https://maestroplay.app")}&title=${encodeURIComponent("MaestroPlay — AI Literacy Game")}&summary=${encodeURIComponent(shareText)}&source=maestroplay.app`
+  const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent("https://play.aimaestro.academy")}&title=${encodeURIComponent("MaestroPlay — AI Literacy Game")}&summary=${encodeURIComponent(shareText)}&source=play.aimaestro.academy`
 
   // ── Cinematic transformation for any game with character images ───────────
   if (showTransform && game.characterImage && game.maestroImage) {
