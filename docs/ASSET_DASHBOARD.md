@@ -44,7 +44,7 @@
 **Game 2 — MISSING:**
 | Asset | File | Type | Status | Notes |
 |-------|------|------|--------|-------|
-| Zoe intro video | `/videos/g02-intro.mp4` | 🎬 HeyGen | ❌ GENERATE | Script in HEYGEN_VIDEO_SCRIPTS.txt — "Marcus Didn't Need Me Anymore" |
+| Zoe intro video | `/videos/g02-intro.mp4` | 🎬 HeyGen | ✅ REMOVED | Converted to text dialogue beats in game2.ts |
 | Marcus NPC portrait | `/images/marcus.png` | 🎨 | ❌ GENERATE | Music producer, 30s-40s, casual studio look, dark aesthetic |
 | Diana Voss NPC portrait | `/images/diana-voss.png` | 🎨 | ❌ GENERATE | VP Artist Development, Meridian Records, 40s, sharp professional, dark power aesthetic |
 | Zoe revelation clip | `/videos/g02-reveal.mp4` | 🎞 PixVerse | ❌ GENERATE | Optional: 8 sec — recording studio, Zoe signing a contract, warm gold light breaking through |
@@ -99,7 +99,7 @@
 | Asset | File | Type | Status | Notes |
 |-------|------|------|--------|-------|
 | Jordan intro video | `/videos/g05-intro.mp4` | 🎬 HeyGen | ❌ GENERATE | Script in HEYGEN_VIDEO_SCRIPTS.txt — "I Billed 40 Hours for 8 Hours of Work" |
-| Felipe Game 5 outro | `/videos/felipe-game5.mp4` | 🎬 HeyGen | ❌ GENERATE | ⚠️ Missing from /videos/ — needed for game 5 outro |
+| Felipe Game 5 outro | `/videos/felipe-game5.mp4` | 🎬 HeyGen | ✅ REMOVED | Bypassed in game5.ts to transition straight to EndScreen |
 
 ---
 

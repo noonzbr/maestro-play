@@ -46,7 +46,6 @@ export const game2: Game = {
   maestroLine:    "The last time she was just a drummer...",
   maestroSubline: "Zoe didn't survive the AI era. She became the one who explains it.",
   audioTrack:     "/audio/zoe-glass-circuit.mp3",
-  introVideo:     "/videos/g02-intro.mp4",          // → GENERATE: see docs/ASSET_DASHBOARD.md
   felipeOutroVideo: "/videos/felipe-game2.mp4",     // ✅ already exists
   aiModel:        "general" as const,
 
@@ -65,10 +64,16 @@ export const game2: Game = {
     noteOrigin: { bottom: "42%", left: "48%" },
     beats: [
       { type: "location",  text: "RECORDING STUDIO · TUESDAY · 2:14 PM" },
-      { type: "narration", text: "She'd played 3,000 sessions. She'd never once been replaced by a machine. Until last Tuesday." },
-      { type: "dialogue",  speaker: "Marcus", text: "Label loved it. 'The drummer is incredible.' They think I recorded it live. I used a plugin. Cost me $8 a month." },
-      { type: "narration", text: "Two weeks ago, a friend's EP dropped. AI-directed. Raw, brilliant, deeply personal. She'd played it on repeat. The AI didn't make it feel human — the human made it feel that way. How?" },
-      { type: "final",     text: "The beat goes on. The question is whether Zoe understands AI well enough to stay ahead of it — or whether she's been thinking about it all wrong." },
+      { type: "narration", text: "She'd played 3,000 sessions. She'd never once been replaced by a machine. Until Marcus called." },
+      { type: "dialogue",  speaker: "Marcus", text: "Hey Zoe. Label absolutely loved the track. They think the drum track is incredible. 'Very human,' they said. 'Very real.'" },
+      { type: "dialogue",  speaker: "Zoe", text: "Great. When do we track the rest of the album?" },
+      { type: "dialogue",  speaker: "Marcus", text: "Well, that's the thing... we don't need to. I used a plugin. Cost me $8 a month. They couldn't tell the difference." },
+      { type: "location",  text: "ZOE'S DRUM STOOL · MOMENTS LATER" },
+      { type: "narration", text: "Zoe sat in silence. She had two choices. She could panic. Or she could figure out what she was actually up against." },
+      { type: "dialogue",  speaker: "Zoe", text: "Everyone is afraid of the wrong version of AI. They're afraid of a machine that thinks, feels, and wants things. But that AI doesn't exist." },
+      { type: "dialogue",  speaker: "Zoe", text: "What exists is a prediction machine. It calculates what note or beat is most likely to come next based on patterns. It's not creative. It's statistical." },
+      { type: "dialogue",  speaker: "Zoe", text: "So the question isn't 'will AI replace me?' The question is: 'Do I understand the patterns well enough to direct them?'" },
+      { type: "final",     text: "The beat goes on. But the people who understand what AI actually is aren't afraid of the machine—they're the ones holding the sticks." },
     ],
   },
 
