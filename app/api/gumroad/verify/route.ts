@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call Gumroad license verification API
-    const productId = process.env.GUMROAD_PRODUCT_ID || ""
+    const productId = process.env.GUMROAD_PRODUCT_ID || "akautn"
     const verifyUrl = "https://api.gumroad.com/v2/licenses/verify"
 
     const response = await fetch(verifyUrl, {
