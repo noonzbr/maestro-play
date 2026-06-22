@@ -75,7 +75,7 @@ export async function hasGameAccess(userId: string, gameSlug: string): Promise<b
       .from("purchases")
       .select("id")
       .eq("user_id", userId)
-      .in("game_slug", ["bundle", "pro-monthly", "pro-annual"])
+      .in("game_slug", ["bundle", "pro-monthly", "pro-annual", "maestro-bundle", "conductor-edition"])
       .maybeSingle()
     if (proAccess) return true
 

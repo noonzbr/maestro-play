@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Scene, Choice } from "@/lib/games/types"
 import ChoiceButton from "./ChoiceButton"
@@ -71,6 +71,16 @@ function ensureKf() {
       from { opacity:0; transform:translateY(10px); }
       to   { opacity:1; transform:translateY(0); }
     }
+    @keyframes ba-slider-oscillate {
+      0%, 100% { left: 0%; }
+      50%      { left: 100%; }
+    }
+    @keyframes ba-choices-reveal {
+      0%   { opacity: 0; transform: translateX(-28px) scale(0.96); }
+      55%  { opacity: 1; transform: translateX(4px)  scale(1.01); }
+      78%  { transform: translateX(-2px) scale(0.995); }
+      100% { opacity: 1; transform: translateX(0)    scale(1); }
+    }
   `
   document.head.appendChild(s)
 }
@@ -114,48 +124,68 @@ export default function BossArena({
   const [shakeKey,      setShakeKey]      = useState(0)  // trigger shake animation
   const [attempt,       setAttempt]       = useState(1)  // re-challenge counter
 
+  const indicatorRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+
   // Rhythm Mini-game States
-  const [tempoActive,   setTempoActive]   = useState(true)
-  const [sliderPos,     setSliderPos]     = useState(0)
-  const [tempoRating,   setTempoRating]   = useState<"perfect" | "good" | "off" | null>(null)
+  const [tempoActive,    setTempoActive]    = useState(true)
+  const [sliderPos,      setSliderPos]      = useState(0)
+  const [tempoRating,    setTempoRating]    = useState<"perfect" | "good" | "off" | null>(null)
+  const [choicesVisible, setChoicesVisible] = useState(false)
+
+  // Auto-reveal choices after 1.4s — Strike button opens them early
+  const choicesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    setChoicesVisible(false)
+    if (choicesTimerRef.current) clearTimeout(choicesTimerRef.current)
+    choicesTimerRef.current = setTimeout(() => setChoicesVisible(true), 1400)
+    return () => { if (choicesTimerRef.current) clearTimeout(choicesTimerRef.current) }
+  }, [round])
 
   const currentQ = questions[round]
+  const selectedChoice = currentQ?.choices?.find(c => c.label === selectedLabel)
 
-  /* ── Smooth Tempo Indicator Oscillation ──────────────────── */
-  useEffect(() => {
-    if (!tempoActive || phase !== "battle") return
-    let start: number | null = null
-    let animId: number
-    const speed = 0.0034 // Tempo indicator speed
-    const update = (time: number) => {
-      if (!start) start = time
-      const elapsed = time - start
-      // Smooth oscillation between 0 and 100 using sine wave
-      const pos = Math.round(50 + 50 * Math.sin(elapsed * speed))
-      setSliderPos(pos)
-      animId = requestAnimationFrame(update)
-    }
-    animId = requestAnimationFrame(update)
-    return () => cancelAnimationFrame(animId)
-  }, [tempoActive, phase])
+  // Real-time mastery adjustment based on cumulative boss questions answered so far
+  const netCorrect = score - (round - score) // correct minus incorrect
+  const perfectHalfWidth = Math.max(2.5, Math.min(22, 7 + netCorrect * 4.5))
+  const goodHalfWidth    = Math.max(10, Math.min(42, 25 + netCorrect * 5.5))
 
   /* ── Strike tempo beat action ────────────────────────────── */
   const strikeTempo = useCallback(() => {
     if (!tempoActive) return
+    
+    // Read the current position of the indicator from DOM to get sub-pixel accuracy
+    let currentPct = 50
+    if (indicatorRef.current && trackRef.current) {
+      const indRect = indicatorRef.current.getBoundingClientRect()
+      const trackRect = trackRef.current.getBoundingClientRect()
+      const indCenter = indRect.left + indRect.width / 2
+      const trackLeft = trackRect.left
+      const trackWidth = trackRect.width
+      if (trackWidth > 0) {
+        currentPct = Math.max(0, Math.min(100, ((indCenter - trackLeft) / trackWidth) * 100))
+      }
+    }
+    
+    const pos = Math.round(currentPct)
+    setSliderPos(pos)
     setTempoActive(false)
+    setChoicesVisible(true) // striking opens choices immediately
+    if (choicesTimerRef.current) clearTimeout(choicesTimerRef.current)
     
     // Harmony zone checks
-    if (sliderPos >= 43 && sliderPos <= 57) {
+    const diff = Math.abs(pos - 50)
+    if (diff <= perfectHalfWidth) {
       setTempoRating("perfect")
       sound.playStreak()
-    } else if (sliderPos >= 25 && sliderPos <= 75) {
+    } else if (diff <= goodHalfWidth) {
       setTempoRating("good")
       sound.playClick()
     } else {
       setTempoRating("off")
       sound.playWrong()
     }
-  }, [tempoActive, sliderPos, sound])
+  }, [tempoActive, sound, perfectHalfWidth, goodHalfWidth])
 
   /* ── Answer handler ──────────────────────────────────────── */
   const handleAnswer = useCallback((choice: Choice) => {
@@ -201,6 +231,7 @@ export default function BossArena({
     setTempoActive(true)
     setTempoRating(null)
     setSliderPos(0)
+    setChoicesVisible(false)
   }, [round, total, score, onPlayFireworks])
 
   const handleFinish = useCallback(() => {
@@ -225,6 +256,7 @@ export default function BossArena({
     setTempoActive(true)
     setTempoRating(null)
     setSliderPos(0)
+    setChoicesVisible(false)
   }, [])
 
   const won = score >= Math.ceil(total / 2)
@@ -536,6 +568,7 @@ export default function BossArena({
             >
               {maestroImage ? (
                 <img src={maestroImage} alt="Maestro" draggable={false}
+                  className="boss-char-arrive"
                   style={{
                     width: "100%", height: "100%", objectFit: "contain",
                     filter: `grayscale(${powerGrayscale(power,total)}) brightness(${powerBrightness(power,total)})`,
@@ -543,11 +576,14 @@ export default function BossArena({
                   }}
                 />
               ) : (
-                <div style={{
-                  fontSize: "3.2rem", lineHeight: 1, userSelect: "none",
-                  filter: `grayscale(${powerGrayscale(power,total)}) brightness(${powerBrightness(power,total)})`,
-                  transition: "filter 0.6s ease",
-                }}>
+                <div
+                  className="boss-char-arrive"
+                  style={{
+                    fontSize: "3.2rem", lineHeight: 1, userSelect: "none",
+                    filter: `grayscale(${powerGrayscale(power,total)}) brightness(${powerBrightness(power,total)})`,
+                    transition: "filter 0.6s ease",
+                  }}
+                >
                   🎼
                 </div>
               )}
@@ -574,39 +610,58 @@ export default function BossArena({
           </div>
 
           {/* Oscillating Bar */}
-          <div style={{
-            position: "relative",
-            width: "100%",
-            height: "12px",
-            background: "rgba(255,255,255,0.05)",
-            border: "1.5px solid rgba(255,255,255,0.12)",
-            borderRadius: "6px",
-            overflow: "hidden",
-          }}>
-            {/* Harmony Zone (Sweet Spot) in center (43% to 57%) */}
+          <div 
+            ref={trackRef}
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "12px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1.5px solid rgba(255,255,255,0.12)",
+              borderRadius: "6px",
+              overflow: "hidden",
+            }}
+          >
+            {/* Good Zone (Fainter green background) */}
             <div style={{
               position: "absolute",
-              left: "43%",
-              width: "14%",
+              left: `${50 - goodHalfWidth}%`,
+              width: `${goodHalfWidth * 2}%`,
+              height: "100%",
+              background: "rgba(88,204,2,0.06)",
+              borderLeft: "1px dashed rgba(88,204,2,0.18)",
+              borderRight: "1px dashed rgba(88,204,2,0.18)",
+              transition: "left 0.4s ease, width 0.4s ease",
+            }} />
+
+            {/* Harmony Zone (Sweet Spot / Perfect) in center */}
+            <div style={{
+              position: "absolute",
+              left: `${50 - perfectHalfWidth}%`,
+              width: `${perfectHalfWidth * 2}%`,
               height: "100%",
               background: "linear-gradient(90deg, rgba(88,204,2,0.15) 0%, rgba(88,204,2,0.4) 50%, rgba(88,204,2,0.15) 100%)",
               borderLeft: "1.5px dashed rgba(88,204,2,0.45)",
               borderRight: "1.5px dashed rgba(88,204,2,0.45)",
+              transition: "left 0.4s ease, width 0.4s ease",
             }} />
             
             {/* Moving Indicator */}
-            <div style={{
-              position: "absolute",
-              left: `${sliderPos}%`,
-              top: 0,
-              width: "12px",
-              height: "12px",
-              transform: "translateX(-50%)",
-              background: tempoRating === "perfect" ? "#7dff6b" : tempoRating === "good" ? "var(--cyan)" : tempoRating === "off" ? "#ff4b4b" : "#fff",
-              borderRadius: "50%",
-              boxShadow: tempoRating === "perfect" ? "0 0 14px #7dff6b" : tempoRating === "good" ? "0 0 10px var(--cyan)" : "0 0 8px rgba(255,255,255,0.5)",
-              transition: tempoRating ? "all 0.1s ease" : "none",
-            }} />
+            <div 
+              ref={indicatorRef}
+              style={{
+                position: "absolute",
+                left: tempoActive ? undefined : `${sliderPos}%`,
+                top: 0,
+                width: "12px",
+                height: "12px",
+                transform: "translateX(-50%)",
+                background: tempoRating === "perfect" ? "#7dff6b" : tempoRating === "good" ? "var(--cyan)" : tempoRating === "off" ? "#ff4b4b" : "#fff",
+                borderRadius: "50%",
+                boxShadow: tempoRating === "perfect" ? "0 0 14px #7dff6b" : tempoRating === "good" ? "0 0 10px var(--cyan)" : "0 0 8px rgba(255,255,255,0.5)",
+                animation: tempoActive ? "ba-slider-oscillate 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite" : "none",
+              }} 
+            />
           </div>
 
           {/* Strike button / Rating feedback */}
@@ -701,15 +756,15 @@ export default function BossArena({
               {currentQ?.question}
             </h2>
 
-            {/* Choices - Hidden until tempo sync completed */}
-            {!tempoActive ? (
+            {/* Choices - slide in cinematically; auto-reveal after 1.4s or instantly on Strike */}
+            {choicesVisible ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.22rem" }}>
                 {currentQ?.choices.map((choice, i) => (
-                  <motion.div
+                  <div
                     key={choice.label}
-                    initial={{ opacity: 0, x: 18 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ type: "spring", stiffness: 380, damping: 30, delay: 0.07 + i * 0.06 }}
+                    style={{
+                      animation: `ba-choices-reveal 0.44s cubic-bezier(0.34,1.3,0.64,1) ${i * 70}ms both`,
+                    }}
                   >
                     <ChoiceButton
                       choice={choice}
@@ -718,21 +773,22 @@ export default function BossArena({
                       selectedLabel={selectedLabel}
                       onSelect={handleAnswer}
                     />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             ) : (
               <div style={{
                 textAlign: "center",
-                padding: "1.5rem",
+                padding: "1.2rem",
                 border: "1.5px dashed rgba(255,255,255,0.06)",
                 borderRadius: "12px",
                 fontFamily: "Inter, sans-serif",
-                fontSize: "0.85rem",
-                color: "rgba(240,238,255,0.3)",
+                fontSize: "0.82rem",
+                color: "rgba(240,238,255,0.28)",
                 background: "rgba(255,255,255,0.01)",
+                letterSpacing: "0.04em",
               }}>
-                Sync the tempo to unlock the options...
+                ♩ the maestro is reading…
               </div>
             )}
           </motion.div>
@@ -757,6 +813,17 @@ export default function BossArena({
           }}
         >
           <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+            {/* Dr. Cole's "Failure as Narrative" story beat */}
+            {!isCorrect && selectedChoice?.wrongStoryText && (
+              <div style={{
+                fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                fontSize: "0.95rem", color: "rgba(255,180,180,0.72)",
+                lineHeight: 1.45, marginBottom: "0.5rem",
+                paddingBottom: "0.4rem", borderBottom: "1px solid rgba(255,75,75,0.15)"
+              }}>
+                {selectedChoice.wrongStoryText}
+              </div>
+            )}
             {/* Result row */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: feedbackText ? "0.3rem" : "0.5rem" }}>
               <div style={{

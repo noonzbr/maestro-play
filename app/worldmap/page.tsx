@@ -3,6 +3,13 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { allGames } from "@/lib/games"
+import { motion, AnimatePresence } from "framer-motion"
+
+const findGameByWeek = (week: number) => {
+  if (week === 1) return allGames.find(g => g.slug === "welcome-to-ai-v2")
+  return allGames.find(g => g.week === week)
+}
+
 
 /* ─── Web Audio Synthesizer Sound Effects ─────────────────────────────────── */
 function playSynthBeep(freq: number, type: OscillatorType = "sine", vol = 0.03, dur = 0.1) {
@@ -51,7 +58,6 @@ const NODES = [
   { week: 10, x: 64, y: 58, hub: "Tech Company HQ", district: "Tech Quarter", emoji: "⚡", label: "C3", isOptional: false },
   { week: 11, x: 33, y: 78, hub: "School Library", district: "Westbrook High", emoji: "🏫", label: "D1", isOptional: false },
   { week: 12, x: 58, y: 78, hub: "Computer Lab", district: "Westbrook High", emoji: "🖥️", label: "D2", isOptional: false },
-  { week: 13, x: 12, y: 24, hub: "Alternate Bedroom", district: "Westbrook Heights", emoji: "🎸", label: "v2", isOptional: true },
   { week: 14, x: 82, y: 50, hub: "The Prompt Lab", district: "Research Wing", emoji: "🔬", label: "13", isOptional: false },
   { week: 15, x: 94, y: 50, hub: "Vera's Studio", district: "Creative Hub", emoji: "🎨", label: "14", isOptional: false },
   { week: 16, x: 95, y: 75, hub: "Orion Bridge", district: "Orion Station", emoji: "🚀", label: "15", isOptional: false }
@@ -65,8 +71,7 @@ const PATHS = [
   [11, 12],
   [4, 14], [7, 14], [10, 14], [12, 14],
   [14, 15],
-  [15, 16],
-  [1, 13]
+  [15, 16]
 ]
 
 /* ─── Duolingo Unit Definitions ───────────────────────────────────────────── */
@@ -87,7 +92,7 @@ const UNITS: Unit[] = [
     subtitle: "Unlock the Socratic companion and learn the Conductor Principle",
     color: "#00d4f0",
     bg: "rgba(0, 212, 240, 0.08)",
-    games: [1, 13],
+    games: [1],
     guidebook: "THE CONDUCTOR PRINCIPLE: AI is a prediction engine that mirrors the specificity and intention of its conductor. Vague prompts output average noise. Detailed contexts inject human value. You are directing the orchestra, not writing the code."
   },
   {
@@ -164,9 +169,83 @@ function ensureWorldMapKf() {
       0%, 100% { opacity: 0.8; }
       50%      { opacity: 1; transform: scale(1.03); }
     }
+    @keyframes wm-wave-bar {
+      0%, 100% { height: 4px; }
+      50%      { height: 28px; }
+    }
   `
   document.head.appendChild(s)
 }
+
+interface VoiceNote {
+  id: string
+  sender: string
+  avatar: string
+  color: string
+  subject: string
+  content: string
+  unlockedAt: number
+  duration: string
+  freq: number
+}
+
+const VOICE_NOTES: VoiceNote[] = [
+  {
+    id: "jake-1",
+    sender: "Jake",
+    avatar: "/images/guitarplayer1.png",
+    color: "rgba(0, 212, 240, 0.9)",
+    subject: "Transcription Prompts",
+    content: "Hey! Coda told me to check out this prompt pattern for copying guitar tabs. I tried it and it actually transcribed my baseline correctly! It's like having a tech copilot who actually understands syncopation. I'm heading to rehearsal, catch you there.",
+    unlockedAt: 1,
+    duration: "0:42",
+    freq: 440
+  },
+  {
+    id: "felipe-1",
+    sender: "Felipe",
+    avatar: "/images/carlos.png",
+    color: "rgba(224, 64, 251, 0.9)",
+    subject: "Prompting Like a Conductor",
+    content: "The orchestra has been tuning their instruments while you were away. Specifying constraints in the prompts is like setting the metronome — if you don't do it, everyone plays at their own tempo. Keep practicing in the daily challenge.",
+    unlockedAt: 2,
+    duration: "0:56",
+    freq: 520
+  },
+  {
+    id: "vega-1",
+    sender: "Senora Vega",
+    avatar: "/images/senoravega.png",
+    color: "rgba(255, 23, 68, 0.9)",
+    subject: "Socratic Reasoning",
+    content: "I'm grading the theory sheets. Some students are still treating AI like a search engine instead of a reasoning tutor. I reminded them that if they ask for direct answers, they won't pass the performance check. Focus on Socratic questions!",
+    unlockedAt: 4,
+    duration: "1:15",
+    freq: 330
+  },
+  {
+    id: "zoe-1",
+    sender: "Zoe",
+    avatar: "/images/zoe.png",
+    color: "rgba(0, 230, 118, 0.9)",
+    subject: "Context Windows & Overflows",
+    content: "Just patched the server room pipeline. We had a token overflow issue because Jordan sent a massive contextual text blob without segmenting it. Keep your context windows tight, people!",
+    unlockedAt: 7,
+    duration: "0:38",
+    freq: 660
+  },
+  {
+    id: "maya-1",
+    sender: "Maya",
+    avatar: "/images/maya.png",
+    color: "rgba(255, 145, 0, 0.9)",
+    subject: "Few-Shot Priming Prep",
+    content: "I'm setting up the prompt challenge rooms. We've got 6 new prompt templates loaded in the lab. If you haven't mastered Few-Shot priming yet, you're going to struggle with the next set of diagnostics. Practicing now is key.",
+    unlockedAt: 13,
+    duration: "1:02",
+    freq: 580
+  }
+]
 
 type Star = { x: number; y: number; r: number; dur: number; delay: number }
 
@@ -175,9 +254,22 @@ export default function WorldMapPage() {
 
   // Page layout state
   const [viewMode, setViewMode] = useState<"path" | "map">("path")
-  const [activeTab, setActiveTab] = useState<"learn" | "leaderboard" | "quests" | "shop">("learn")
+  const [activeTab, setActiveTab] = useState<"learn" | "leaderboard" | "quests" | "chatter" | "shop">("learn")
   const [activeNodePopup, setActiveNodePopup] = useState<number | null>(null)
   const [activeGuidebookUnit, setActiveGuidebookUnit] = useState<number | null>(null)
+
+  const [activeTransmission, setActiveTransmission] = useState<VoiceNote | null>(null)
+  const [newTransmissionsCount, setNewTransmissionsCount] = useState(0)
+  const [typedLogText, setTypedLogText] = useState("")
+  const [isPlayingLog, setIsPlayingLog] = useState(false)
+
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   // Game/User progress state
   const [stars, setStars] = useState<Star[]>([])
@@ -208,6 +300,13 @@ export default function WorldMapPage() {
       delay: Math.random() * 3,
     })))
     setMounted(true)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const tab = params.get("tab")
+      if (tab === "chatter" || tab === "learn" || tab === "leaderboard" || tab === "quests" || tab === "shop") {
+        setActiveTab(tab)
+      }
+    }
     
     try {
       const xps: Record<number, number> = {}
@@ -240,16 +339,51 @@ export default function WorldMapPage() {
       // Power-up indicators
       setShieldActive(localStorage.getItem("maestro_shield_active") === "true")
       setDoubleXpActive(localStorage.getItem("maestro_double_xp_active") === "true")
+
+      // Offline updates / voice notes trigger
+      const lastVisit = localStorage.getItem("maestro_last_map_visit")
+      const now = Date.now()
+      localStorage.setItem("maestro_last_map_visit", now.toString())
+      
+      const readList = JSON.parse(localStorage.getItem("maestro_read_transmissions") ?? "[]")
+      const unlocked = VOICE_NOTES.filter(t => {
+        const week = t.unlockedAt
+        return week === 1 || (parseInt(localStorage.getItem(`maestro_game_${week}_xp`) ?? "0") || 0) > 0
+      })
+      const unread = unlocked.filter(t => !readList.includes(t.id))
+      setNewTransmissionsCount(unread.length)
+
+      if (unread.length > 0 && lastVisit) {
+        const elapsed = (now - parseInt(lastVisit)) / 1000
+        // Trigger transmission popup if returned after 15 seconds
+        if (elapsed > 15) {
+          const target = unread[0]
+          setActiveTransmission(target)
+          
+          // Mark as read
+          const nextReadList = [...readList, target.id]
+          localStorage.setItem("maestro_read_transmissions", JSON.stringify(nextReadList))
+          setNewTransmissionsCount(VOICE_NOTES.filter(t => {
+            const week = t.unlockedAt
+            return week === 1 || (parseInt(localStorage.getItem(`maestro_game_${week}_xp`) ?? "0") || 0) > 0
+          }).filter(t => !nextReadList.includes(t.id)).length)
+        }
+      }
     } catch {}
   }, [])
 
   const completedWeeks = new Set(Object.keys(gameXp).map(Number))
+  if (completedWeeks.has(13)) {
+    completedWeeks.add(1)
+  }
+  if (completedWeeks.has(1)) {
+    completedWeeks.add(13)
+  }
   const completedCount = completedWeeks.size
 
   // Unlocked path calculations
   const unlockedWeeks = new Set<number>()
   unlockedWeeks.add(1)
-  unlockedWeeks.add(13) // optional v2 is always unlocked
   if (completedWeeks.has(1)) {
     unlockedWeeks.add(2)
     unlockedWeeks.add(5)
@@ -282,7 +416,7 @@ export default function WorldMapPage() {
   // Continue button slug
   let continueSlug = ""
   if (!completedWeeks.has(1)) {
-    continueSlug = "welcome-to-ai"
+    continueSlug = "welcome-to-ai-v2"
   } else if (unlockedWeeks.has(16) && !completedWeeks.has(16)) {
     continueSlug = "antigravity-cli"
   } else if (unlockedWeeks.has(15) && !completedWeeks.has(15)) {
@@ -292,11 +426,11 @@ export default function WorldMapPage() {
   } else {
     const activeUncompleted = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].find(w => unlockedWeeks.has(w) && !completedWeeks.has(w))
     if (activeUncompleted !== undefined) {
-      continueSlug = allGames.find(g => g.week === activeUncompleted)?.slug ?? ""
+      continueSlug = findGameByWeek(activeUncompleted)?.slug ?? ""
     }
   }
 
-  const hoveredGame = hovered ? allGames.find(g => g.week === hovered) : null
+  const hoveredGame = hovered ? findGameByWeek(hovered) : null
   const hoveredNode = hovered ? NODES.find(n => n.week === hovered) : null
 
   // Purchase handler
@@ -346,6 +480,7 @@ export default function WorldMapPage() {
       color: "#f0eeff",
       fontFamily: "Inter, sans-serif",
       display: "flex",
+      flexDirection: isMobile ? "column" : "row",
       overflow: "hidden"
     }}>
 
@@ -361,19 +496,20 @@ export default function WorldMapPage() {
       </svg>
 
       {/* ── Left Sidebar Navigation (Duolingo Style) ────────────────────────── */}
-      <div style={{
-        width: "240px",
-        background: "rgba(10, 8, 22, 0.72)",
-        borderRight: "1.5px solid rgba(255, 255, 255, 0.08)",
-        padding: "2rem 1.5rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: "2.5rem",
-        zIndex: 30,
-        backdropFilter: "blur(20px)",
-        boxSizing: "border-box",
-        height: "100vh"
-      }}>
+      {!isMobile && (
+        <div style={{
+          width: "240px",
+          background: "rgba(10, 8, 22, 0.72)",
+          borderRight: "1.5px solid rgba(255, 255, 255, 0.08)",
+          padding: "2rem 1.5rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2.5rem",
+          zIndex: 30,
+          backdropFilter: "blur(20px)",
+          boxSizing: "border-box",
+          height: "100vh"
+        }}>
         {/* Brand Logo */}
         <Link href="/" style={{ textDecoration: "none" }} onClick={sfxClick}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
@@ -393,11 +529,13 @@ export default function WorldMapPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", flex: 1 }}>
           {[
             { id: "learn", label: "Learn Path", icon: "🟢" },
+            { id: "chatter", label: "Radio Chatter", icon: "📻", badge: newTransmissionsCount > 0 },
             { id: "leaderboard", label: "Leaderboard", icon: "🏆" },
             { id: "quests", label: "Daily Quests", icon: "🎯" },
             { id: "shop", label: "Power Shop", icon: "💎" },
           ].map(item => {
             const active = activeTab === item.id && viewMode === "path"
+            const showBadge = (item as any).badge
             return (
               <button
                 key={item.id}
@@ -409,6 +547,7 @@ export default function WorldMapPage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "space-between",
                   gap: "1rem",
                   padding: "0.9rem 1.2rem",
                   borderRadius: "16px",
@@ -420,7 +559,8 @@ export default function WorldMapPage() {
                   fontSize: "0.86rem",
                   textAlign: "left",
                   cursor: "pointer",
-                  transition: "all 0.2s"
+                  transition: "all 0.2s",
+                  width: "100%",
                 }}
                 onMouseEnter={e => {
                   if (!active) {
@@ -435,13 +575,21 @@ export default function WorldMapPage() {
                   }
                 }}
               >
-                <span style={{ fontSize: "1.1rem" }}>{item.icon}</span>
-                <span>{item.label}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <span style={{ fontSize: "1.1rem" }}>{item.icon}</span>
+                  <span>{item.label}</span>
+                </div>
+                {showBadge && (
+                  <div style={{
+                    width: "8px", height: "8px", borderRadius: "50%",
+                    background: "#ff1744", boxShadow: "0 0 8px #ff1744"
+                  }} />
+                )}
               </button>
             )
           })}
 
-          <Link href="/review" style={{ textDecoration: "none" }} onClick={sfxClick}>
+          <Link href="/daily-challenge" style={{ textDecoration: "none" }} onClick={sfxClick}>
             <div
               style={{
                 display: "flex",
@@ -498,7 +646,8 @@ export default function WorldMapPage() {
             </span>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* ── Main View Panel ────────────────────────────────────────────────── */}
       <div style={{
@@ -512,7 +661,7 @@ export default function WorldMapPage() {
 
         {/* ── Top stats bar ────────────────────────────────────────────────── */}
         <div style={{
-          padding: "1.2rem 2.5rem",
+          padding: isMobile ? "0.6rem 0.8rem" : "1.2rem 2.5rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -522,361 +671,100 @@ export default function WorldMapPage() {
           zIndex: 40,
         }}>
           {/* Title Header */}
-          <div>
-            <div style={{ fontWeight: 800, fontSize: "1.1rem", letterSpacing: "0.01em" }}>
-              {viewMode === "map" ? "Westbrook City Map" : "Westbrook Learning Path"}
+          {!isMobile && (
+            <div>
+              <div style={{ fontWeight: 800, fontSize: "1.1rem", letterSpacing: "0.01em" }}>
+                Westbrook Learning Path
+              </div>
+              <div style={{ fontSize: "0.68rem", color: "rgba(240, 238, 255, 0.4)", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 700, marginTop: "0.15rem" }}>
+                Unit Progress
+              </div>
             </div>
-            <div style={{ fontSize: "0.68rem", color: "rgba(240, 238, 255, 0.4)", letterSpacing: "0.05em", textTransform: "uppercase", fontWeight: 700, marginTop: "0.15rem" }}>
-              {viewMode === "map" ? "2D Constellation Grid" : `Unit ${activeTab.toUpperCase()} Progress`}
-            </div>
-          </div>
+          )}
 
           {/* Duolingo Stats Pills */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1.8rem" }}>
-            {/* View Mode Toggle */}
-            <div style={{
-              background: "rgba(255, 255, 255, 0.03)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "100px",
-              padding: "2px",
-              display: "flex",
-              gap: "2px"
-            }}>
-              <button
-                onClick={() => { sfxClick(); setViewMode("path") }}
-                style={{
-                  background: viewMode === "path" ? "linear-gradient(90deg, #00d4f0, #e040fb)" : "transparent",
-                  border: "none",
-                  borderRadius: "100px",
-                  padding: "0.45rem 1rem",
-                  color: viewMode === "path" ? "#08060f" : "#f0eeff",
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "0.72rem",
-                  cursor: "pointer",
-                  transition: "background 0.2s"
-                }}
-              >
-                🟢 Path View
-              </button>
-              <button
-                onClick={() => { sfxClick(); setViewMode("map") }}
-                style={{
-                  background: viewMode === "map" ? "linear-gradient(90deg, #00d4f0, #e040fb)" : "transparent",
-                  border: "none",
-                  borderRadius: "100px",
-                  padding: "0.45rem 1rem",
-                  color: viewMode === "map" ? "#08060f" : "#f0eeff",
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 800,
-                  fontSize: "0.72rem",
-                  cursor: "pointer",
-                  transition: "background 0.2s"
-                }}
-              >
-                🗺️ 2D Map
-              </button>
-            </div>
-
-            <div style={{ width: "1.5px", height: "24px", background: "rgba(255, 255, 255, 0.15)" }} />
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: isMobile ? "space-between" : "flex-end",
+            width: isMobile ? "100%" : "auto",
+            gap: isMobile ? "0.6rem" : "1.8rem"
+          }}>
 
             {/* Streak */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-              <span style={{ fontSize: "1.45rem", filter: streak > 0 ? "none" : "grayscale(1) opacity(0.4)" }}>🔥</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+              <span style={{ fontSize: isMobile ? "1.15rem" : "1.45rem", filter: streak > 0 ? "none" : "grayscale(1) opacity(0.4)" }}>🔥</span>
               <div>
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#ff9100" }}>{streak}</div>
-                <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Streak</div>
+                <div style={{ fontWeight: 800, fontSize: isMobile ? "0.85rem" : "0.95rem", color: "#ff9100", lineHeight: 1 }}>{streak}</div>
+                {!isMobile && <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Streak</div>}
               </div>
             </div>
 
             {/* Lives */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-              <span style={{ fontSize: "1.45rem" }}>❤️</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+              <span style={{ fontSize: isMobile ? "1.15rem" : "1.45rem" }}>❤️</span>
               <div>
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#ff1744" }}>{lives}/3</div>
-                <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Hearts</div>
+                <div style={{ fontWeight: 800, fontSize: isMobile ? "0.85rem" : "0.95rem", color: "#ff1744", lineHeight: 1 }}>{lives}/3</div>
+                {!isMobile && <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Hearts</div>}
               </div>
             </div>
 
             {/* Gems */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-              <span style={{ fontSize: "1.45rem" }}>💎</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+              <span style={{ fontSize: isMobile ? "1.15rem" : "1.45rem" }}>💎</span>
               <div>
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#00d4f0" }}>{gems}</div>
-                <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Gems</div>
+                <div style={{ fontWeight: 800, fontSize: isMobile ? "0.85rem" : "0.95rem", color: "#00d4f0", lineHeight: 1 }}>{gems}</div>
+                {!isMobile && <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Gems</div>}
               </div>
             </div>
 
             {/* XP */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-              <span style={{ fontSize: "1.45rem" }}>⚡</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+              <span style={{ fontSize: isMobile ? "1.15rem" : "1.45rem" }}>⚡</span>
               <div>
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "#e040fb" }}>{totalXp}</div>
-                <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Total XP</div>
+                <div style={{ fontWeight: 800, fontSize: isMobile ? "0.85rem" : "0.95rem", color: "#e040fb", lineHeight: 1 }}>{totalXp}</div>
+                {!isMobile && <div style={{ fontSize: "0.5rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase" }}>Total XP</div>}
               </div>
             </div>
 
             {/* Continue CTA */}
-            <Link
-              href={continueSlug ? `/games/${continueSlug}` : "/games"}
-              style={{ textDecoration: "none" }}
-              onClick={sfxClick}
-            >
-              <div style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 800,
-                fontSize: "0.78rem",
-                color: "#08060f",
-                background: "linear-gradient(90deg, #00d4f0, #e040fb)",
-                padding: "0.55rem 1.4rem",
-                borderRadius: "100px",
-                letterSpacing: "0.01em",
-                boxShadow: "0 0 20px rgba(0, 212, 240, 0.3)",
-                transition: "transform 0.15s",
-              }}
-              onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
-              onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+            {continueSlug && (
+              <Link
+                href={`/games/${continueSlug}`}
+                style={{ textDecoration: "none" }}
+                onClick={sfxClick}
               >
-                {!completedWeeks.has(1) 
-                  ? "Begin →" 
-                  : completedWeeks.has(16) 
-                  ? "Mastered ✓" 
-                  : "Continue →"}
-              </div>
-            </Link>
+                <div style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 800,
+                  fontSize: isMobile ? "0.62rem" : "0.78rem",
+                  color: "#08060f",
+                  background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                  padding: isMobile ? "0.35rem 0.65rem" : "0.55rem 1.4rem",
+                  borderRadius: "100px",
+                  letterSpacing: "0.01em",
+                  boxShadow: "0 0 12px rgba(0, 212, 240, 0.2)",
+                  transition: "transform 0.15s",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                >
+                  {isMobile ? "Play" : (!completedWeeks.has(1) ? "Begin →" : "Continue →")}
+                </div>
+              </Link>
+            )}
           </div>
         </div>
 
         {/* ── Viewport Contents ────────────────────────────────────────────── */}
-        <div style={{ flex: 1, overflowY: "auto", position: "relative", zIndex: 10, padding: "2rem" }}>
-          
-          {/* ── VIEW MODE: 2D Constellation Map ── */}
-          {viewMode === "map" && (
-            <div style={{ width: "100%", height: "100%", position: "relative" }}>
-              
-              {/* Halos */}
-              {[
-                { x: 12, y: 50, color: "rgba(0,212,240,0.08)",  r: 180 },
-                { x: 46, y: 22, color: "rgba(255,180,80,0.06)", r: 200 },
-                { x: 46, y: 40, color: "rgba(224,64,251,0.06)", r: 180 },
-                { x: 46, y: 58, color: "rgba(16,185,129,0.07)", r: 180 },
-                { x: 46, y: 78, color: "rgba(0,120,212,0.07)",  r: 160 },
-                { x: 88, y: 50, color: "rgba(224,64,251,0.08)", r: 200 },
-              ].map((g, i) => (
-                <div key={i} style={{
-                  position:     "absolute",
-                  left:         `${g.x}%`,
-                  top:          `${g.y}%`,
-                  transform:    "translate(-50%,-50%)",
-                  width:        `${g.r}px`,
-                  height:       `${g.r}px`,
-                  borderRadius: "50%",
-                  background:   `radial-gradient(circle, ${g.color} 0%, transparent 70%)`,
-                  pointerEvents:"none",
-                  zIndex:       1,
-                }} />
-              ))}
-
-              {/* Constellation SVGs */}
-              <svg
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 2, pointerEvents: "none" }}
-              >
-                {PATHS.map(([fromW, toW], i) => {
-                  const from = NODES.find(n => n.week === fromW)!
-                  const to   = NODES.find(n => n.week === toW)!
-                  const destGame = allGames.find(g => g.week === toW) || allGames.find(g => g.week === fromW)
-                  const done  = completedWeeks.has(fromW) && completedWeeks.has(toW)
-                  const active = completedWeeks.has(fromW) && unlockedWeeks.has(toW) && !completedWeeks.has(toW)
-                  const accent = destGame?.accentColor ?? "#00d4f0"
-
-                  const mx = (from.x + to.x) / 2 + (i % 2 === 0 ? 1 : -1)
-                  const my = (from.y + to.y) / 2 + (i % 3 === 0 ? -1 : 1)
-
-                  return (
-                    <g key={i}>
-                      <path
-                        d={`M${from.x},${from.y} Q${mx},${my} ${to.x},${to.y}`}
-                        fill="none"
-                        stroke="rgba(255,255,255,0.05)"
-                        strokeWidth="0.35"
-                        strokeLinecap="round"
-                        strokeDasharray={fromW === 1 && toW === 13 ? "1.5,1.5" : "none"}
-                      />
-                      {(done || active) && (
-                        <path
-                          d={`M${from.x},${from.y} Q${mx},${my} ${to.x},${to.y}`}
-                          fill="none"
-                          stroke={done ? accent : `${accent}88`}
-                          strokeWidth={done ? "0.45" : "0.3"}
-                          strokeLinecap="round"
-                          strokeDasharray={fromW === 1 && toW === 13 ? "1.5,1.5" : undefined}
-                          strokeDashoffset="0"
-                          opacity={done ? 0.75 : 0.45}
-                          style={{ filter: `drop-shadow(0 0 2px ${accent})` }}
-                        />
-                      )}
-                    </g>
-                  )
-                })}
-              </svg>
-
-              {/* Node Placement */}
-              <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
-                {NODES.map(node => {
-                  const game = allGames.find(g => g.week === node.week)
-                  if (!game) return null
-                  const done = completedWeeks.has(node.week)
-                  const unlocked = unlockedWeeks.has(node.week)
-                  const isNext = unlocked && !done
-                  const locked = !unlocked
-                  const accent = game.accentColor ?? "#00d4f0"
-                  const isHovered = hovered === node.week
-
-                  return (
-                    <div
-                      key={node.week}
-                      onMouseEnter={() => setHovered(node.week)}
-                      onMouseLeave={() => setHovered(null)}
-                      style={{
-                        position: "absolute",
-                        left: `${node.x}%`,
-                        top: `${node.y}%`,
-                        transform: "translate(-50%,-50%)",
-                        cursor: locked ? "default" : "pointer",
-                        zIndex: isHovered ? 20 : 10,
-                      }}
-                    >
-                      {/* Interactive Circle */}
-                      <Link href={locked ? "#" : `/games/${game.slug}`} onClick={locked ? sfxLocked : sfxClick} style={{ textDecoration: "none" }}>
-                        <div style={{
-                          width: isNext ? "44px" : "36px",
-                          height: isNext ? "44px" : "36px",
-                          borderRadius: "50%",
-                          background: done
-                            ? `linear-gradient(135deg, ${accent}cc, ${accent}66)`
-                            : isNext
-                            ? `linear-gradient(135deg, ${accent}44, ${accent}22)`
-                            : "rgba(255,255,255,0.04)",
-                          border: done
-                            ? `2px solid ${accent}`
-                            : isNext
-                            ? `2px solid ${accent}88`
-                            : "1px solid rgba(255,255,255,0.1)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "1.1rem",
-                          transition: "all 0.3s ease",
-                          transform: isHovered ? "scale(1.18)" : "scale(1)",
-                          ["--nc" as string]: `${accent}44`,
-                          animation: isNext
-                            ? "wm-next-pulse 2.4s ease-in-out infinite"
-                            : done
-                            ? "wm-node-pulse 4s ease-in-out infinite"
-                            : "none",
-                          filter: locked ? "grayscale(1) brightness(0.5)" : "none",
-                          boxShadow: done
-                            ? `0 0 14px ${accent}44`
-                            : isNext
-                            ? `0 0 20px ${accent}55`
-                            : "none",
-                        }}>
-                          {done ? "✓" : locked ? "🔒" : node.emoji}
-                        </div>
-                      </Link>
-
-                      {/* Small badge */}
-                      <div style={{
-                        position: "absolute",
-                        top: "-10px",
-                        right: "-8px",
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "50%",
-                        background: done ? accent : "rgba(255,255,255,0.08)",
-                        border: `1px solid ${done ? accent : "rgba(255,255,255,0.15)"}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "0.55rem",
-                        fontWeight: 800,
-                        color: done ? "#08060f" : "rgba(255,255,255,0.5)",
-                      }}>
-                        {node.label}
-                      </div>
-
-                      {/* Label hub */}
-                      <div style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        marginTop: "6px",
-                        whiteSpace: "nowrap",
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: "0.52rem",
-                        fontWeight: 700,
-                        letterSpacing: "0.08em",
-                        color: done ? "rgba(240,238,255,0.8)" : isNext ? "rgba(240,238,255,0.6)" : "rgba(240,238,255,0.25)",
-                        textTransform: "uppercase",
-                      }}>
-                        {node.hub}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Hover popup */}
-              {hovered && hoveredGame && hoveredNode && (
-                <div style={{
-                  position: "absolute",
-                  bottom: "3rem",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  zIndex: 50,
-                  background: "rgba(8,6,20,0.95)",
-                  border: `1.5px solid ${hoveredGame.accentColor ?? "#00d4f0"}44`,
-                  borderTop: `3px solid ${hoveredGame.accentColor ?? "#00d4f0"}`,
-                  borderRadius: "20px",
-                  padding: "1.2rem 1.8rem",
-                  width: "320px",
-                  backdropFilter: "blur(20px)",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.6rem" }}>
-                    <div style={{ fontSize: "1.8rem" }}>{hoveredNode.emoji}</div>
-                    <div>
-                      <div style={{ fontSize: "0.6rem", letterSpacing: "0.18em", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase", fontWeight: 700 }}>
-                        Game {hoveredGame.week} · {hoveredNode.district}
-                      </div>
-                      <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#fff" }}>
-                        {hoveredGame.title}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ fontSize: "0.76rem", color: "rgba(240, 238, 255, 0.5)", lineHeight: 1.5, marginBottom: "0.6rem" }}>
-                    Help <span style={{ color: hoveredGame.accentColor ?? "#00d4f0", fontWeight: 700 }}>{hoveredGame.characterName}</span> solve the AI bottleneck in Westbrook Heights.
-                  </div>
-                  {completedWeeks.has(hoveredGame.week) ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <span style={{ fontSize: "0.8rem" }}>🟢</span>
-                      <span style={{ fontSize: "0.7rem", color: "#58cc02", fontWeight: 800 }}>Completed</span>
-                    </div>
-                  ) : unlockedWeeks.has(hoveredGame.week) ? (
-                    <div style={{ fontSize: "0.7rem", color: hoveredGame.accentColor ?? "#00d4f0", fontWeight: 800 }}>
-                      ▶ Ready to play
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.25)", fontWeight: 800 }}>
-                      🔒 Complete previous chapters to unlock
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          position: "relative",
+          zIndex: 10,
+          padding: isMobile ? "1rem 1rem calc(1.5rem + 64px + env(safe-area-inset-bottom, 0px))" : "2rem"
+        }}>
 
           {/* ── VIEW MODE: Duolingo Path View ── */}
           {viewMode === "path" && activeTab === "learn" && (
@@ -895,17 +783,20 @@ export default function WorldMapPage() {
                   <div key={unit.id} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                     
                     {/* Unit Banner Card */}
-                    <div style={{
-                      background: `linear-gradient(135deg, ${unit.color}15, rgba(12, 10, 20, 0.95))`,
-                      border: `1.5px solid ${unit.color}35`,
-                      borderLeft: `5px solid ${unit.color}`,
-                      borderRadius: "22px",
-                      padding: "1.4rem 1.8rem",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4)`,
-                    }}>
+                    <motion.div 
+                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                      style={{
+                        background: `linear-gradient(135deg, ${unit.color}15, rgba(12, 10, 20, 0.95))`,
+                        border: `1.5px solid ${unit.color}35`,
+                        borderLeft: `5px solid ${unit.color}`,
+                        borderRadius: "22px",
+                        padding: isMobile ? "1rem 1.2rem" : "1.4rem 1.8rem",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4)`,
+                      }}
+                    >
                       <div style={{ flex: 1, paddingRight: "1rem" }}>
                         <div style={{
                           fontFamily: "Inter, sans-serif",
@@ -948,7 +839,7 @@ export default function WorldMapPage() {
                       >
                         📖 Guidebook
                       </button>
-                    </div>
+                    </motion.div>
 
                     {/* Vertical Snake Node Path */}
                     <div style={{
@@ -961,7 +852,7 @@ export default function WorldMapPage() {
                     }}>
                       
                       {unit.games.map((weekNum, idx) => {
-                        const game = allGames.find(g => g.week === weekNum)
+                        const game = findGameByWeek(weekNum)
                         if (!game) return null
 
                         const done = completedWeeks.has(weekNum)
@@ -1019,55 +910,68 @@ export default function WorldMapPage() {
                               </div>
                             )}
 
-                            {/* Circular Node Button */}
-                            <button
-                              onClick={() => {
-                                if (locked) {
-                                  sfxLocked()
-                                } else {
-                                  sfxClick()
-                                  setActiveNodePopup(weekNum)
-                                }
-                              }}
-                              style={{
-                                width: isNext ? "66px" : "58px",
-                                height: isNext ? "66px" : "58px",
-                                borderRadius: "50%",
-                                background: done
-                                  ? "linear-gradient(135deg, #ffd700, #ff8f00)" 
-                                  : isNext
-                                  ? `linear-gradient(135deg, ${unit.color}22, ${unit.color}11)`
-                                  : "rgba(255, 255, 255, 0.03)",
-                                border: done
-                                  ? "3.5px solid #ffcc00"
-                                  : isNext
-                                  ? `3.5px solid ${unit.color}`
-                                  : "2px solid rgba(255,255,255,0.06)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "1.7rem",
-                                cursor: "pointer",
-                                boxShadow: done
-                                  ? "0 4px 18px rgba(255, 143, 0, 0.4), 0 0 24px rgba(255,215,0,0.18)"
-                                  : isNext
-                                  ? `0 0 24px ${unit.color}55`
-                                  : "none",
-                                outline: "none",
-                                transition: "all 0.25s",
-                                filter: locked ? "grayscale(1) brightness(0.4)" : "none",
-                                ["--nc" as string]: `${unit.color}44`,
-                                animation: isNext ? "wm-next-pulse 2.2s infinite" : "none",
-                              }}
-                              onMouseEnter={e => {
-                                if (!locked) e.currentTarget.style.transform = "scale(1.08)"
-                              }}
-                              onMouseLeave={e => {
-                                if (!locked) e.currentTarget.style.transform = "scale(1)"
-                              }}
-                            >
-                              {done ? "👑" : locked ? "🔒" : game.emoji}
-                            </button>
+                            {/* Circular Node Button — direct navigation when unlocked */}
+                            {!locked ? (
+                              <Link href={`/games/${game.slug}`} style={{ textDecoration: "none" }} onClick={() => sfxSuccessChime()}>
+                                <button
+                                  style={{
+                                    width: isNext ? "66px" : "58px",
+                                    height: isNext ? "66px" : "58px",
+                                    borderRadius: "50%",
+                                    background: done
+                                      ? "linear-gradient(135deg, #ffd700, #ff8f00)" 
+                                      : isNext
+                                      ? `linear-gradient(135deg, ${unit.color}22, ${unit.color}11)`
+                                      : "rgba(255, 255, 255, 0.03)",
+                                    border: done
+                                      ? "3.5px solid #ffcc00"
+                                      : isNext
+                                      ? `3.5px solid ${unit.color}`
+                                      : "2px solid rgba(255,255,255,0.06)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "1.7rem",
+                                    cursor: "pointer",
+                                    boxShadow: done
+                                      ? "0 4px 18px rgba(255, 143, 0, 0.4), 0 0 24px rgba(255,215,0,0.18)"
+                                      : isNext
+                                      ? `0 0 24px ${unit.color}55`
+                                      : "none",
+                                    outline: "none",
+                                    transition: "all 0.25s",
+                                    ["--nc" as string]: `${unit.color}44`,
+                                    animation: isNext ? "wm-next-pulse 2.2s infinite" : "none",
+                                  }}
+                                  onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.08)" }}
+                                  onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)" }}
+                                >
+                                  {done ? "👑" : game.emoji}
+                                </button>
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={() => sfxLocked()}
+                                style={{
+                                  width: "58px",
+                                  height: "58px",
+                                  borderRadius: "50%",
+                                  background: "rgba(255, 255, 255, 0.03)",
+                                  border: "2px solid rgba(255,255,255,0.06)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "1.7rem",
+                                  cursor: "not-allowed",
+                                  outline: "none",
+                                  filter: "grayscale(1) brightness(0.4)",
+                                  transition: "all 0.25s",
+                                }}
+                              >
+                                🔒
+                              </button>
+                            )}
+
 
                             {/* Mini Name underneath circular node */}
                             <div style={{
@@ -1087,77 +991,84 @@ export default function WorldMapPage() {
                               {game.characterName ?? `Game ${weekNum}`}
                             </div>
 
-                            {/* Node Popup Drawer */}
-                            {activeNodePopup === weekNum && (
-                              <div style={{
-                                position: "absolute",
-                                top: "110%",
-                                left: "50%",
-                                transform: "translateX(-50%)",
-                                zIndex: 100,
-                                background: "rgba(10, 8, 22, 0.98)",
-                                border: `1.5px solid ${unit.color}44`,
-                                borderTop: `4px solid ${unit.color}`,
-                                borderRadius: "20px",
-                                padding: "1.2rem 1.5rem",
-                                width: "270px",
-                                boxShadow: "0 10px 32px rgba(0,0,0,0.6)",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.8rem",
-                              }}>
-                                <div style={{ display: "flex", width: "100%", justifyContent: "flex-end" }}>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); setActiveNodePopup(null) }}
-                                    style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "0.8rem" }}
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-                                  {game.characterImage && (
-                                    <div style={{ width: "42px", height: "42px", borderRadius: "50%", overflow: "hidden", border: `1px solid ${unit.color}33` }}>
-                                      <img src={game.characterImage} alt={game.characterName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    </div>
-                                  )}
-                                  <div>
-                                    <div style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
-                                      Game {weekNum} · {game.characterRole ?? "Bot"}
-                                    </div>
-                                    <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "#fff" }}>
-                                      {game.title}
-                                    </div>
-                                  </div>
-                                </div>
-                                <p style={{ fontSize: "0.75rem", color: "rgba(240, 238, 255, 0.6)", margin: 0, lineHeight: 1.45 }}>
-                                  {game.slug === "antigravity-cli"
-                                    ? "Direct autonomous coding agents with Commander Nova on Orion Station."
-                                    : game.accentColor === "#00d4f0" 
-                                    ? "Help Jake conduct his band's EP with Socratic AI."
-                                    : `Master AI skills alongside ${game.characterName || "the team"} in this track.`}
-                                </p>
-                                <Link
-                                  href={`/games/${game.slug}`}
-                                  style={{ textDecoration: "none" }}
-                                  onClick={sfxSuccessChime}
-                                >
-                                  <button style={{
-                                    width: "100%",
-                                    background: unit.color,
-                                    color: "#08060f",
-                                    border: "none",
-                                    borderRadius: "12px",
-                                    padding: "0.65rem",
-                                    fontWeight: 900,
-                                    fontSize: "0.8rem",
-                                    cursor: "pointer",
-                                    boxShadow: `0 0 16px ${unit.color}33`,
-                                  }}>
-                                    {done ? "REVIEW (+50 XP)" : "START (+100 XP)"}
-                                  </button>
-                                </Link>
-                              </div>
-                            )}
+                             {/* Node Popup Drawer */}
+                             <AnimatePresence>
+                               {activeNodePopup === weekNum && (
+                                 <motion.div
+                                   initial={{ opacity: 0, scale: 0.9, y: -10, x: "-50%" }}
+                                   animate={{ opacity: 1, scale: 1, y: 0, x: "-50%" }}
+                                   exit={{ opacity: 0, scale: 0.9, y: -10, x: "-50%" }}
+                                   transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                                   style={{
+                                     position: "absolute",
+                                     top: "110%",
+                                     left: "50%",
+                                     zIndex: 100,
+                                     background: "rgba(10, 8, 22, 0.98)",
+                                     border: `1.5px solid ${unit.color}44`,
+                                     borderTop: `4px solid ${unit.color}`,
+                                     borderRadius: "20px",
+                                     padding: "1.2rem 1.5rem",
+                                     width: "270px",
+                                     boxShadow: "0 10px 32px rgba(0,0,0,0.6)",
+                                     display: "flex",
+                                     flexDirection: "column",
+                                     gap: "0.8rem",
+                                   }}
+                                 >
+                                   <div style={{ display: "flex", width: "100%", justifyContent: "flex-end" }}>
+                                     <button
+                                       onClick={(e) => { e.stopPropagation(); setActiveNodePopup(null) }}
+                                       style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: "0.8rem" }}
+                                     >
+                                       ✕
+                                     </button>
+                                   </div>
+                                   <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                                     {game.characterImage && (
+                                       <div style={{ width: "42px", height: "42px", borderRadius: "50%", overflow: "hidden", border: `1px solid ${unit.color}33` }}>
+                                         <img src={game.characterImage} alt={game.characterName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                       </div>
+                                     )}
+                                     <div>
+                                       <div style={{ fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+                                         Game {weekNum} · {game.characterRole ?? "Bot"}
+                                       </div>
+                                       <div style={{ fontSize: "0.9rem", fontWeight: 800, color: "#fff" }}>
+                                         {game.title}
+                                       </div>
+                                     </div>
+                                   </div>
+                                   <p style={{ fontSize: "0.75rem", color: "rgba(240, 238, 255, 0.6)", margin: 0, lineHeight: 1.45 }}>
+                                     {game.slug === "antigravity-cli"
+                                       ? "Direct autonomous coding agents with Commander Nova on Orion Station."
+                                       : game.accentColor === "#00d4f0" 
+                                       ? "Help Jake conduct his band's EP with Socratic AI."
+                                       : `Master AI skills alongside ${game.characterName || "the team"} in this track.`}
+                                   </p>
+                                   <Link
+                                     href={`/games/${game.slug}`}
+                                     style={{ textDecoration: "none" }}
+                                     onClick={sfxSuccessChime}
+                                   >
+                                     <button style={{
+                                       width: "100%",
+                                       background: unit.color,
+                                       color: "#08060f",
+                                       border: "none",
+                                       borderRadius: "12px",
+                                       padding: "0.65rem",
+                                       fontWeight: 900,
+                                       fontSize: "0.8rem",
+                                       cursor: "pointer",
+                                       boxShadow: `0 0 16px ${unit.color}33`,
+                                     }}>
+                                       {done ? "REVIEW (+50 XP)" : "START (+100 XP)"}
+                                     </button>
+                                   </Link>
+                                 </motion.div>
+                               )}
+                             </AnimatePresence>
 
                           </div>
                         )
@@ -1199,7 +1110,7 @@ export default function WorldMapPage() {
                   { rank: 2, name: "You (Conductor)", xp: totalXp, avatar: "/images/ai-tutor.png", isPlayer: true },
                   { rank: 3, name: "Carlos (Pro)", xp: 480, avatar: "/images/carlos.png" },
                   { rank: 4, name: "Kai (Coder)", xp: 420, avatar: "/images/kai.png" },
-                  { rank: 5, name: "Jake (Guitarist)", xp: 390, avatar: "/images/tyler.png" },
+                  { rank: 5, name: "Jake (Guitarist)", xp: 390, avatar: "/images/guitarplayer1.png" },
                   { rank: 6, name: "Aria (Violinist)", xp: 340, avatar: "/images/aria.png" },
                   { rank: 7, name: "Priya (Ops)", xp: 260, avatar: "/images/priya.png" },
                   { rank: 8, name: "Jordan (Consultant)", xp: 190, avatar: "/images/jordan.png" },
@@ -1211,8 +1122,9 @@ export default function WorldMapPage() {
                   const promoZone = rank <= 3
                   
                   return (
-                    <div
+                    <motion.div
                       key={student.name}
+                      whileHover={{ x: 3 }}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -1267,7 +1179,7 @@ export default function WorldMapPage() {
                       }}>
                         ⚡ {student.xp} XP
                       </span>
-                    </div>
+                    </motion.div>
                   )
                 })}
               </div>
@@ -1338,8 +1250,9 @@ export default function WorldMapPage() {
                 const pct = Math.min(100, (quest.prog.current / quest.prog.target) * 100)
                 
                 return (
-                  <div
+                  <motion.div
                     key={quest.key}
+                    whileHover={{ y: -2 }}
                     style={{
                       background: "rgba(10, 8, 22, 0.65)",
                       border: done ? "1.5px solid rgba(88,204,2,0.3)" : "1.5px solid rgba(255,255,255,0.06)",
@@ -1417,10 +1330,113 @@ export default function WorldMapPage() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })}
 
+            </div>
+          )}
+
+          {/* ── VIEW MODE: Radio Chatter Panel ── */}
+          {viewMode === "path" && activeTab === "chatter" && (
+            <div style={{
+              maxWidth: "520px",
+              margin: "0 auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1.5rem"
+            }}>
+              <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+                <span style={{ fontSize: "2.8rem" }}>📻</span>
+                <h2 style={{ fontSize: "1.4rem", fontWeight: 900, margin: "0.5rem 0 0.2rem", color: "#fff" }}>
+                  Radio Chatter Feed
+                </h2>
+                <p style={{ fontSize: "0.75rem", color: "rgba(240, 238, 255, 0.4)", textTransform: "uppercase", letterSpacing: "0.12em", margin: 0 }}>
+                  Incoming transmissions from the Westbrook team
+                </p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {VOICE_NOTES.filter(note => {
+                  const week = note.unlockedAt
+                  return week === 1 || (parseInt(localStorage.getItem(`maestro_game_${week}_xp`) ?? "0") || 0) > 0
+                }).map(note => {
+                  const readList = JSON.parse(localStorage.getItem("maestro_read_transmissions") ?? "[]")
+                  const isUnread = !readList.includes(note.id)
+                  
+                  return (
+                    <motion.div
+                      key={note.id}
+                      whileHover={{ y: -2 }}
+                      onClick={() => {
+                        sfxClick()
+                        setActiveTransmission(note)
+                        
+                        // Mark as read
+                        if (isUnread) {
+                          const nextReadList = [...readList, note.id]
+                          localStorage.setItem("maestro_read_transmissions", JSON.stringify(nextReadList))
+                          setNewTransmissionsCount(VOICE_NOTES.filter(t => {
+                            const week = t.unlockedAt
+                            return week === 1 || (parseInt(localStorage.getItem(`maestro_game_${week}_xp`) ?? "0") || 0) > 0
+                          }).filter(t => !nextReadList.includes(t.id)).length)
+                        }
+                      }}
+                      style={{
+                        background: "rgba(10, 8, 22, 0.65)",
+                        border: isUnread ? `1.5px solid ${note.color}` : "1.5px solid rgba(255, 255, 255, 0.06)",
+                        borderRadius: "20px",
+                        padding: "1.2rem 1.4rem",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1.2rem",
+                        boxShadow: isUnread ? `0 0 20px ${note.color}15` : "none",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      {/* NPC Avatar representation */}
+                      <div style={{
+                        width: "56px", height: "56px", borderRadius: "50%",
+                        border: `1.5px solid ${note.color}`,
+                        background: `url(${note.avatar}) bottom center / cover no-repeat`,
+                        flexShrink: 0
+                      }} />
+
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <span style={{ fontWeight: 800, fontSize: "0.9rem", color: "#fff" }}>{note.sender}</span>
+                          <span style={{ fontSize: "0.7rem", color: note.color, fontWeight: 700, textTransform: "uppercase" }}>
+                            {note.subject}
+                          </span>
+                          {isUnread && (
+                            <span style={{
+                              fontSize: "0.58rem", fontWeight: 900, color: "#ff1744",
+                              background: "rgba(255, 23, 68, 0.15)", padding: "0.1rem 0.4rem", borderRadius: "6px"
+                            }}>
+                              NEW
+                            </span>
+                          )}
+                        </div>
+                        <p style={{
+                          fontSize: "0.78rem", color: "rgba(240, 238, 255, 0.65)",
+                          margin: "0.25rem 0 0", lineHeight: 1.4,
+                          display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden"
+                        }}>
+                          {note.content}
+                        </p>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.2rem" }}>
+                        <span style={{ fontSize: "1.1rem" }}>🔊</span>
+                        <span style={{ fontSize: "0.6rem", color: "rgba(240, 238, 255, 0.4)", fontWeight: 700 }}>
+                          {note.duration}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           )}
 
@@ -1471,8 +1487,9 @@ export default function WorldMapPage() {
                 }
               ].map(item => {
                 return (
-                  <div
+                  <motion.div
                     key={item.key}
+                    whileHover={{ y: -2 }}
                     style={{
                       background: "rgba(10, 8, 22, 0.65)",
                       border: "1.5px solid rgba(255,255,255,0.06)",
@@ -1533,7 +1550,7 @@ export default function WorldMapPage() {
                         </button>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })}
 
@@ -1603,36 +1620,116 @@ export default function WorldMapPage() {
 
       </div>
 
+      {isMobile && (
+        <div style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "64px",
+          background: "rgba(10, 8, 22, 0.96)",
+          borderTop: "1.5px solid rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          zIndex: 40,
+          boxSizing: "border-box",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}>
+          {[
+            { id: "learn", label: "Learn", icon: "🟢" },
+            { id: "chatter", label: "Radio", icon: "📻", badge: newTransmissionsCount > 0 },
+            { id: "leaderboard", label: "Leaderboard", icon: "🏆" },
+            { id: "quests", label: "Quests", icon: "🎯" },
+            { id: "shop", label: "Shop", icon: "💎" },
+          ].map(item => {
+            const active = activeTab === item.id && viewMode === "path"
+            const showBadge = (item as any).badge
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  sfxClick()
+                  setViewMode("path")
+                  setActiveTab(item.id as any)
+                }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.2rem",
+                  background: "transparent",
+                  border: "none",
+                  color: active ? "var(--cyan)" : "rgba(240, 238, 255, 0.6)",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: active ? 800 : 500,
+                  fontSize: "0.65rem",
+                  cursor: "pointer",
+                  flex: 1,
+                  height: "100%",
+                  position: "relative"
+                }}
+              >
+                <span style={{ fontSize: "1.2rem" }}>{item.icon}</span>
+                <span>{item.label}</span>
+                {showBadge && (
+                  <div style={{
+                    position: "absolute", top: "4px", right: "24%",
+                    width: "6px", height: "6px", borderRadius: "50%",
+                    background: "#ff1744", boxShadow: "0 0 6px #ff1744"
+                  }} />
+                )}
+              </button>
+            )
+          })}
+          <Link href="/daily-challenge" style={{ textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "0.2rem", flex: 1, height: "100%" }} onClick={sfxClick}>
+            <span style={{ fontSize: "1.2rem" }}>🧠</span>
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: "0.65rem", color: "rgba(240, 238, 255, 0.6)" }}>Practice</span>
+          </Link>
+        </div>
+      )}
+
       {/* ── Guidebook Detail Modal Overlay ─────────────────────────────────── */}
-      {activeGuidebookUnit !== null && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1000,
-            background: "rgba(5, 3, 13, 0.8)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "2rem"
-          }}
-          onClick={() => setActiveGuidebookUnit(null)}
-        >
-          <div
+      <AnimatePresence>
+        {activeGuidebookUnit !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={{
-              maxWidth: "520px",
-              width: "100%",
-              background: "rgba(12, 10, 20, 0.98)",
-              border: `1.5px solid ${UNITS.find(u => u.id === activeGuidebookUnit)?.color}44`,
-              borderTop: `5px solid ${UNITS.find(u => u.id === activeGuidebookUnit)?.color}`,
-              borderRadius: "24px",
-              padding: "2rem",
-              boxShadow: "0 20px 48px rgba(0,0,0,0.65)",
-              position: "relative"
+              position: "fixed",
+              inset: 0,
+              zIndex: 1000,
+              background: "rgba(5, 3, 13, 0.8)",
+              backdropFilter: "blur(8px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "2rem"
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={() => setActiveGuidebookUnit(null)}
           >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 26 }}
+              style={{
+                maxWidth: "520px",
+                width: "100%",
+                background: "rgba(12, 10, 20, 0.98)",
+                border: `1.5px solid ${UNITS.find(u => u.id === activeGuidebookUnit)?.color}44`,
+                borderTop: `5px solid ${UNITS.find(u => u.id === activeGuidebookUnit)?.color}`,
+                borderRadius: "24px",
+                padding: "2rem",
+                boxShadow: "0 20px 48px rgba(0,0,0,0.65)",
+                position: "relative"
+              }}
+              onClick={e => e.stopPropagation()}
+            >
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -1710,9 +1807,222 @@ export default function WorldMapPage() {
             >
               Got it, back to training
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      {/* ── Active Transmission Playback Modal Overlay ─────────────────────── */}
+      <AnimatePresence>
+        {activeTransmission !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 1000,
+              background: "rgba(5, 3, 13, 0.8)",
+              backdropFilter: "blur(12px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "2rem"
+            }}
+            onClick={() => {
+              // Clear any running interval
+              const interval = (activeTransmission as any)._interval
+              if (interval) clearInterval(interval)
+              setActiveTransmission(null)
+              setIsPlayingLog(false)
+              setTypedLogText("")
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 26 }}
+              style={{
+                maxWidth: "460px",
+                width: "100%",
+                background: "rgba(10, 8, 20, 0.98)",
+                border: `1.5px solid ${activeTransmission.color}35`,
+                borderRadius: "24px",
+                padding: "2rem",
+                boxShadow: `0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px ${activeTransmission.color}15`,
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center"
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Retro Header */}
+              <div style={{
+                position: "absolute", top: "1rem", left: "1.5rem", right: "1.5rem",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                fontSize: "0.62rem", fontFamily: "monospace", letterSpacing: "0.15em",
+                color: "rgba(240, 238, 255, 0.35)", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                paddingBottom: "0.4rem"
+              }}>
+                <span>📻 RADIO CHATTER CH. {activeTransmission.freq} kHz</span>
+                <span style={{ color: isPlayingLog ? "#00d4f0" : "inherit" }}>
+                  {isPlayingLog ? "● LIVE INCOMING" : "■ CONNECTION STANDBY"}
+                </span>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  const interval = (activeTransmission as any)._interval
+                  if (interval) clearInterval(interval)
+                  setActiveTransmission(null)
+                  setIsPlayingLog(false)
+                  setTypedLogText("")
+                }}
+                style={{
+                  position: "absolute", top: "2rem", right: "1.5rem",
+                  background: "none", border: "none", color: "rgba(255, 255, 255, 0.4)",
+                  fontSize: "1rem", cursor: "pointer", fontWeight: 800, zIndex: 10
+                }}
+              >
+                ✕
+              </button>
+
+              {/* Character art representation */}
+              <div style={{ marginTop: "1.5rem", position: "relative" }}>
+                <div style={{
+                  width: "110px", height: "110px", borderRadius: "50%",
+                  border: `3px solid ${activeTransmission.color}`,
+                  background: `url(${activeTransmission.avatar}) bottom center / cover no-repeat`,
+                  boxShadow: `0 0 24px ${activeTransmission.color}25`
+                }}
+                className={isPlayingLog ? "char-talk" : "char-breathe"}
+                />
+                
+                {isPlayingLog && (
+                  <div style={{
+                    position: "absolute", bottom: "-3px", right: "-3px",
+                    width: "28px", height: "28px", borderRadius: "50%",
+                    background: "#08060f", border: `1.5px solid ${activeTransmission.color}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "0.8rem", animation: "side-nav-pulse 1.2s infinite"
+                  }}>
+                    🔊
+                  </div>
+                )}
+              </div>
+
+              <h3 style={{ fontSize: "1.2rem", fontWeight: 900, color: "#fff", margin: "0.8rem 0 0.15rem" }}>
+                {activeTransmission.sender}
+              </h3>
+              <div style={{
+                fontSize: "0.68rem", fontWeight: 700, color: activeTransmission.color,
+                textTransform: "uppercase", letterSpacing: "0.10em", marginBottom: "1.5rem"
+              }}>
+                {activeTransmission.subject}
+              </div>
+
+              {/* Monospace monolog screen */}
+              <div style={{
+                width: "100%", minHeight: "140px", background: "#060408",
+                border: "1.5px solid rgba(255,255,255,0.06)", borderRadius: "16px",
+                padding: "1rem 1.2rem", textAlign: "left", boxSizing: "border-box",
+                marginBottom: "1.6rem", position: "relative", overflow: "hidden"
+              }}>
+                <div style={{
+                  fontFamily: "monospace", fontSize: "0.8rem", lineHeight: 1.5,
+                  color: "rgba(240, 238, 255, 0.8)", whiteSpace: "pre-wrap"
+                }}>
+                  {isPlayingLog ? typedLogText : `[Click Play to establish link...]`}
+                </div>
+                
+                {isPlayingLog && typedLogText.length < activeTransmission.content.length && (
+                  <span style={{
+                    display: "inline-block", width: "8px", height: "14px",
+                    background: activeTransmission.color, marginLeft: "3px",
+                    animation: "wm-star-twinkle 0.8s infinite"
+                  }} />
+                )}
+              </div>
+
+              {/* Voice Waveform visualizer */}
+              {isPlayingLog && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  gap: "3px", height: "30px", marginBottom: "1.5rem"
+                }}>
+                  {Array.from({ length: 15 }).map((_, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: "3px",
+                        background: activeTransmission.color,
+                        borderRadius: "2px",
+                        animation: `wm-wave-bar ${0.4 + Math.random() * 0.5}s ease-in-out infinite alternate`,
+                        animationDelay: `${i * 0.05}s`
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Audio controls */}
+              <button
+                onClick={() => {
+                  if (isPlayingLog) {
+                    const interval = (activeTransmission as any)._interval
+                    if (interval) clearInterval(interval)
+                    setIsPlayingLog(false)
+                    setTypedLogText("")
+                    return
+                  }
+                  
+                  // Play tuning chimes
+                  playSynthBeep(activeTransmission.freq, "sawtooth", 0.02, 0.15)
+                  setTimeout(() => playSynthBeep(activeTransmission.freq * 1.5, "sine", 0.02, 0.3), 150)
+                  
+                  setIsPlayingLog(true)
+                  setTypedLogText("")
+                  
+                  // Start typing text interval
+                  let idx = 0
+                  const text = activeTransmission.content
+                  const interval = setInterval(() => {
+                    idx++
+                    setTypedLogText(text.slice(0, idx))
+                    if (idx >= text.length) {
+                      clearInterval(interval)
+                      // Play end click
+                      playSynthBeep(220, "triangle", 0.03, 0.1)
+                    }
+                  }, 25)
+                  
+                  ;(activeTransmission as any)._interval = interval
+                }}
+                style={{
+                  width: "100%",
+                  background: isPlayingLog ? "rgba(255, 255, 255, 0.05)" : activeTransmission.color,
+                  color: isPlayingLog ? "rgba(255, 255, 255, 0.7)" : "#08060f",
+                  border: isPlayingLog ? `1px solid ${activeTransmission.color}44` : "none",
+                  borderRadius: "12px",
+                  padding: "0.75rem",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 900,
+                  fontSize: "0.82rem",
+                  cursor: "pointer",
+                  boxShadow: isPlayingLog ? "none" : `0 0 20px ${activeTransmission.color}25`,
+                  transition: "all 0.12s"
+                }}
+              >
+                {isPlayingLog ? "⏹ Stop Transmission" : "▶ Play Audio Log"}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AnimatePresence>
 
     </div>
   )

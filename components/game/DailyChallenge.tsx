@@ -321,6 +321,25 @@ export default function DailyChallenge({
           }}>
             Complete more games to earn review cards.
           </div>
+          <button 
+            onClick={() => window.location.href = "/worldmap"}
+            style={{
+              marginTop: "1.5rem",
+              width: "100%",
+              padding: "0.75rem",
+              borderRadius: "10px",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "background 0.15s",
+            }}
+          >
+            Return to World Map
+          </button>
         </div>
       </div>
     )
@@ -334,6 +353,25 @@ export default function DailyChallenge({
         <div style={{ textAlign: "center", padding: "2rem", color: "#ff4757" }}>
           <p style={{ marginBottom: "0.5rem" }}>Something went wrong.</p>
           <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.4)" }}>{error}</p>
+          <button 
+            onClick={() => window.location.href = "/worldmap"}
+            style={{
+              marginTop: "1.5rem",
+              width: "100%",
+              padding: "0.75rem",
+              borderRadius: "10px",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "background 0.15s",
+            }}
+          >
+            Return to World Map
+          </button>
         </div>
       </div>
     )
@@ -396,6 +434,26 @@ export default function DailyChallenge({
           }}>
             "The musician who practices daily does not merely maintain — they compound."
           </p>
+          <button 
+            onClick={() => window.location.href = "/worldmap"}
+            style={{
+              marginTop: "2rem",
+              width: "100%",
+              padding: "0.85rem",
+              borderRadius: "10px",
+              background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+              border: "none",
+              color: "#08060f",
+              fontSize: "0.87rem",
+              fontWeight: 800,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              boxShadow: "0 0 20px rgba(0,212,240,0.25)",
+              transition: "transform 0.12s",
+            }}
+          >
+            Return to World Map
+          </button>
         </div>
       </div>
     )

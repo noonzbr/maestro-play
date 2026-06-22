@@ -63,7 +63,9 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Format alone wouldn't fix this. Without knowing WHAT type of content, WHO it's for, WHAT to avoid, and WHY it matters, even a beautifully formatted output would still be generic and useless.",
+          wrongStoryText: "Aria sighs and slumps. 'Format alone won't save a hollow prompt.'",
           leadsTo: "w4-s1-consequence",
+          wrongFeedback: "**Format** is just one of four **Maestro Pillars** — without What, What Not, and Why, you're still building on sand.",
         },
         {
           label: "C",
@@ -71,7 +73,9 @@ export const game4: Game = {
           correct: false,
           feedback:
             "AI is exceptional at marketing — some of the most compelling copy being written today is AI-assisted. The issue was always the prompt, not the model. With a structured Maestro prompt, that same AI would produce something publishable.",
+          wrongStoryText: "Aria crosses her arms. 'AI is incredibly capable. Giving up because of a bad prompt is like blaming the violin for a bad performance.'",
           leadsTo: "w4-s1-consequence",
+          wrongFeedback: "AI writes world-class marketing daily — **Prompt Quality**, not model weakness, determines whether output is publishable or generic.",
         },
         {
           label: "D",
@@ -79,7 +83,9 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Specifying the output type (email vs. post vs. press release) would help, but that's one pillar of four. Without constraints, format specs, and purpose, the output would still be generic.",
+          wrongStoryText: "Aria rubs her temples. 'It's a start, but without context or constraints, the output will still be corporate mush.'",
           leadsTo: "w4-s1-consequence",
+          wrongFeedback: "**What** is one pillar — but without **What Not**, **How**, and **Why**, even a labeled output stays frustratingly generic.",
         },
       ],
       xpAward: 200,
@@ -115,7 +121,9 @@ export const game4: Game = {
           correct: false,
           feedback:
             "This is Game 1 territory. No audience, no stakes, no constraints, no format. You'll get a template you'll spend an hour editing into something usable.",
+          wrongStoryText: "Aria's eyes go wide. 'That's Game 1 all over again! Zero context, zero empathy. The corporate office is about to explode.'",
           leadsTo: "w4-s2-consequence",
+          wrongFeedback: "A vague prompt earns a vague result — **Prompt Specificity** means giving AI the audience, stakes, and constraints it needs to execute.",
         },
         {
           label: "B",
@@ -123,7 +131,7 @@ export const game4: Game = {
           correct: true,
           feedback:
             "Maestro Method complete. What: company-wide RTO announcement email. What Not: no corporate jargon, no hollow phrases. How: empathetic tone, specific components, under 350 words. Why: Glassdoor narrative, anxious remote workers. This prompt produces something you can present to your CEO tomorrow.",
-          leadsTo: "w4-s3",
+          leadsTo: "w4-prompt-challenge",
         },
         {
           label: "C",
@@ -131,7 +139,9 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Better than Option A, but still missing the key specifics. No policy details, no tone constraints, no format, no stakes. AI needs the actual context to do real work for you.",
+          wrongStoryText: "Aria winces. 'A bit better, but still way too vague. You're leaving it all up to the AI's imagination.'",
           leadsTo: "w4-s2-consequence",
+          wrongFeedback: "Without **context constraints** — real policy details, tone rules, and format specs — AI can only offer general guidance, not ready-to-send execution.",
         },
         {
           label: "D",
@@ -139,7 +149,9 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Again a search query, not a Maestro prompt. You'd get a generic article about RTO best practices, not a draft email. Know when you want research vs. when you want execution.",
+          wrongStoryText: "Aria shakes her head. 'That's a search query, not an action prompt. We need an email draft, not an essay about emails!'",
           leadsTo: "w4-s2-consequence",
+          wrongFeedback: "Research mode and **execution mode** are different — a **Maestro Prompt** commands a deliverable; a search query returns a listicle.",
         },
       ],
       xpAward: 200,
@@ -158,8 +170,33 @@ export const game4: Game = {
       xpAward:         0,
       felipeCard: {
         quote:     "A loud, discordant note in a quiet movement ruins the entire piece. When communicating policy changes, tone is not a cosmetic detail—it is the difference between keeping your section together or watching them walk off the stage. Constraints protect your human relationships.",
-        rejoinsAt: "w4-s3",
+        rejoinsAt: "w4-prompt-challenge",
       },
+    },
+    {
+      id: "w4-prompt-challenge",
+      type: "prompt",
+      location: "CONCERT HALL · BACKSTAGE",
+      promptChallenge: {
+        context:
+          "Aria wants Claude to write a professional follow-up email to a concert organizer who requested a discount on her quartet's performance fee. The email must: maintain a polite but firm tone, explain that the fee covers travel and rehearsal costs, offer a free post-concert Q&A session as an alternative gesture of goodwill, and avoid sounding defensive or overly apologetic.",
+        goal:
+          "Write the prompt Aria should send to Claude to draft this follow-up email based on these constraints.",
+        placeholder: "Write Aria's response prompt..."
+      },
+      nextLeadsTo: "w4-near-transfer",
+      xpAward: 100,
+    },
+    {
+      id:       "w4-near-transfer",
+      type:     "learn",
+      location: "CONCERT HALL · BACKSTAGE",
+      xpAward:  0,
+      concept: {
+        title: "Same Synergy. Different Stage.",
+        body:  "Thomas, a high school biology teacher, spent hours editing dry, encyclopedic lesson plans generated by AI. He realized he had left out all constraints and context. He rewrote the prompt combining all four pillars: WHAT — A 45-minute lesson plan on photosynthesis for 9th graders. WHAT NOT — No dense lecture slides or passive reading. HOW — Include a 15-minute hands-on leaf chromatography lab and two diagnostic discussion questions. WHY — The students struggle with biochem concepts and need physical models. The new lesson plan was immediately actionable and kept the class highly engaged. All four pillars, unified.",
+      },
+      learnHighlight: "When you define the guardrails, the structure, and the intent, you aren't just prompting — you are conducting the performance before the first note is played.",
     },
     {
       id: "w4-s3",
@@ -175,6 +212,8 @@ export const game4: Game = {
           correct: false,
           feedback:
             "Model quality is rarely the issue at this point. Frontier models (Claude, GPT-4o, Gemini 1.5) are all extremely capable. The bottleneck is almost always input quality.",
+          wrongStoryText: "Aria looks disappointed. 'Modern frontier models are incredibly smart. The issue is almost never the model's intellect.'",
+          wrongFeedback: "**Frontier models** are already exceptional — when output is generic, the bottleneck is **input quality**, not the model you chose.",
         },
         {
           label: "B",
@@ -189,6 +228,8 @@ export const game4: Game = {
           correct: false,
           feedback:
             "AI is being used in law firms, hospitals, investment banks, and Fortune 500 companies right now. The question isn't whether AI is ready — it's whether the user has learned the method.",
+          wrongStoryText: "Aria raises an eyebrow. 'Thousands of professionals use it every day to automate hours of work. It's ready. Are we?'",
+          wrongFeedback: "AI powers Fortune 500 decisions today — the real question is whether you've mastered the **Maestro Method** to unlock its professional capability.",
         },
         {
           label: "D",
@@ -196,6 +237,8 @@ export const game4: Game = {
           correct: false,
           feedback:
             "We've been over this. Subscription tier is noise. Prompt quality is signal.",
+          wrongStoryText: "Aria shakes her head. 'Payment tier doesn't make a bad prompt good. Focus on the words, not the credit card.'",
+          wrongFeedback: "**Subscription tier** is noise; **Prompt Structure** is signal — a pro account with a weak prompt still produces weak output.",
         },
       ],
       xpAward: 300,
@@ -271,6 +314,7 @@ export const game4: Game = {
             correct: false,
             feedback: "Capability and constraint-following are different things. ChatGPT is extremely capable — but when holding 5 simultaneous rules, it more commonly simplifies or drops a subtle constraint. Claude's training emphasizes following detailed instructions more completely.",
             wrongFeedback: "Capability and constraint-following are different things. ChatGPT is extremely capable — but when holding 5 simultaneous rules, it more commonly simplifies or drops a subtle constraint. Claude's training emphasizes following detailed instructions more completely.",
+          wrongStoryText: "Aria counts the rules honored: four out of five. One slipped. The Maestro sighs: 'A conductor needs every instrument to play on cue.'",
           },
           {
             label: "C",
@@ -278,6 +322,7 @@ export const game4: Game = {
             correct: false,
             feedback: "Topic matters less than architecture. The difference in multi-constraint handling is consistent across subject areas — it comes from how each model was trained to interpret instructions, not what it knows.",
             wrongFeedback: "Topic matters less than architecture. The difference in multi-constraint handling is consistent across subject areas — it comes from how each model was trained to interpret instructions, not what it knows.",
+          wrongStoryText: "Aria frowns at the flickering output. The Maestro's voice echoes: 'The subject didn't fail you — the architecture did.'",
           },
         ],
       },

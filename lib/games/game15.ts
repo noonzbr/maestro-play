@@ -42,6 +42,8 @@ export const game15: Game = {
     ],
   },
 
+  mondayPrompt: "Write a prompt for an agentic coding assistant to migrate a legacy database adapter file. Do NOT just say 'rewrite this'. Include: 1) The target goal (e.g., migrate db.js to use TypeScript and pg-promise), 2) The exact file locations to read context from, 3) Important constraints (do NOT change query structure, preserve connection timeout parameters), 4) Verification rules (propose a step-by-step plan first, write surgical chunk replacements, ask for approval before running shell commands).",
+
   scenes: [
     // [0] LEARN — Agentic Coding with Antigravity
     {
@@ -87,6 +89,8 @@ export const game15: Game = {
           text:     "Approve the complete rewrite — it is safer and guarantees all code is updated.",
           correct:  false,
           feedback: "Rewriting entire files is extremely expensive, prone to context-window truncation, and can wipe out unrelated comments, docstrings, or structural styling. Surgical replacement is always better.",
+          wrongStoryText: "Nova sighs. 'No, a full rewrite of a 4,000-line file is dangerous and unnecessary. Try a surgical edit.'",
+          wrongFeedback: "A full **file rewrite** risks **context-window truncation** and overwrites unrelated logic — **surgical ReplacementChunks** protect everything outside the target formulas.",
         },
         {
           label:    "B",
@@ -99,12 +103,16 @@ export const game15: Game = {
           text:     "Abort the task and write the formulas by hand to avoid AI errors.",
           correct:  false,
           feedback: "While manual coding is safe, it is too slow under this time constraint. Directing the agent to use targeted replacements gives you the speed of AI with the safety of manual control.",
+          wrongStoryText: "Nova frowns. 'We don't have time to fix 4,000 lines by hand. Use the agent, but direct it safely.'",
+          wrongFeedback: "Manual coding is reliable but ignores **Agentic Speed** — **targeted AI replacements** give you precision *and* velocity under real mission constraints.",
         },
         {
           label:    "D",
           text:     "Direct the agent to delete the file and create a new one with the updated code.",
           correct:  false,
           feedback: "Deleting and recreating a core flight file destroys version history and can break system-level imports. Targeted replacements are the proper agentic coding workflow.",
+          wrongStoryText: "Nova winces. 'Deleting a critical flight controller file will drop us out of orbit! Never delete core files.'",
+          wrongFeedback: "Deleting a core file destroys **version history** and breaks **system imports** — **targeted replacements** are the safe, precise agentic coding standard.",
         },
       ],
     },
@@ -124,6 +132,8 @@ export const game15: Game = {
           text:     "Wait for the diagnostic build to finish, then manually run search commands in the main terminal.",
           correct:  false,
           feedback: "This is sequential and slow. AI agents can execute tasks concurrently. We should utilize subagents.",
+          wrongStoryText: "Nova shakes her head. 'Waiting sequentially is too slow. The atmosphere is approaching fast. Use background tasks.'",
+          wrongFeedback: "**Sequential execution** wastes AI's parallel potential — **subagents** exist precisely to handle concurrent tasks without blocking the main workflow.",
         },
         {
           label:    "B",
@@ -136,6 +146,8 @@ export const game15: Game = {
           text:     "Spawn two 'self' subagents that run their own compile tasks simultaneously in the same workspace.",
           correct:  false,
           feedback: "Running multiple compile tasks in the same shared workspace simultaneously can cause file lock conflicts and corrupted builds. Specialized delegation (search vs. build) is the correct pattern.",
+          wrongStoryText: "Nova looks at the warnings. 'Running concurrent compilers in the same folder will corrupt the build caches.'",
+          wrongFeedback: "Concurrent **compile tasks** in a shared workspace cause **file lock conflicts** — proper **subagent delegation** separates search and build into clean, isolated lanes.",
         },
       ],
     },
@@ -146,7 +158,7 @@ export const game15: Game = {
       type:         "order",
       location:     "ORION DIAGNOSTIC UNIT",
       xpAward:      120,
-      nextLeadsTo:  "w16-boss",
+      nextLeadsTo:  "w16-prompt",
       scenarioText: "Arrange these agent actions in the correct sequence to show how Antigravity diagnoses and repairs a flight system bug:",
       orderItems: [
         { id: "search",  text: "Use grep_search to locate error references",  correctPosition: 0 },
@@ -155,6 +167,32 @@ export const game15: Game = {
         { id: "modify",  text: "Apply precise search-and-replace chunk edits",   correctPosition: 3 },
         { id: "sandbox", text: "Run compile commands inside the sandboxed shell", correctPosition: 4 },
       ],
+    },
+
+    {
+      id: "w16-prompt",
+      type: "prompt",
+      location: "ORION STATION · BRIDGE",
+      promptChallenge: {
+        context:
+          "Nova wants the Antigravity agent to debug a syntax error inside `/navigation/navigation_controller.py`. She has the exact traceback. She wants to direct the agent to focus only on the navigation_controller file, use the traceback details to find the bug, and apply surgical chunk replacements to fix it without rewriting the entire file.",
+        goal:
+          "Write the prompt Nova should send to the agent to debug this file surgically based on the traceback details.",
+        placeholder: "Write Nova's debugging prompt..."
+      },
+      nextLeadsTo: "w16-near-transfer",
+      xpAward: 100,
+    },
+    {
+      id:       "w16-near-transfer",
+      type:     "learn",
+      location: "ORION STATION · BRIDGE",
+      xpAward:  0,
+      concept: {
+        title: "Same Autonomy. Different Systems.",
+        body:  "Toby, a senior platform engineer at a large bank, was tasked with migrating 200 microservices from an old API gateway to a new service mesh. Each service required modifying configurations and updating pipelines. Instead of doing this manually, Toby launched an autonomous platform agent. He defined the playbook and staging directory. He instructed it: 'Analyze the old configs, generate the new manifests, write surgical chunk replacements for pipelines, and run dry-run validations. Ask for my approval before executing commands or editing files.' The agent successfully migrated all 200 services. Same autonomous platform engineering. Completely different target systems.",
+      },
+      learnHighlight: "Autonomous agents don't replace engineers; they amplify their capacity. The engineer remains the conductor, defining the playbook, boundaries, and validation requirements, while the agent handles the bulk execution.",
     },
 
     // [5] BOSS — Commander's Final Check
@@ -180,6 +218,8 @@ export const game15: Game = {
               text:     "Approve the command automatically to speed up recovery.",
               correct:  false,
               feedback: "Blind trust in autonomous code execution invites malicious package injection or security breaches. The human director must review all network actions.",
+              wrongStoryText: "Nova's screen flashes red. 'Downloading untrusted execution packages directly to the flight core is a security breach!'",
+          wrongFeedback: "**Autonomous Code Execution** without verification opens the door to malicious package injection — always verify the source first.",
             },
           ],
         },
@@ -198,6 +238,8 @@ export const game15: Game = {
               text:     "Grant full root access so the agent doesn't get blocked by permissions again.",
               correct:  false,
               feedback: "Root access gives the agent power to modify system-critical files. Always narrow the permission scope to the exact target path.",
+              wrongStoryText: "Nova's console blares a warning. 'Wildcard access allowed the agent to overwrite the boot loader. Denied!'",
+          wrongFeedback: "**Least Privilege** means granting access only to the exact path needed — root access risks corrupting every system-critical file.",
             },
           ],
         },
@@ -210,6 +252,8 @@ export const game15: Game = {
               text:     "Call replace_file_content 5 times in parallel to update all blocks.",
               correct:  false,
               feedback: "Parallel writes to the same file cause write-conflict errors and corrupt content. Use multi_replace_file_content.",
+              wrongStoryText: "Nova's compiler crashes. 'Parallel writes to the same file caused a write conflict error.'",
+          wrongFeedback: "**Parallel writes** to the same file cause write-conflicts and corruption — **multi_replace_file_content** handles all chunks safely in one call.",
             },
             {
               label:    "B",
@@ -228,6 +272,8 @@ export const game15: Game = {
               text:     "Write 'Fix the thrusters' and let the agent search on its own.",
               correct:  false,
               feedback: "Vague instructions cause agents to loop, hallucinate, or waste time. Provide the direct compiler output.",
+              wrongStoryText: "Nova watches the agent loop. 'Without the error traceback, the agent has no idea what code is failing.'",
+          wrongFeedback: "**Prompt Specificity** matters — vague instructions cause agents to loop or hallucinate; always include exact error output and file context.",
             },
             {
               label:    "B",
@@ -252,6 +298,8 @@ export const game15: Game = {
               text:     "Restart the entire computer to terminate all processes.",
               correct:  false,
               feedback: "Overkill! Restarting shuts down all running agents and loses active context. Use manage_task to selectively kill the looping command.",
+              wrongStoryText: "Nova shakes her head. 'Rebooting the entire navigation system takes 15 minutes! The ship will crash. Kill the task instead.'",
+          wrongFeedback: "**Targeted Task Management** with `manage_task` kills only the looping process — restarting destroys all active **agent context** needlessly.",
             },
           ],
         },

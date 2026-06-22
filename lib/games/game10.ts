@@ -34,7 +34,7 @@ export const game10: Game = {
   nextGame: {
     slug:         "microsoft-copilot",
     character:    "Jake",
-    teaserLine:   "Sam automated the terminal. Now Jake's back — and this time he's dealing with a totally different world: Microsoft 365. Copilot is hiding in every app his school uses, and most people have no idea it's there.",
+    teaserLine:   "Sam automated the terminal. Now Jake's back — dealing with Microsoft 365. Copilot is hiding in every app his school uses, and most people have no idea it's there.",
     previewImage: "/images/guitarplayer1.png",
   },
   scenes: [
@@ -104,6 +104,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI is powered by Gemini 2.5 Pro — the same frontier model, with a 1-million-token context window. The difference isn't the model, it's the environment it operates in.",
+          wrongFeedback: "Gemini CLI uses the same **Frontier Model** — Gemini 2.5 Pro — the gap is **Agentic Environment**, not model power.",
+          wrongStoryText: "Sam squints at the terminal. Same model, different world — this one reaches into her files and acts, not just answers.",
         },
         {
           label: "B",
@@ -118,6 +120,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI is general-purpose. It works with any files, any language, any project — YAML configs, Python scripts, shell scripts, CI definitions, you name it. It's not GCP-specific.",
+          wrongFeedback: "Gemini CLI is **General-Purpose Agentic AI** — it works across any language, file type, or project, not just GCP.",
+          wrongStoryText: "Sam's Python scripts sit untouched. The tool doesn't care they're not on GCP — it reads them anyway, without hesitation.",
         },
         {
           label: "D",
@@ -125,6 +129,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI still calls Google's API — it's not a local model. The difference is its agency: it can read, write, and run things in your environment, whereas the browser chat is isolated from your files.",
+          wrongFeedback: "Gemini CLI calls Google's **Remote API** — its power is **Agency** over your environment, not local processing speed.",
+          wrongStoryText: "Sam checks her network monitor. Requests are flying outward. The magic isn't local — it's what the model does when it arrives.",
         },
       ],
       xpAward: 100,
@@ -145,6 +151,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI has a 1-million-token context window. 200 files is well within range. It reads everything before responding, which is precisely what makes it useful for large-scale analysis.",
+          wrongFeedback: "Gemini CLI's **1-Million-Token Context Window** comfortably holds 200 files — it reads everything before forming a single answer.",
+          wrongStoryText: "Sam watches the cursor blink. All 200 files load silently. No error. No limit hit. Just a clean, complete summary returned.",
         },
         {
           label: "B",
@@ -152,6 +160,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI doesn't sample or guess — it reads all the files. Incomplete context leads to incomplete answers, and Gemini CLI is designed to work with the full picture.",
+          wrongFeedback: "**Full-Context Analysis** means Gemini CLI reads every file — sampling would undermine the whole point of large-context reasoning.",
+          wrongStoryText: "Sam's rarest config file wasn't skipped. Gemini CLI found the change buried in file 187. Nothing was left to chance.",
         },
         {
           label: "C",
@@ -166,6 +176,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "With --all-files, Gemini CLI reads the whole directory automatically. You can always narrow scope with explicit file paths, but the tool doesn't require you to pre-select when you want broad analysis.",
+          wrongFeedback: "With **--all-files**, Gemini CLI reads the whole directory automatically — no pre-selection needed for broad **Context Ingestion**.",
+          wrongStoryText: "Sam typed one command. No file picker appeared. Gemini CLI quietly read everything and came back with the full picture.",
         },
       ],
       xpAward: 100,
@@ -240,6 +252,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI writes to the directory you specify. It doesn't silently redirect output. The protection comes from the confirmation prompt — you approve the write before it happens, not after.",
+          wrongFeedback: "Gemini CLI writes directly to your target directory — the safeguard is its **Explicit Confirmation Prompt**, not silent redirection.",
+          wrongStoryText: "Sam checks the temp folder. Nothing's there. The file landed exactly where she pointed — after she said yes, not before.",
         },
         {
           label: "B",
@@ -254,6 +268,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI doesn't manage your git history automatically. It can be asked to run git commands, but it doesn't silently commit on your behalf. The built-in protection is the confirmation prompt, not version control.",
+          wrongFeedback: "Gemini CLI's protection is a **Human-in-the-Loop Confirmation Prompt** — it won't silently manage your **Version Control** for you.",
+          wrongStoryText: "Sam opens git log. No surprise commits. Gemini CLI waited for her approval before writing — it never touched her history.",
         },
         {
           label: "D",
@@ -261,6 +277,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI can overwrite existing files — that's often what you want for an in-place update. The protection is that it tells you what it's about to write and waits for a yes before proceeding.",
+          wrongFeedback: "Gemini CLI can overwrite existing files — the real protection is **Explicit Confirmation**, pausing so you can review the plan before anything changes.",
+          wrongStoryText: "Sam clicks confidently. The terminal blinks back: 'Not quite.' A file she thought was safe quietly gets updated. Confirmation, not refusal, was the shield.",
         },
       ],
       xpAward: 100,
@@ -281,6 +299,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "There's no built-in --watch flag in Gemini CLI. Filesystem monitoring is handled by the surrounding automation layer — a GitHub Actions trigger, a git hook, or a cron job. Gemini CLI's role is the headless execution step.",
+          wrongFeedback: "There's no **--watch flag** in Gemini CLI — filesystem triggers live in the **Automation Pipeline Layer** like GitHub Actions, not inside the tool itself.",
+          wrongStoryText: "Sam types --watch and waits. Nothing. Riya leans over: 'Gemini doesn't watch. You need the pipeline to do the watching for it.'",
         },
         {
           label: "B",
@@ -295,6 +315,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "MCP servers extend what Gemini CLI can connect to, but they don't provide event-driven triggers inside a repo. Automation triggers come from the pipeline layer — GitHub Actions, hooks, or cron. MCP is about data sources and tool integrations, not scheduling.",
+          wrongFeedback: "**MCP Integration** extends data sources and tools — it doesn't provide **Event-Driven Triggers**; those belong to the pipeline layer like GitHub Actions or git hooks.",
+          wrongStoryText: "Sam wires in an MCP server and waits for the magic. The repo stays silent. Riya smiles gently: 'MCP connects things. It doesn't schedule them.'",
         },
         {
           label: "D",
@@ -302,6 +324,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "The free tier has a rate limit of 60 requests per minute — it's not an unlimited background daemon. Continuous automation with Gemini CLI works by running it as discrete steps in a pipeline, not as an always-on process.",
+          wrongFeedback: "The free tier has a **Rate Limit** of 60 requests per minute — Gemini CLI is a discrete **Pipeline Step**, never an always-on background daemon.",
+          wrongStoryText: "Sam grins, imagining Gemini humming endlessly in the background. Then the rate-limit error lands. 'It runs in steps,' Riya says, 'not forever.'",
         },
       ],
       xpAward: 150,
@@ -323,6 +347,19 @@ export const game10: Game = {
       xpAward: 150,
     },
 
+    // ── NEAR-TRANSFER: Same Automation, Different Infrastructure ──────────────
+    {
+      id:       "w10-near-transfer",
+      type:     "learn",
+      location: "TECH COMPANY · SRE TEAM OFFICE · MONDAY · 2:15 PM",
+      xpAward:  0,
+      concept: {
+        title: "Same Automation. Different Infrastructure.",
+        body:  "Carla, a systems administrator at a school district, needed to clean up student accounts across 50 school servers at the end of the school year. She had to archive active student portfolios, delete inactive accounts, and reset permissions. Instead of writing complex scripting logic by hand, Carla used a terminal AI agent. She ran: 'Read our district archiving policy in policy.txt. Scan all home directories, identify accounts inactive for more than 180 days, compress portfolios to /archive, delete home folders, and write an execution log. Do not delete active portfolios. Show me a dry run plan first.' The agent safely executed the cleanup. Same command-line agency. Completely different infrastructure.",
+      },
+      learnHighlight: "Terminal automation isn't just for software engineers. It's for any system administrator who wants to apply complex business policies directly to file systems safely and efficiently.",
+    },
+
     // ── Scene 6 ── Boss: Conductor Test ───────────────────────────────────────
     {
       id: "w10-s6",
@@ -338,6 +375,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Manual, per-developer steps break down immediately. People forget, rush, or skip them under deadline pressure. Gemini CLI's headless mode exists precisely so you don't depend on individual discipline — you automate the check into the pipeline where it can't be skipped.",
+          wrongFeedback: "Manual steps rely on individual discipline — **Headless Mode** exists to remove that dependency by embedding the check into the **Automated Pipeline** where it can't be skipped.",
+          wrongStoryText: "Sam pictures every dev dutifully running the command. Then she remembers last Tuesday's rushed push. 'People forget,' she murmurs. 'The pipeline doesn't.'",
         },
         {
           label: "B",
@@ -352,6 +391,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Gemini CLI isn't designed as a persistent daemon. It's a request-driven tool — it runs, completes a task, and exits. The right pattern for PR reviews is event-driven: trigger on pull_request events via GitHub Actions, not continuous polling.",
+          wrongFeedback: "Gemini CLI is **Request-Driven**, not a persistent daemon — the right pattern is **Event-Triggered Execution** via GitHub Actions on pull_request events.",
+          wrongStoryText: "Sam imagines a daemon humming over SSH. The console replies coldly: 'I finish tasks. I don't linger.' Riya nods: 'Trigger it. Don't babysit it.'",
         },
         {
           label: "D",
@@ -359,6 +400,8 @@ export const game10: Game = {
           correct: false,
           feedback:
             "Manual copy-paste at the browser interface is exactly the workflow Gemini CLI's headless mode replaces. At any meaningful PR volume, a human doing this for every review becomes the bottleneck. Automate it.",
+          wrongFeedback: "Manual copy-paste is exactly what **Headless Mode** replaces — at any real PR volume, a human in the loop becomes the **Automation Bottleneck**.",
+          wrongStoryText: "Sam opens the browser interface, ready to paste. Riya raises an eyebrow: 'Thirty PRs a day. You sure?' Sam closes the tab slowly.",
         },
       ],
       xpAward: 250,
@@ -440,6 +483,7 @@ export const game10: Game = {
             correct: false,
             feedback: "Gemini CLI's headless mode is powerful for automation — but it lacks the native GitHub Actions integration that makes Copilot a natural fit for PR review automation in a GitHub workflow. Integration depth matters here.",
             wrongFeedback: "Gemini CLI's headless mode is powerful for automation — but it lacks the native GitHub Actions integration that makes Copilot a natural fit for PR review automation in a GitHub workflow. Integration depth matters here.",
+          wrongStoryText: "Sam nods — headless mode feels right. But the pipeline keeps throwing auth errors. Riya sighs: 'Right tool, wrong home. Copilot lives here natively.'",
           },
           {
             label: "B",
@@ -453,6 +497,7 @@ export const game10: Game = {
             correct: false,
             feedback: "Claude Code's security analysis is excellent — but it requires terminal-level setup and doesn't have native GitHub Actions integration for automated PR workflows. For this specific use case, the integration architecture of Copilot is the decisive factor.",
             wrongFeedback: "Claude Code's security analysis is excellent — but it requires terminal-level setup and doesn't have native GitHub Actions integration for automated PR workflows. For this specific use case, the integration architecture of Copilot is the decisive factor.",
+          wrongStoryText: "Sam sets up Claude Code, impressed by its analysis. Then the Actions step fails on setup. 'Brilliant reviewer,' she mutters, 'wrong doorway entirely.'",
           },
         ],
       },

@@ -101,6 +101,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Speed and link count aren't the point. Gemini is a reasoning model — it thinks through problems, generates content, and works inside your documents. Google Search retrieves pages; Gemini creates, analyzes, and acts.",
+          wrongFeedback: "**Gemini** isn't faster search — it's a **reasoning model** that generates, analyzes, and acts inside your tools. Speed and links are Search's job, not Gemini's.",
+          wrongStoryText: "Luna blinks. The screen responds: 'I don't fetch pages, Luna — I think through problems and build things with you.'",
         },
         {
           label: "B",
@@ -115,6 +117,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Length isn't the distinction. The real difference is integration: Gemini lives inside your tools and can act on your personal files. Search AI only ever sees the public web.",
+          wrongFeedback: "**Response length** isn't what separates Gemini — its power is **Workspace integration**, reasoning over your personal files rather than only the public web.",
+          wrongStoryText: "Luna frowns at the long answer. Mia leans in: 'More words isn't the point. Ask it to rewrite your actual email.'",
         },
         {
           label: "D",
@@ -122,6 +126,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "The free tier at gemini.google.com is genuinely powerful and runs Gemini 2.5 Flash. Google One (Gemini Advanced) unlocks 2.5 Pro and Deep Research — useful upgrades, but not required to get real value.",
+          wrongFeedback: "The **free tier** runs **Gemini 2.5 Flash** and is genuinely capable — **Google One** upgrades to 2.5 Pro and Deep Research, but isn't required for real value.",
+          wrongStoryText: "Luna nearly closes the tab. The screen lights up: 'You haven't even tried me yet — open the door before deciding it's locked.'",
         },
       ],
       xpAward: 100,
@@ -142,6 +148,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Context window size is about how much text the model holds in memory at once — not processing speed. A larger window means Gemini can read more material before its memory resets.",
+          wrongFeedback: "**Context Window** measures simultaneous memory capacity, not speed — Gemini holds more text at once, not reads faster.",
+          wrongStoryText: "Luna frowns at the screen. The Maestro's voice echoes: 'More memory, not more miles per hour. Think bigger, not quicker.'",
         },
         {
           label: "B",
@@ -156,6 +164,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Context windows are per-session — Gemini doesn't retain files between conversations unless you're using a specific integration like NotebookLM. The 1M token window is about what Gemini can process at once, not what it remembers forever.",
+          wrongFeedback: "**Context Windows** reset each session — Gemini processes your uploads now, but forgets them the moment the conversation ends.",
+          wrongStoryText: "Luna reaches for yesterday's chat. It's gone. The console blinks: 'I held your words once. Now they've faded like morning notes.'",
         },
         {
           label: "D",
@@ -163,6 +173,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "The context window determines how much Gemini can read — not automatically the quality of the answer. What makes the difference is using that capacity well: uploading the right documents and asking a precise question.",
+          wrongFeedback: "**Context Window** expands what Gemini can read — but **Prompt Quality** and the right documents determine answer depth.",
+          wrongStoryText: "Luna hits send on a vague prompt. Pages upload, but the answer drifts. 'A wide lens still needs something worth seeing,' the Maestro murmurs.",
         },
       ],
       xpAward: 150,
@@ -232,6 +244,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Auto-drafting without review creates risk — wrong tone, wrong information, wrong decisions. Gemini is a drafting partner, not an autopilot. You review and send; it reduces the work of composing.",
+          wrongFeedback: "**Human-in-the-Loop** matters — auto-drafting without review risks tone errors and misinformation you'd never knowingly send.",
+          wrongStoryText: "An email fires off. Luna gasps — wrong tone, wrong recipient. The Maestro sighs: 'Automation without oversight isn't help. It's a gamble.'",
         },
         {
           label: "B",
@@ -246,6 +260,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Translation is useful but niche. For most project managers, the bottleneck is keeping track of what's happening across many conversations — which is where thread summarisation has the broadest impact.",
+          wrongFeedback: "Translation is valuable but narrow; **Thread Summarisation** tackles the universal bottleneck of information overload across complex projects.",
+          wrongStoryText: "Luna translates an email perfectly — but still drowns in forty unread threads. 'Fluency,' the Maestro notes quietly, 'isn't the same as clarity.'",
         },
         {
           label: "D",
@@ -253,6 +269,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Gemini can suggest meeting times, but calendar actions still require your confirmation. The highest-value feature for complex projects remains the ability to instantly understand long email threads.",
+          wrongFeedback: "Gemini suggests times but requires **Human Confirmation** — the real project management win is understanding threads, not automating calendars.",
+          wrongStoryText: "A meeting appears on Luna's calendar uninvited. She blinks. 'I never approved that,' she whispers. The Maestro nods: 'Exactly the point.'",
         },
       ],
       xpAward: 100,
@@ -273,6 +291,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Length is a symptom, not the capability. Standard Gemini can also write long responses. What Deep Research does differently is how it gathers information — by actively browsing and synthesising dozens of live sources before writing.",
+          wrongFeedback: "**Deep Research** doesn't just write longer — it actively **browses live sources** and synthesises them before composing, unlike standard chat.",
+          wrongStoryText: "Luna expects a longer reply — instead, she gets a research report. 'It wasn't writing more,' the Maestro says. 'It was working first.'",
         },
         {
           label: "B",
@@ -287,6 +307,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Deep Research browses the public web — it doesn't automatically access private Drive files unless you explicitly share them. Your private documents remain private unless you bring them into the conversation.",
+          wrongFeedback: "**Deep Research** only browses the public web — your private Drive files stay private unless you explicitly upload them to the session.",
+          wrongStoryText: "Luna checks her Drive nervously. Everything's intact. 'Your private work stays yours,' the Maestro reassures. 'I only see what you show me.'",
         },
         {
           label: "D",
@@ -294,6 +316,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Actually the opposite — Deep Research takes longer because it does more work. It browses and reads sources before generating the report. The trade-off is time for depth: you wait 20–40 minutes and get a research-grade output instead of a quick reply.",
+          wrongFeedback: "**Deep Research** actually takes longer — it trades speed for depth by reading dozens of live sources before generating a cited report.",
+          wrongStoryText: "Luna taps her desk waiting forty minutes. Then twelve cited pages appear. 'Worth it,' she breathes. The Maestro smiles: 'Depth has its own clock.'",
         },
       ],
       xpAward: 150,
@@ -315,6 +339,19 @@ export const game9: Game = {
       xpAward: 150,
     },
 
+    // ── NEAR-TRANSFER: Same Window, Different Critique ────────────────────────
+    {
+      id:       "w9-near-transfer",
+      type:     "learn",
+      location: "LIBRARY STUDY ROOM · SATURDAY · 2:00 PM",
+      xpAward:  0,
+      concept: {
+        title: "Same Window. Different Critique.",
+        body:  "Alex, a lead product designer at a fintech startup, was overwhelmed by design critique feedback. He had collected 50 feedback comments from Slack, Figma, and a 12-person video recording transcript. Instead of manually sorting the chaos, Alex uploaded the Figma comment export and the video transcript into Gemini. He used its massive context window to ask: 'Analyze these design critiques. Group the comments into three themes: navigation clarity, trust concerns, and visual polish. For each theme, identify the three most common suggestions and point out if any conflict with our design system.' Gemini mapped the comments, flagging a crucial contradiction in the checkout flow. Same context window. Completely different feedback synthesis.",
+      },
+      learnHighlight: "A massive context window isn't just about reading books. It's about dumping all your messy, unstructured team feedback into one place and letting the AI find the signal.",
+    },
+
     // ── Scene 6 ── Boss: Conductor Test ──────────────────────────────────────
     {
       id: "w9-s6",
@@ -330,6 +367,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "This uses Gemini as a note summariser — the least powerful application. Luna is still doing the hardest cognitive work herself. Gemini's context window exists precisely so it can do the reading across documents, not you.",
+          wrongFeedback: "Summarising your own notes wastes Gemini's **Large Context Window** — its power is reading the source documents directly, so you don't have to.",
+          wrongStoryText: "Luna highlights notes all afternoon. The Maestro watches, patient then firm: 'You carried the weight the window was built for. Upload the papers.'",
         },
         {
           label: "B",
@@ -337,6 +376,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Eight separate conversations means Gemini never sees the full picture at once — it can't identify cross-paper patterns or make genuine comparisons. You lose the main advantage of a 1-million-token context window.",
+          wrongFeedback: "Splitting documents across sessions destroys **Cross-Document Context** — Gemini's **1M Token Window** only works when all sources coexist simultaneously.",
+          wrongStoryText: "Luna submits her eighth question and stares at eight disconnected answers. The Maestro sighs: 'You gave it pieces, never the puzzle.'",
         },
         {
           label: "C",
@@ -351,6 +392,8 @@ export const game9: Game = {
           correct: false,
           feedback:
             "Deep Research is powerful for discovering sources you don't have yet. But Luna already has the 8 specific papers she needs to compare — her task is cross-document analysis, not discovery. Using her PDFs directly gives Gemini the exact corpus she cares about.",
+          wrongFeedback: "**Deep Research** discovers sources you lack — but Luna's corpus exists; she needs **Multi-Document Analysis**, not web discovery.",
+          wrongStoryText: "Luna watches Gemini scour the web while her 8 PDFs sit unopened. The Maestro murmurs: 'You sent it searching for what you already held.'",
         },
       ],
       xpAward: 250,
@@ -427,6 +470,7 @@ export const game9: Game = {
             correct: false,
             feedback: "Claude writes the best arguments — but feeding it 50 papers requires working around its context limits and manual uploads. The synthesis task itself is better handled by a tool with built-in research infrastructure and massive context.",
             wrongFeedback: "Claude writes the best arguments — but feeding it 50 papers requires working around its context limits and manual uploads. The synthesis task itself is better handled by a tool with built-in research infrastructure and massive context.",
+          wrongStoryText: "Luna admires Claude's elegant prose, then watches it stall at paper thirty-one. The Maestro says quietly: 'Brilliance means nothing without capacity.'",
           },
           {
             label: "B",
@@ -440,6 +484,7 @@ export const game9: Game = {
             correct: false,
             feedback: "ChatGPT's browsing is valuable for finding new papers — but for synthesizing 50 you ALREADY have, you need context capacity and multi-document analysis. ChatGPT's 128K context and lack of deep research mode are limiting factors here.",
             wrongFeedback: "ChatGPT's browsing is valuable for finding new papers — but for synthesizing 50 you ALREADY have, you need context capacity and multi-document analysis. ChatGPT's 128K context and lack of deep research mode are limiting factors here.",
+          wrongStoryText: "Luna watches ChatGPT find three new papers while ignoring thirty she already has. The Maestro nods slowly: 'Finding more won't help you understand what you have.'",
           },
         ],
       },

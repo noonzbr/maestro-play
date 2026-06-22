@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Target paths for screenshots
-const artifactDir = 'C:/Users/night/.gemini/antigravity-cli/brain/c3674a47-0041-4a61-8c3e-f07d71c39ba6';
+const artifactDir = 'C:/Users/night/.gemini/antigravity-cli/brain/284166a3-1ea6-4c8c-83f9-fb69cb19426d';
 const screenshotDir = path.join(artifactDir, 'screenshots');
 if (!fs.existsSync(screenshotDir)) {
   fs.mkdirSync(screenshotDir, { recursive: true });
@@ -70,27 +70,29 @@ if (!fs.existsSync(screenshotDir)) {
     await delay(1500); // Wait for Coda intro entrance
     await page.screenshot({ path: path.join(screenshotDir, '06_coda_intro_started.png') });
 
-    // 7. Click through Coda's 8 dialogue beats
-    console.log("7. Advancing through Coda's onboarding dialogue...");
-    // There are 7 "Continue" buttons, then 1 "Begin Game" button.
-    for (let i = 0; i < 7; i++) {
-      console.log(`Advancing Coda dialogue beat ${i + 1}/8...`);
-      const continueBtn = page.locator('button:has-text("Continue")');
-      await continueBtn.waitFor({ state: 'visible', timeout: 10000 });
-      await continueBtn.click();
-      await delay(800);
-    }
-
-    console.log("Clicking final Coda start button...");
+    // 7. Skip Coda dialogue
+    console.log("7. Skipping Coda's onboarding dialogue...");
     const beginQuestBtn = page.locator('button:has-text("Begin Game")');
     await beginQuestBtn.waitFor({ state: 'visible', timeout: 10000 });
     await page.screenshot({ path: path.join(screenshotDir, '07_coda_dialogue_finished.png') });
     await beginQuestBtn.click();
     await delay(2000); // Wait for transition to play state
 
+
     // 8. Verify first scenario text
     console.log("8. Verifying arrival at Scene 0 Branch Point 1...");
     await page.screenshot({ path: path.join(screenshotDir, '08_first_decision_scene.png') });
+
+    // Advance dialogue (4 lines)
+    console.log("Advancing through scene 0 dialogue...");
+    for (let i = 0; i < 4; i++) {
+      await page.click('body');
+      await delay(120);
+      await page.click('body');
+      await delay(350);
+    }
+    await delay(500);
+
     const scenarioLocator = page.locator('text=Tyler\'s been raving');
     await scenarioLocator.waitFor({ state: 'visible', timeout: 10000 });
     console.log("SUCCESS: Arrived at Scene 0 Branch Point 1!");

@@ -104,6 +104,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Plan tier affects features like longer context or file uploads — not Claude's fundamental reasoning ability. The free tier is genuinely powerful.",
+          wrongFeedback: "Plan tier shapes features like file uploads, not **Core Reasoning Ability** — the free tier is genuinely capable of serious, substantive work.",
+          wrongStoryText: "Jordan upgrades, expecting a revelation. The interface looks the same. She realizes the ceiling was never the plan — it was her prompts.",
         },
         {
           label: "B",
@@ -118,6 +120,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Claude is designed to be conversational. You don't need any technical background — you just need to know how to ask clearly.",
+          wrongFeedback: "Claude is built for conversation — **Conversational Prompting** requires no technical background, just the ability to describe what you need clearly.",
+          wrongStoryText: "Jordan hesitates, convinced she's unqualified. A colleague with zero AI experience beside her types a question and gets a perfect answer instantly.",
         },
         {
           label: "D",
@@ -125,6 +129,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "One of Claude's biggest strengths is helping non-programmers do things that used to require a developer. No coding knowledge required.",
+          wrongFeedback: "Claude helps non-programmers do things that once required developers — **Natural Language Interaction** is the interface, and you already speak it.",
+          wrongStoryText: "Jordan waits for a developer to help her. He's busy for a week. Later she learns she could have just asked Claude herself, in plain English.",
         },
       ],
       xpAward: 100,
@@ -158,6 +164,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Claude doesn't browse the internet by default — it generates responses from training data. It creates, it doesn't retrieve. That's a fundamental difference.",
+          wrongFeedback: "Claude doesn't retrieve — it generates from training data. That distinction between **Retrieval** and **Generative Reasoning** changes how you should use and trust it.",
+          wrongStoryText: "Jordan asks Claude for today's top news. It answers fluently. She shares it — then learns the 'results' were reasoned, not retrieved. Silence from her team.",
         },
         {
           label: "B",
@@ -172,6 +180,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "The opposite. Claude generates novel responses every time — it doesn't retrieve from a fixed list. Each answer is constructed from patterns learned during training.",
+          wrongFeedback: "Claude doesn't retrieve fixed answers — it **generates** novel responses each time using patterns from **training data**, not a static database.",
+          wrongStoryText: "Jordan frowns at the screen. The Maestro's voice echoes: 'A FAQ bot repeats. Claude reasons. Those are not the same thing.'",
         },
         {
           label: "D",
@@ -179,6 +189,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Writing is one use case out of dozens. Claude is used by engineers, analysts, researchers, lawyers, educators, founders, and students — across almost every professional domain.",
+          wrongFeedback: "Writing is one slice of Claude's range — **multi-domain capability** means engineers, analysts, and researchers use it just as heavily as writers.",
+          wrongStoryText: "Jordan pauses. The Maestro leans in: 'Calling Claude a writer's tool is like calling electricity a reading lamp. Look wider.'",
         },
       ],
       xpAward: 100,
@@ -240,6 +252,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Formality doesn't help. Clarity and context do. A casual but specific prompt beats a formal but vague one every time.",
+          wrongFeedback: "**Prompt Specificity** beats formality every time — Claude needs the reader, goal, and tone, not elevated language.",
+          wrongStoryText: "Jordan's draft lands flat. The Maestro sighs softly: 'Fancy words with no direction are still just noise, Jordan.'",
         },
         {
           label: "B",
@@ -254,6 +268,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Sometimes useful, but not required. Claude can start from zero when you give it context. Don't make extra work for yourself.",
+          wrongFeedback: "**Context-first prompting** means Claude can start from scratch — a first draft isn't required when your instructions are specific enough.",
+          wrongStoryText: "Jordan types a full draft first. The Maestro watches, then gently says: 'You did Claude's job. Let it carry more weight next time.'",
         },
         {
           label: "D",
@@ -261,6 +277,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Vague instruction, vague output. 'Professional' means different things in different industries and contexts. Describe the reader and goal instead.",
+          wrongFeedback: "'Professional' is a **vague instruction** — describe the reader and desired outcome for Claude to produce truly targeted output.",
+          wrongStoryText: "The email comes back stiff and hollow. Jordan winces. 'You gave Claude a mood,' the Maestro says. 'Give it a mission instead.'",
         },
       ],
       xpAward: 100,
@@ -311,6 +329,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "No context = no useful answer. 'Best' depends on your industry, client type, revenue goals, and risk tolerance. Claude needs the situation to reason about it.",
+          wrongFeedback: "Without **situational context**, 'best' is meaningless — Claude's strategic reasoning only activates when you share your specific goals and constraints.",
+          wrongStoryText: "Jordan gets a generic list. The Maestro shakes his head: 'You asked a universal question. Claude needed your world to reason inside.'",
         },
         {
           label: "B",
@@ -325,6 +345,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "That's a search question — what the average consultant does. What you actually need is strategic reasoning about YOUR situation. Ask for thinking, not statistics.",
+          wrongFeedback: "Asking for averages is a **search query**, not a strategy prompt — share your situation so Claude reasons *with* you, not *at* you.",
+          wrongStoryText: "Jordan reads a stat-filled reply and slumps. 'You asked what others do,' the Maestro says. 'You needed to know what *you* should do.'",
         },
         {
           label: "D",
@@ -332,6 +354,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Claude can make a decision, but it'll be low-quality without context. You'd end up with generic advice. The goal is to think alongside Claude, not outsource the thinking entirely.",
+          wrongFeedback: "Outsourcing decisions without context produces **generic output** — effective **prompt design** means thinking *alongside* Claude, not handing it the wheel.",
+          wrongStoryText: "Jordan gets a bland answer and stares blankly. The Maestro folds his arms: 'You gave Claude the question but kept all the clues yourself.'",
         },
       ],
       xpAward: 100,
@@ -351,6 +375,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Code generation is one of Claude's strongest capabilities. It can write, explain, debug, and translate code — making technical tasks accessible to non-programmers.",
+          wrongFeedback: "**Code generation** is a core Claude capability — it writes, explains, and debugs code, making technical work accessible without any programming background.",
+          wrongStoryText: "Jordan hesitates, convinced this needs a developer. The Maestro smiles: 'Priya proved otherwise this afternoon. So can you.'",
         },
         {
           label: "B",
@@ -365,6 +391,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Claude Chat works with text and code — not image generation or video editing. Other tools handle visual creation. Claude's strength is language and reasoning.",
+          wrongFeedback: "Claude operates in **text and reasoning** — visual tools handle image and video creation, while Claude's power lives in language, logic, and code.",
+          wrongStoryText: "Jordan searches for an image button that isn't there. The Maestro steps closer: 'You're looking for a paintbrush inside a library, Jordan.'",
         },
         {
           label: "D",
@@ -372,6 +400,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Claude handles genuinely complex work: multi-step data analysis, debugging production bugs, summarizing 100-page documents, drafting legal templates. Complexity isn't the barrier — clarity is.",
+          wrongFeedback: "Complexity isn't the barrier — **Prompt Clarity** is. Claude handles multi-step data work, legal drafts, and production debugging just as Priya discovered.",
+          wrongStoryText: "Jordan frowns at the screen. The Maestro's voice echoes: 'Priya updated 200 listings without a single line of code. Still think complexity is the wall?'",
         },
       ],
       xpAward: 150,
@@ -394,6 +424,19 @@ export const game5: Game = {
       xpAward: 150,
     },
 
+    // ── NEAR-TRANSFER: Same Partner, Different Discovery ───────────────────────
+    {
+      id:       "w5-near-transfer",
+      type:     "learn",
+      location: "HOME OFFICE · WEDNESDAY · 4:48 PM",
+      xpAward:  0,
+      concept: {
+        title: "Same Partner. Different Discovery.",
+        body:  "Sarah, an enterprise sales rep, was preparing for a crucial discovery call with a skeptical CIO. Instead of searching Google for generic prep questions, she treated Claude as a sparring partner. She fed the model the prospect's recent quarterly earnings report and past interview transcripts. She asked Claude: 'Act as this CIO. Ask me the three hardest questions about our software's security implementation and data compliance. Push back on my standard answers.' After three rounds of roleplay, Sarah uncovered a major hidden concern about legacy database migrations. She closed the deal. Same co-pilot. Completely different conversation.",
+      },
+      learnHighlight: "AI is not a search engine to fetch static answers. It is an active thinking partner to stress-test your assumptions before you face the real room.",
+    },
+
     // ── Scene 6 ── Boss: Conductor Test ───────────────────────────────────────
     {
       id: "w5-s6",
@@ -409,6 +452,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Claude is built to be conversational. No technical skill required. The interface is a chat window — anyone can use it.",
+          wrongFeedback: "Claude needs no **Technical Expertise** — it's a chat window. The real barrier is always **Prompt Quality**, not the user's background.",
+          wrongStoryText: "Jordan blinks. The Maestro leans in: 'Your colleague didn't need a manual. They needed a better question.'",
         },
         {
           label: "B",
@@ -423,6 +468,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Version differences exist but don't explain generic responses. The dominant driver of output quality is always input quality — not which model version you're on.",
+          wrongFeedback: "Version rarely explains vague outputs. **Input Quality** is the dominant driver — richer context always produces richer reasoning, regardless of model.",
+          wrongStoryText: "Jordan taps the desk nervously. The console flickers: 'Same model, two prompts — one generic, one brilliant. The version never changed.'",
         },
         {
           label: "D",
@@ -430,6 +477,8 @@ export const game5: Game = {
           correct: false,
           feedback:
             "Professional contexts are where Claude performs best. Complex, nuanced, high-stakes work benefits most from Claude's reasoning ability. Shallow use gets shallow results.",
+          wrongFeedback: "Professional complexity is where Claude thrives most. **Shallow Prompting** produces shallow results — not shallow capability.",
+          wrongStoryText: "Jordan's confidence wavers. The Maestro's words cut clean: 'The scalpel isn't the problem. The surgeon's instructions were.'",
         },
       ],
       xpAward: 250,
@@ -512,6 +561,7 @@ export const game5: Game = {
             correct: false,
             feedback: "Gemini's 1M token context is technically the largest — but context window size and context consistency aren't the same thing. For professional contract analysis where every clause matters, Claude's reliable handling of legal language is the more important factor.",
             wrongFeedback: "Gemini's 1M token context is technically the largest — but context window size and context consistency aren't the same thing. For professional contract analysis where every clause matters, Claude's reliable handling of legal language is the more important factor.",
+          wrongStoryText: "Jordan hovers over Gemini. The Maestro speaks softly: 'A bigger net doesn't mean every fish gets caught. One missed clause can cost a client.'",
           },
           {
             label: "C",
@@ -519,6 +569,7 @@ export const game5: Game = {
             correct: false,
             feedback: "Browsing helps if you need current case law — but contract review is about analyzing THIS document, not finding external data. ChatGPT's browse capability is a distraction here. The bottleneck is consistent full-document reasoning.",
             wrongFeedback: "Browsing helps if you need current case law — but contract review is about analyzing THIS document, not finding external data. ChatGPT's browse capability is a distraction here. The bottleneck is consistent full-document reasoning.",
+          wrongStoryText: "Jordan pauses. The Maestro's voice steadies him: 'You don't need the internet. You need every clause on page 47 to connect to page 12.'",
           },
         ],
       },

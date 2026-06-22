@@ -110,6 +110,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Plan tier affects context length and feature access — not whether Claude writes on-brand or off-brand. The quality gap here comes from context, not subscription level.",
+          wrongFeedback: "**Plan tier** affects features and limits — not brand voice. The real gap is always **context quality**, not subscription level.",
+          wrongStoryText: "Priya checks her teammate's plan. Same tier. The outputs are still worlds apart. She stares at the screen, confused.",
         },
         {
           label: "B",
@@ -117,6 +119,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Claude doesn't introduce deliberate variance. It generates the best response it can based on what it receives. Inconsistent input is the only reason for inconsistent output.",
+          wrongFeedback: "Claude doesn't introduce **deliberate variance** — it maximizes quality from whatever input it receives. Inconsistent output always traces back to **inconsistent context**.",
+          wrongStoryText: "Priya refreshes the chat, expecting a different result. The same thin prompt returns another off-brand paragraph. Claude wasn't the variable.",
         },
         {
           label: "C",
@@ -131,6 +135,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Standard Claude Chat has no memory between sessions — it doesn't learn individual users' styles. Every new chat starts blank. Claude Projects are specifically designed to fix this.",
+          wrongFeedback: "Standard Claude Chat has **no persistent memory** — every session starts blank. **Claude Projects** are the specific solution built for style continuity.",
+          wrongStoryText: "Priya sends Claude a follow-up, assuming it remembers last week. It doesn't. The blank slate stares back, indifferent.",
         },
       ],
       xpAward: 100,
@@ -165,6 +171,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Uploading to a Project does not retrain Claude's underlying model. It makes the document available as context within that Project's conversations — scoped to your team, not the whole world.",
+          wrongFeedback: "Uploading to a Project adds **scoped context** for your team — it never retrains Claude's **global model** or affects other users.",
+          wrongStoryText: "Priya imagines her brand guide shaping Claude globally. The console hums quietly: 'Your document lives here — only here.'",
         },
         {
           label: "B",
@@ -179,6 +187,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Claude retains access to the actual document content, not just a summary. It can reference specific sections, quote passages, and reason over the details you uploaded.",
+          wrongFeedback: "Claude retains the **full document content**, not a summary — enabling it to quote, cite, and reason over **specific details** you uploaded.",
+          wrongStoryText: "Priya asks Claude to pull an exact policy line. She expected a paraphrase. Instead, Claude quotes it perfectly. The original is all still there.",
         },
         {
           label: "D",
@@ -186,6 +196,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Uploaded documents are read-only reference material for Claude — it can't modify them. The value is in giving Claude accurate, current information to reason from.",
+          wrongFeedback: "Documents are **read-only context** for Claude — it references them to reason accurately, but cannot **modify or update** uploaded files.",
+          wrongStoryText: "Priya opens the uploaded brief, expecting edits. It's unchanged. The chat beside it shows Claude's suggestions — waiting for her to decide.",
         },
       ],
       xpAward: 100,
@@ -258,6 +270,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Company history is rarely useful in custom instructions. Focus on what shapes Claude's output: tone, constraints, audience, format, and what to avoid. History can go in an uploaded document if it's genuinely relevant.",
+          wrongFeedback: "**Custom instructions** shape Claude's live output — tone, constraints, and limits. Background history belongs in an **uploaded document**, not instructions.",
+          wrongStoryText: "Priya pastes three paragraphs of company history. Claude responds formally, correctly — but still misses the tone. The real rules were never written.",
         },
         {
           label: "B",
@@ -272,6 +286,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Personal preferences belong in individual conversations, not Project instructions. Project instructions should reflect team-wide standards — so every teammate gets the same on-brand output, not just you.",
+          wrongFeedback: "**Project Instructions** set team-wide standards — personal style preferences belong in your own individual conversations, not shared configurations.",
+          wrongStoryText: "Priya frowns at the screen. The console replies softly: 'Your teammates need this too — not just your voice.'",
         },
         {
           label: "D",
@@ -279,6 +295,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Claude already knows how it works. Custom instructions are for teaching Claude about your company, not about itself. Write instructions about your team's needs, not about AI architecture.",
+          wrongFeedback: "**Custom Instructions** teach Claude about *your team*, not about itself — focus on audience, tone, and constraints, not AI architecture.",
+          wrongStoryText: "Priya pauses. The Project stares back, waiting. 'I already know me,' it seems to say. 'Tell me about you.'",
         },
       ],
       xpAward: 100,
@@ -299,6 +317,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "One-off creative tasks don't need persistent context or team sharing — a regular chat works fine. Projects shine when the same context needs to be applied consistently across many conversations or team members.",
+          wrongFeedback: "**Claude Projects** persist context across many sessions and teammates — one-time creative tasks need no such shared foundation.",
+          wrongStoryText: "Priya's cursor hovers. A soft chime: 'A single spark doesn't need a furnace. Save the Project for the fire you keep lit.'",
         },
         {
           label: "B",
@@ -313,6 +333,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Open-ended personal brainstorming doesn't need persistent instructions or shared access. A regular conversation is more flexible for exploration. Projects are for recurring, structured work.",
+          wrongFeedback: "**Persistent Context** and shared access are wasted on open-ended solo exploration — Projects power *recurring, structured* team workflows.",
+          wrongStoryText: "Priya leans back. The screen glows gently: 'A brainstorm needs space to wander — not walls to hold it.'",
         },
         {
           label: "D",
@@ -320,6 +342,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "A one-question lookup doesn't need a Project — that's what regular chat is for. Projects are worth setting up when the same context needs to power dozens or hundreds of future conversations.",
+          wrongFeedback: "A single lookup needs no **Project infrastructure** — Projects pay off when the same context must power hundreds of future conversations.",
+          wrongStoryText: "Priya blinks. The console hums: 'You don't build a library for one page. Come back when the questions multiply.'",
         },
       ],
       xpAward: 150,
@@ -340,6 +364,19 @@ export const game7: Game = {
           "Write the custom instructions for Priya's Claude Project...",
       },
       xpAward: 150,
+    },
+
+    // ── NEAR-TRANSFER: Same System, Different Insights ────────────────────────
+    {
+      id:       "w7-near-transfer",
+      type:     "learn",
+      location: "CONFERENCE ROOM · FRIDAY · 9:00 AM",
+      xpAward:  0,
+      concept: {
+        title: "Same System. Different Insights.",
+        body:  "Elena, a UX researcher at a travel startup, ran dozens of user interviews but struggled to synthesize the transcripts consistently across her team. She created a Claude Project named 'Traveler Persona Hub.' She uploaded their user interview templates, target personas, and recent raw transcripts. In the Custom Instructions, she wrote: 'Synthesize traveler interviews. Classify friction into three categories: booking confusion, cost anxiety, and navigation fatigue. Always use the traveler's exact quotes to support each finding.' Now, any researcher can paste a raw transcript and get a standardized, quote-backed analysis. Same Project framework. Completely different user insights.",
+      },
+      learnHighlight: "Shared context changes AI from an ad-hoc assistant to an aligned team member that understands your methodology and goals from day one.",
     },
 
     // ── Scene 6 ── Boss: Conductor Test ──────────────────────────────────────
@@ -364,6 +401,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Uploaded documents are read-only reference material — Claude can't edit them. If the handbook changes, you'd upload the updated version. The value is in making existing content searchable and conversational, not in auto-editing.",
+          wrongFeedback: "Uploaded files are **read-only reference material** — Claude surfaces knowledge from them, but cannot rewrite or auto-update their contents.",
+          wrongStoryText: "Priya reaches for the handbook. The Project replies calmly: 'I can read every word. Rewriting them? That's still yours to do.'",
         },
         {
           label: "C",
@@ -371,6 +410,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Uploading a document doesn't restrict Claude to only discussing that document. Claude can still answer other questions. The handbook adds grounded context — it doesn't build a wall around Claude's capabilities.",
+          wrongFeedback: "A **Knowledge Document** adds grounded context — it doesn't restrict Claude's full capabilities or wall off unrelated topics.",
+          wrongStoryText: "Priya narrows her eyes. The console hums: 'The handbook opens a door, Priya. It doesn't lock all the others.'",
         },
         {
           label: "D",
@@ -378,6 +419,8 @@ export const game7: Game = {
           correct: false,
           feedback:
             "Response speed comes from infrastructure, not uploaded documents. Claude still reasons over the handbook content — the upload doesn't skip its thinking. The benefit is accuracy and accessibility, not raw speed.",
+          wrongFeedback: "Speed comes from **infrastructure**, not documents — Claude still reasons carefully; the upload buys *accuracy and accessibility*, not shortcuts.",
+          wrongStoryText: "Priya checks the clock. The Project responds evenly: 'I read it all. I just don't skip thinking. That's the point.'",
         },
       ],
       xpAward: 250,
@@ -460,6 +503,7 @@ export const game7: Game = {
             correct: false,
             feedback: "Copilot's Microsoft Graph access is powerful — but it's reactive (it knows what's in M365) rather than proactive (it doesn't automatically apply specific company SOPs as instructions). Claude Projects lets Priya define exactly what the AI must always know and always follow.",
             wrongFeedback: "Copilot's Microsoft Graph access is powerful — but it's reactive (it knows what's in M365) rather than proactive (it doesn't automatically apply specific company SOPs as instructions). Claude Projects lets Priya define exactly what the AI must always know and always follow.",
+          wrongStoryText: "Priya glances at the M365 tiles. The Maestro speaks: 'Knowing where your files live isn't the same as always following your rules.'",
           },
           {
             label: "C",
@@ -467,6 +511,7 @@ export const game7: Game = {
             correct: false,
             feedback: "ChatGPT Teams is excellent, and Custom GPTs solve some of this. But at the project context level — where every session starts from shared documents and instructions without manual setup — Claude Projects has a more direct solution for Priya's exact problem.",
             wrongFeedback: "ChatGPT Teams is excellent, and Custom GPTs solve some of this. But at the project context level — where every session starts from shared documents and instructions without manual setup — Claude Projects has a more direct solution for Priya's exact problem.",
+          wrongStoryText: "Priya weighs the options carefully. The Maestro nods: 'A wide road isn't always the right road. Match the tool to the problem.'",
           },
         ],
       },

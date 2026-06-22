@@ -107,6 +107,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "The model can be the same. The difference isn't which AI is running — it's how it interfaces with your work. Claude Code operates inside your project, not outside it.",
+          wrongFeedback: "The **AI Model** can be identical — what changes is the **Execution Layer**. Claude Code lives inside your project; browser chat stays outside it.",
+          wrongStoryText: "Kai scratches his head. The terminal blinks back: 'Same engine, different track. One reads your files. The other waits for you to paste them.'",
         },
         {
           label: "B",
@@ -121,6 +123,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Claude Code works with any language your terminal can handle. It reads whatever files are in your project — TypeScript, Python, Go, Rust, Ruby, you name it.",
+          wrongFeedback: "Claude Code has no language restrictions — **Terminal-Native Access** means it works with any language your environment supports, from Go to Ruby.",
+          wrongStoryText: "Kai's eyes widen slightly. The Maestro's voice carries through the terminal: 'If your machine can run it, Claude Code can read it.'",
         },
         {
           label: "D",
@@ -128,6 +132,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Claude Code lives in your terminal, not inside an editor. You run it with the claude command in any directory. It has editor integrations, but the core tool is terminal-native.",
+          wrongFeedback: "Claude Code is **Terminal-Native**, not editor-bound — it runs via the `claude` command in any directory, with optional editor integrations as extras.",
+          wrongStoryText: "Kai glances at his VS Code sidebar. The terminal cursor blinks: 'I don't live in your sidebar, Kai. Open the terminal. That's where I work.'",
         },
       ],
       xpAward: 100,
@@ -147,6 +153,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "That's how browser-based AI chat works. Claude Code bypasses the clipboard entirely — it writes changes straight to the file on disk, just like your own editor would.",
+          wrongFeedback: "That's **Browser Chat** behavior — Claude Code skips your clipboard entirely, writing changes straight to disk using **Direct File Editing**.",
+          wrongStoryText: "Kai reaches for his mouse to paste. Then stops. The terminal already shows the diff — the file changed while he was still reaching.",
         },
         {
           label: "B",
@@ -161,6 +169,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Claude Code edits in place — it modifies the original file directly. It doesn't create shadow copies. That's why reviewing diffs before confirming changes is an important habit.",
+          wrongFeedback: "Claude Code edits **in-place** — no shadow files, just direct disk writes shown as a **diff** for your review.",
+          wrongStoryText: "Kai scans his folder. No _claude.ts files anywhere. The console blinks: 'I work on the real thing, not a copy.'",
         },
         {
           label: "D",
@@ -168,6 +178,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Claude Code applies changes directly once you confirm. It's agentic — it acts, it doesn't just advise. That's the whole point. You're in control of confirming, but Claude Code does the actual work.",
+          wrongFeedback: "Claude Code is **agentic** — it applies changes directly upon confirmation, not just narrates them for you to execute.",
+          wrongStoryText: "Kai waits for a patch file that never arrives. The console hums: 'I don't advise. I act — once you say go.'",
         },
       ],
       xpAward: 100,
@@ -236,6 +248,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Claude Code is capable, but it doesn't have full business context. It might technically refactor correctly while missing an important constraint — like a part of the codebase it wasn't told about. Always read the plan.",
+          wrongFeedback: "Claude Code lacks your **business context** — even a technically perfect plan can miss a constraint only you know about.",
+          wrongStoryText: "Kai hits yes instantly. Three files refactor cleanly. A fourth — one he forgot to mention — breaks silently in production.",
         },
         {
           label: "B",
@@ -250,6 +264,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Over-caution cuts off the value. Claude Code reads the full codebase before proposing, shows diffs before applying, and waits for confirmation. The workflow is designed to keep you in control.",
+          wrongFeedback: "Claude Code's **diff-review workflow** is designed for control — rejecting it entirely trades safety for unnecessary manual effort.",
+          wrongStoryText: "Kai closes the session and opens his editor. An hour later, he's done what Claude Code would have finished in minutes.",
         },
         {
           label: "D",
@@ -257,6 +273,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "File-by-file can work, but it misses one of Claude Code's core strengths: understanding how files relate to each other. A context-aware multi-file plan is often more accurate than sequential single-file edits.",
+          wrongFeedback: "Claude Code's strength is **cross-file context awareness** — isolating it to one file at a time discards its most powerful capability.",
+          wrongStoryText: "Kai locks Claude Code to one file. It fixes the function perfectly — but misses the three callers that now break downstream.",
         },
       ],
       xpAward: 100,
@@ -277,6 +295,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Restarting hardware won't change anything. The issue is context length inside the session, not the machine. Claude Code manages context through conversation, not RAM.",
+          wrongFeedback: "Sluggish responses signal **context window** saturation, not hardware — restarting your machine changes nothing about the conversation length.",
+          wrongStoryText: "Kai reboots. The session reloads. Claude Code gives the same drifting answer. The machine was never the problem.",
         },
         {
           label: "B",
@@ -291,6 +311,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Claude Code is built for long, complex sessions. /compact is the mechanism for managing them. This is a feature, not a limitation.",
+          wrongFeedback: "Long sessions are Claude Code's design strength — **/compact** is the built-in tool that manages **context length** without abandoning the work.",
+          wrongStoryText: "Kai switches tools mid-refactor. The new session knows nothing. He spends twenty minutes re-explaining what Claude Code already understood.",
         },
         {
           label: "D",
@@ -298,6 +320,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "A new session loses all context from the current one. /compact keeps the important history while trimming the noise — it's a much better solution than starting over.",
+          wrongFeedback: "**/compact** preserves relevant **session context** while trimming noise — a new terminal discards everything you've built together.",
+          wrongStoryText: "Kai opens a second terminal. The new Claude Code stares back, blank. Ninety minutes of shared context — gone.",
         },
       ],
       xpAward: 100,
@@ -319,6 +343,19 @@ export const game6: Game = {
       xpAward: 150,
     },
 
+    // ── NEAR-TRANSFER: Same Agent, Different Venture ──────────────────────────
+    {
+      id:       "w6-near-transfer",
+      type:     "learn",
+      location: "STARTUP OFFICE · WEDNESDAY · 10:30 AM",
+      xpAward:  0,
+      concept: {
+        title: "Same Agent. Different Venture.",
+        body:  "Leo, a startup founder, had to prepare a personalized pitch deck for twelve different venture firms. Instead of copying slides manually, he used a command-line agentic script. He instructed it: 'Read our master pitch.md and the portfolio profiles of the twelve target VCs in /profiles. For each VC, write a plan showing how to customize slide 3 (market fit) and slide 5 (differentiation) to match their investment focus. Show me the plan first. Do not modify the files until I approve.' The agent proposed a list of custom slides. Leo approved, and the agent wrote the files. Same planning loop. Completely different venture.",
+      },
+      learnHighlight: "Terminal agency isn't just for code. It's for any developer-minded professional who wants to plan, review, and execute complex workflows programmatically.",
+    },
+
     // ── Scene 6 ── Boss: Conductor Test ───────────────────────────────────────
     {
       id: "w6-s6",
@@ -334,6 +371,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Unrestricted autonomy without context leads to technically correct but strategically wrong changes. Claude Code works best as a partner — it needs your goal and constraints to make good decisions.",
+          wrongFeedback: "Without your **goal and constraints**, Claude Code optimises technically but can't know what's strategically correct for your project.",
+          wrongStoryText: "Kai grants full access and steps back. The refactor compiles cleanly — and quietly removes the feature flag still needed in production.",
         },
         {
           label: "B",
@@ -341,6 +380,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "Over-constraining Claude Code undermines the core benefit. It's designed to reason across files. Micro-managing each edit is slower and more error-prone than letting it plan the full refactor and reviewing the result.",
+          wrongFeedback: "Micro-managing one-line edits ignores Claude Code's **cross-file reasoning** — the real safety net is reviewing the **diff**, not shrinking the task.",
+          wrongStoryText: "Kai feeds Claude Code one line at a time. It obeys — slowly, confused, unable to see the pattern he's trying to build.",
         },
         {
           label: "C",
@@ -355,6 +396,8 @@ export const game6: Game = {
           correct: false,
           feedback:
             "That's the old workflow — the one Claude Code replaces. Manual copy-paste loses context, misses file relationships, and doubles your work. Claude Code handles the file layer directly so you never have to do this.",
+          wrongFeedback: "**Manual copy-paste** destroys file relationships and doubles work — Claude Code's power is operating **directly on your codebase**.",
+          wrongStoryText: "Kai's hand hovers over the keyboard. The terminal blinks slowly. The old workflow flickers on screen — and he realizes he almost went backward.",
         },
       ],
       xpAward: 250,
@@ -431,6 +474,7 @@ export const game6: Game = {
             correct: false,
             feedback: "Copilot knows his open files but lacks the agentic ability to trace a race condition across 4 files simultaneously while understanding the async relationships between them. This is a whole-codebase problem.",
             wrongFeedback: "Copilot knows his open files but lacks the agentic ability to trace a race condition across 4 files simultaneously while understanding the async relationships between them. This is a whole-codebase problem.",
+          wrongStoryText: "Kai selects Copilot. Four file tabs blur together. The race condition hides in the gaps between them, untouched.",
           },
           {
             label: "B",
@@ -444,6 +488,7 @@ export const game6: Game = {
             correct: false,
             feedback: "ChatGPT is excellent at reasoning — but it needs the context pasted in manually. Pasting 4 files of async code, maintaining the context, and iterating is exactly the friction Claude Code eliminates. The tool's ability to READ the files directly is the key advantage here.",
             wrongFeedback: "ChatGPT is excellent at reasoning — but it needs the context pasted in manually. Pasting 4 files of async code, maintaining the context, and iterating is exactly the friction Claude Code eliminates. The tool's ability to READ the files directly is the key advantage here.",
+          wrongStoryText: "Kai starts pasting. File two. File three. By file four, the context has already started slipping away.",
           },
         ],
       },

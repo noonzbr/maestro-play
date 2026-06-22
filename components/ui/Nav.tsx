@@ -170,37 +170,23 @@ export default function Nav() {
               )}
             </div>
           ) : (
-            <>
-              <button
-                onClick={() => openAuthModal("signin")}
-                style={{
-                  fontFamily:"Inter, sans-serif", fontSize:"0.82rem", fontWeight:600,
-                  color:"rgba(240,238,255,0.80)", background:"none", border:"none",
-                  cursor:"pointer", transition:"color 0.2s", padding:0,
-                }}
-                onMouseEnter={e => (e.currentTarget.style.color="#fff")}
-                onMouseLeave={e => (e.currentTarget.style.color="rgba(240,238,255,0.65)")}
-              >
-                Sign in
-              </button>
-              <Link
-                href="/games/welcome-to-ai"
-                suppressHydrationWarning
-                style={{
-                  fontFamily:"Inter, sans-serif", fontSize:"0.8rem", fontWeight:700,
-                  color:"#08060f",
-                  background:"linear-gradient(90deg,#00d4f0,#e040fb)",
-                  padding:"0.45rem 1.2rem", borderRadius:"100px",
-                  textDecorationLine:"none", letterSpacing:"0.02em",
-                  flexShrink: 0,
-                  transition:"opacity 0.2s, transform 0.2s",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.opacity="0.9"; e.currentTarget.style.transform="translateY(-1px)" }}
-                onMouseLeave={e => { e.currentTarget.style.opacity="1";   e.currentTarget.style.transform="translateY(0)" }}
-              >
-                Play Free
-              </Link>
-            </>
+            <button
+              onClick={() => openAuthModal("signin")}
+              style={{
+                fontFamily:"Inter, sans-serif", fontSize:"0.8rem", fontWeight:700,
+                color:"#08060f",
+                background:"linear-gradient(90deg,#00d4f0,#e040fb)",
+                padding:"0.45rem 1.2rem", borderRadius:"100px",
+                border:"none",
+                cursor:"pointer", letterSpacing:"0.02em",
+                flexShrink: 0,
+                transition:"opacity 0.2s, transform 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity="0.9"; e.currentTarget.style.transform="translateY(-1px)" }}
+              onMouseLeave={e => { e.currentTarget.style.opacity="1";   e.currentTarget.style.transform="translateY(0)" }}
+            >
+              Sign in
+            </button>
           )
         )}
       </div>

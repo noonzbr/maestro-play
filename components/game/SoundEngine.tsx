@@ -11,6 +11,15 @@ export function useSoundEngine() {
   const runningRef = useRef(false)
   const moodRef = useRef<SoundMood>("normal")
 
+  const streakRef = useRef(0)
+  const livesRef = useRef(3)
+  const sequencerTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const updateGameState = useCallback((streak: number, livesVal: number) => {
+    streakRef.current = streak
+    livesRef.current = livesVal
+  }, [])
+
   // MP3 track refs
   const trackRef = useRef<HTMLAudioElement | null>(null)
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -228,10 +237,111 @@ export function useSoundEngine() {
     return mutedRef.current
   }, [])
 
+  const startSequencer = useCallback(() => {
+    if (sequencerTimerRef.current) return
+    let step = 0
+    sequencerTimerRef.current = setInterval(() => {
+      try {
+        const ctx = getCtx()
+        if (ctx.state === "suspended") return
+        const t = ctx.currentTime
+
+        const streak = streakRef.current
+        const livesVal = livesRef.current
+
+        // 1. Tension Heartbeat - low lives (plays every 4 steps)
+        if (livesVal === 1 && step % 4 === 0) {
+          const osc = ctx.createOscillator()
+          const g = ctx.createGain()
+          osc.frequency.setValueAtTime(55, t)
+          osc.frequency.exponentialRampToValueAtTime(30, t + 0.12)
+          g.gain.setValueAtTime(0.08, t)
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12)
+          osc.connect(g)
+          g.connect(ctx.destination)
+          osc.start(t)
+          osc.stop(t + 0.15)
+        }
+
+        // 2. Stem 1: Chord Pad (Ambient block, plays at step 0 and 8)
+        if (step % 8 === 0) {
+          const freqs = step % 16 === 0 
+            ? [261.63, 329.63, 392.00] // C major chord
+            : [220.00, 261.63, 329.63] // A minor chord
+          
+          freqs.forEach(f => {
+            const osc = ctx.createOscillator()
+            const g = ctx.createGain()
+            osc.type = "sine"
+            osc.frequency.setValueAtTime(f, t)
+            g.gain.setValueAtTime(0, t)
+            g.gain.linearRampToValueAtTime(0.02, t + 0.4) // soft attack
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4) // release
+            osc.connect(g)
+            g.connect(ctx.destination)
+            osc.start(t)
+            osc.stop(t + 1.5)
+          })
+        }
+
+        // 3. Stem 2: Bassline (Triangle pulses, plays eighth notes when streak >= 1)
+        if (streak >= 1 && step % 2 === 0) {
+          const isFirstBar = step < 8
+          const rootFreq = isFirstBar ? 130.81 : 110.00 // C3 or A2
+          const notes = [rootFreq, rootFreq * 1.5, rootFreq * 1.2, rootFreq * 0.8]
+          const f = notes[(step / 2) % 4]
+
+          const osc = ctx.createOscillator()
+          const g = ctx.createGain()
+          osc.type = "triangle"
+          osc.frequency.setValueAtTime(f, t)
+          g.gain.setValueAtTime(0.02, t)
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15)
+          osc.connect(g)
+          g.connect(ctx.destination)
+          osc.start(t)
+          osc.stop(t + 0.18)
+        }
+
+        // 4. Stem 3: Lead Arpeggiator (High sparkling sine notes, 16th notes when streak >= 3)
+        if (streak >= 3) {
+          const isFirstBar = step < 8
+          const chord = isFirstBar 
+            ? [523.25, 659.25, 783.99, 1046.50] // C5, E5, G5, C6
+            : [440.00, 523.25, 659.25, 880.00] // A4, C5, E5, A5
+          const f = chord[step % 4]
+
+          const osc = ctx.createOscillator()
+          const g = ctx.createGain()
+          const filter = ctx.createBiquadFilter()
+
+          osc.type = "sine"
+          osc.frequency.setValueAtTime(f, t)
+
+          filter.type = "lowpass"
+          filter.frequency.setValueAtTime(1000, t)
+          filter.frequency.exponentialRampToValueAtTime(250, t + 0.08)
+
+          g.gain.setValueAtTime(0.008, t)
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08)
+
+          osc.connect(filter)
+          filter.connect(g)
+          g.connect(ctx.destination)
+          osc.start(t)
+          osc.stop(t + 0.10)
+        }
+
+        step = (step + 1) % 16
+      } catch { /* AudioContext suspended */ }
+    }, 200)
+  }, [])
+
   const stopAmbient = useCallback(() => {
     runningRef.current = false
     if (schedulerRef.current) { clearTimeout(schedulerRef.current); schedulerRef.current = null }
     if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
+    if (sequencerTimerRef.current) { clearInterval(sequencerTimerRef.current); sequencerTimerRef.current = null }
     const track = trackRef.current
     if (!track) return
     // Fade out over 1.5s
@@ -254,7 +364,10 @@ export function useSoundEngine() {
       const current = trackRef.current
 
       // If same file is already playing, don't restart
-      if (current && !current.paused && current.src.endsWith(src.replace("/audio/", ""))) return
+      if (current && !current.paused && current.src.endsWith(src.replace("/audio/", ""))) {
+        startSequencer()
+        return
+      }
 
       // Fade out old track
       if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
@@ -278,7 +391,8 @@ export function useSoundEngine() {
         }, { once: true })
       }
 
-      const targetVol = mood === "cinematic" ? 0.55 : mood === "revelation" ? 0.6 : 0.75
+      // LOWERED ANOTHER 70%: music is background ambience only, SFX must cut through clearly
+      const targetVol = mood === "cinematic" ? 0.003 : mood === "revelation" ? 0.004 : 0.002
       const fadeInDuration = mood === "cinematic" ? 4000 : 2500
       const steps = fadeInDuration / 50
 
@@ -291,8 +405,10 @@ export function useSoundEngine() {
           if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null }
         }
       }, 50)
+
+      startSequencer()
     } catch { /* no audio */ }
-  }, [])
+  }, [startSequencer])
 
   const setMood = useCallback((mood: SoundMood) => {
     if (moodRef.current !== mood) {
@@ -342,6 +458,10 @@ export function useSoundEngine() {
   useEffect(() => {
     return () => {
       stopAmbient()
+      if (sequencerTimerRef.current) {
+        clearInterval(sequencerTimerRef.current)
+        sequencerTimerRef.current = null
+      }
       if (trackRef.current) { trackRef.current.pause(); trackRef.current = null }
       if (ctxRef.current && ctxRef.current.state !== "closed") {
         ctxRef.current.close()
@@ -367,5 +487,6 @@ export function useSoundEngine() {
     setGameVolume,
     fadeVolumeTo,
     toggleMute,
+    updateGameState,
   }
 }

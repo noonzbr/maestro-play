@@ -182,14 +182,29 @@ export default function VisualNovelScene({ scene, onComplete, protagonistImage }
       {/* ── Real background image ────────────────────────────────────────── */}
       {bgImage ? (
         <>
-          <div style={{
-            position:           "absolute",
-            inset:              0,
-            zIndex:             0,
-            backgroundImage:    `url(${bgImage})`,
-            backgroundSize:     "cover",
-            backgroundPosition: "center center",
-          }} />
+          <motion.img
+            src={bgImage}
+            alt=""
+            draggable={false}
+            animate={{
+              scale: [1.02, 1.12, 1.05, 1.1, 1.02],
+              x: [0, -15, 10, -5, 0],
+              y: [0, 8, -6, 5, 0],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 25,
+              ease: "linear",
+            }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              zIndex: 0,
+            }}
+          />
           {/* Darken overlay — keeps characters readable */}
           <div style={{
             position:   "absolute",

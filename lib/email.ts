@@ -216,7 +216,7 @@ export async function sendReviewDue(
     "",
     "The Maestro has summoned you to the practice room.",
     "",
-    "Review now: https://maestroplay.com/review",
+    "Review now: https://maestroplay.com/daily-challenge",
     "",
     "— The MaestroPlay Orchestra",
     "",
@@ -249,7 +249,7 @@ export async function sendReviewDue(
           The Maestro has summoned you to the practice room.
         </p>
 
-        <a href="https://maestroplay.com/review"
+        <a href="https://maestroplay.com/daily-challenge"
            style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;
                   text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;
                   font-weight:600;letter-spacing:0.3px;">

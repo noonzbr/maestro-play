@@ -4,7 +4,54 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Scene } from "@/lib/games/types"
 
-/* ── Audio Synthesis Dialogue Voice (Celeste/Animal Crossing style) ────── */
+/* ── Voice Synthesis (Web Speech API) ──────────────────────────────────── */
+let ttsEnabled = true  // user can toggle off
+
+function speakLine(text: string, speakerName: string, onStart?: () => void, onEnd?: () => void) {
+  if (typeof window === "undefined" || !window.speechSynthesis) return
+  if (!ttsEnabled) return
+  window.speechSynthesis.cancel()
+  const clean = text.replace(/\*\*/g, "").replace(/[\u{1F000}-\u{1FFFF}]/gu, "").trim()
+  if (!clean) return
+  const utt = new SpeechSynthesisUtterance(clean)
+  const name = speakerName.toUpperCase()
+  // Distinct voice character per speaker
+  if (name.includes("VEGA") || name.includes("DIANA") || name.includes("PRIYA") || name.includes("LUNA")) {
+    utt.pitch = 1.2; utt.rate = 0.92; utt.volume = 0.85
+  } else if (name.includes("JAKE") || name.includes("PROTAGONIST")) {
+    utt.pitch = 1.0; utt.rate = 1.0; utt.volume = 0.9
+  } else if (name.includes("FELIPE") || name.includes("MAESTRO") || name.includes("TYLER") || name.includes("MARCUS")) {
+    utt.pitch = 0.75; utt.rate = 0.88; utt.volume = 0.9
+  } else if (name.includes("CARLOS") || name.includes("DIEGO")) {
+    utt.pitch = 0.85; utt.rate = 0.9; utt.volume = 0.9
+  } else if (name.includes("AI") || name.includes("CLAUDE") || name.includes("CODA")) {
+    utt.pitch = 1.4; utt.rate = 1.08; utt.volume = 0.8
+  } else if (name.includes("ZOE") || name.includes("ARIA") || name.includes("MAYA")) {
+    utt.pitch = 1.3; utt.rate = 0.98; utt.volume = 0.85
+  } else {
+    utt.pitch = 1.0; utt.rate = 0.95; utt.volume = 0.85
+  }
+  // Try to pick a matching voice from the system
+  const voices = window.speechSynthesis.getVoices()
+  if (voices.length > 0) {
+    const enVoices = voices.filter(v => v.lang.startsWith("en"))
+    if (enVoices.length > 0) {
+      const femaleVoices = enVoices.filter(v => /female|zira|victoria|samantha|karen|moira|tessa|fiona/i.test(v.name))
+      const maleVoices   = enVoices.filter(v => /male|daniel|alex|david|mark|james|arthur/i.test(v.name))
+      const isFemale = name.includes("VEGA") || name.includes("ZOE") || name.includes("ARIA") || name.includes("PRIYA") || name.includes("LUNA") || name.includes("MAYA") || name.includes("DIANA")
+      const pool = isFemale ? (femaleVoices.length ? femaleVoices : enVoices) : (maleVoices.length ? maleVoices : enVoices)
+      utt.voice = pool[0]
+    }
+  }
+  if (onStart) utt.onstart = onStart
+  if (onEnd)   utt.onend   = onEnd
+  window.speechSynthesis.speak(utt)
+}
+
+export function stopSpeech() {
+  if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel()
+}
+
 let audioCtx: AudioContext | null = null
 
 export function playVoiceBlip(speaker: string, char: string) {
@@ -150,6 +197,99 @@ const NPC_IMAGES: Record<string, string> = {
   default:     "",
 }
 
+/* ── Mouth positions for each character ─────────────────────────────────── */
+// Coordinates are % of the 1:1 aspect-ratio container placed at bottom-left/right
+// top% = distance from TOP of that square container (portrait fills bottom portion)
+// The character faces typically occupy the upper 55% of the square
+const MOUTH_POSITIONS: Record<string, { top: string; left: string }> = {
+  jake:        { top: "24.8%", left: "48.0%" }, // restored anime guitarplayer1.png
+  tyler:       { top: "24.3%", left: "53.0%" }, // tyler.png
+  senora_vega: { top: "34.8%", left: "50.2%" }, // senoravega.png
+  zoe:         { top: "33.3%", left: "51.6%" },
+  carlos:      { top: "42.2%", left: "50.3%" },
+  aria:        { top: "21%",   left: "50%" },
+  jordan:      { top: "21%",   left: "50%" },
+  kai:         { top: "25.7%", left: "29.0%" },
+  priya:       { top: "26.5%", left: "24.7%" },
+  alex:        { top: "22.1%", left: "27.5%" },
+  luna:        { top: "20%",   left: "50%" },
+  sam:         { top: "20%",   left: "50%" },
+  vera:        { top: "24.9%", left: "48.7%" },
+  maya:        { top: "27.1%", left: "49.9%" },
+  nova:        { top: "30.3%", left: "44.8%" },
+  felipe:      { top: "19.7%", left: "53.5%" },
+  ai:          { top: "22%",   left: "50%" },
+  default:     { top: "22%",   left: "50%" },
+}
+
+
+/* Helper component to dynamically load emotion-specific character art with a fallback to the base image */
+type CharacterImageProps = {
+  baseSrc: string
+  emotion: "neutral" | "excited" | "thinking" | "tense"
+  alt: string
+  className?: string
+  style?: React.CSSProperties
+}
+
+function CharacterImage({ baseSrc, emotion, alt, className, style }: CharacterImageProps) {
+  const [currentSrc, setCurrentSrc] = useState(baseSrc)
+  const [lastBaseSrc, setLastBaseSrc] = useState(baseSrc)
+  const [lastEmotion, setLastEmotion] = useState(emotion)
+
+  const getEmotionUrl = useCallback((src: string, emo: string) => {
+    if (emo === "neutral" || !src) return src
+    const urlParts = src.split('?')
+    const path = urlParts[0]
+    const query = urlParts[1] ? `?${urlParts[1]}` : ''
+    if (path.toLowerCase().endsWith('.png')) {
+      const mainPath = path.substring(0, path.length - 4)
+      return `${mainPath}_${emo}.png${query}`
+    }
+    return src
+  }, [])
+
+  if (baseSrc !== lastBaseSrc || emotion !== lastEmotion) {
+    setLastBaseSrc(baseSrc)
+    setLastEmotion(emotion)
+    setCurrentSrc(getEmotionUrl(baseSrc, emotion))
+  }
+
+  const handleError = () => {
+    const expectedEmotionUrl = getEmotionUrl(baseSrc, emotion)
+    if (currentSrc === expectedEmotionUrl && currentSrc !== baseSrc) {
+      setCurrentSrc(baseSrc)
+    }
+  }
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <AnimatePresence mode="popLayout">
+        <motion.img
+          key={currentSrc}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.12, ease: "linear" }}
+          src={currentSrc}
+          alt={alt}
+          draggable={false}
+          className={className}
+          style={{
+            ...style,
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+          }}
+          onError={handleError}
+        />
+      </AnimatePresence>
+    </div>
+  )
+}
+
+
 /* ── NPC color + initials ──────────────────────────────────────────────── */
 type NpcCfg = { color: string; initial: string }
 
@@ -177,7 +317,7 @@ const NPC_CONFIGS: Record<string, NpcCfg> = {
 }
 
 /* Helper to resolve npc keys robustly across all 14 visual novel game characters */
-function resolveNpcKey(keyOrSpeaker: string | undefined): string {
+export function resolveNpcKey(keyOrSpeaker: string | undefined): string {
   if (!keyOrSpeaker) return "default"
   const clean = keyOrSpeaker.toLowerCase().replace(/[^a-z0-9]/g, "")
   if (clean.includes("vega")) return "senora_vega"
@@ -242,11 +382,14 @@ type Props = {
 }
 
 export default function NovelScene({ scene, onComplete, protagonistImage, protagonistName, accentColor, fastText = false }: Props) {
-  const [lineIndex, setLineIndex] = useState(0)
-  const [skip,      setSkip]      = useState(false)
-  const [flashKey,  setFlashKey]  = useState(0)
-  const bottomRef                 = useRef<HTMLDivElement>(null)
-  const advanceRef                = useRef<() => void>(() => {})
+  const [lineIndex,    setLineIndex]    = useState(0)
+  const [skip,         setSkip]         = useState(false)
+  const [flashKey,     setFlashKey]     = useState(0)
+  const [autoProgress, setAutoProgress] = useState(0)   // 0-100 fill %
+  const bottomRef    = useRef<HTMLDivElement>(null)
+  const advanceRef   = useRef<() => void>(() => {})
+  const autoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoRafRef   = useRef<number | null>(null)
 
   const [isMobile, setIsMobile] = useState(false)
   useEffect(() => {
@@ -286,6 +429,21 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
         30%  { opacity:0.6; }
         100% { opacity:0; transform:translateY(-20px); }
       }
+      /* Bubble land — slides in from speaker direction, springs to rest */
+      @keyframes dlg-bubble-land-left {
+        0%   { opacity:0; transform:translateX(-22px) scale(0.88); }
+        48%  { opacity:1; transform:translateX(5px)  scale(1.04, 0.97); }
+        68%  { transform:translateX(-2px) scale(0.99, 1.01); }
+        84%  { transform:translateX(1px)  scale(1.005, 0.998); }
+        100% { opacity:1; transform:translateX(0)    scale(1); }
+      }
+      @keyframes dlg-bubble-land-right {
+        0%   { opacity:0; transform:translateX(22px)  scale(0.88); }
+        48%  { opacity:1; transform:translateX(-5px) scale(1.04, 0.97); }
+        68%  { transform:translateX(2px)  scale(0.99, 1.01); }
+        84%  { transform:translateX(-1px) scale(1.005, 0.998); }
+        100% { opacity:1; transform:translateX(0)    scale(1); }
+      }
     `
     document.head.appendChild(s)
   }, [])
@@ -302,14 +460,71 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
   const visibleText = skip ? line.text : displayed
   const textDone    = skip || done
 
+  /* Speak the current line using Web Speech API */
+  useEffect(() => {
+    if (fastText) return  // skip voice in fast/review mode
+    const currentLine = lines[lineIndex]
+    if (!currentLine?.text) return
+    // Small delay so the first character appears before speech starts
+    const timer = setTimeout(() => {
+      speakLine(currentLine.text, currentLine.speaker ?? "")
+    }, 120)
+    return () => {
+      clearTimeout(timer)
+      stopSpeech()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineIndex])
+
+  /* ── Reading-speed auto-advance ─────────────────────────────────────── */
+  // After the typewriter finishes, wait <readingMs> then auto-advance.
+  // Short punchy lines: ~900ms. Long reflective lines: up to 4200ms.
+  // Click/tap still skips immediately.
+  function calcAutoMs(text: string): number {
+    const words = text.trim().split(/\s+/).length
+    return Math.min(4200, Math.max(900, words * 270))
+  }
+
+  function cancelAuto() {
+    if (autoTimerRef.current)  { clearTimeout(autoTimerRef.current);  autoTimerRef.current  = null }
+    if (autoRafRef.current)    { cancelAnimationFrame(autoRafRef.current); autoRafRef.current = null }
+    setAutoProgress(0)
+  }
+
   const advance = useCallback(() => {
+    cancelAuto()
+    stopSpeech()
     if (!textDone) { setSkip(true) }
     else {
+      setAutoProgress(0)
       setSkip(false)
       if (isLast) onComplete()
       else setLineIndex(i => i + 1)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [textDone, isLast, onComplete])
+
+  /* Kick off auto-advance once text is fully shown */
+  useEffect(() => {
+    if (!textDone) { cancelAuto(); return }
+    const ms = calcAutoMs(line.text)
+    const start = performance.now()
+
+    function tick() {
+      const elapsed = performance.now() - start
+      const pct = Math.min(100, (elapsed / ms) * 100)
+      setAutoProgress(pct)
+      if (pct < 100) {
+        autoRafRef.current = requestAnimationFrame(tick)
+      }
+    }
+    autoRafRef.current = requestAnimationFrame(tick)
+    autoTimerRef.current = setTimeout(() => {
+      advanceRef.current()
+    }, ms)
+    return cancelAuto
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [textDone, lineIndex])
 
   useEffect(() => { advanceRef.current = advance }, [advance])
 
@@ -407,7 +622,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
   const bgImage      = scene.location ? getBackgroundImage(scene.location) : ""
 
   // Parse the emotional state of the active dialogue line
-  const activeEmotion = getLineEmotion(line.text)
+  const activeEmotion = line.emotion || getLineEmotion(line.text)
   const npcEmotion    = npcActive ? activeEmotion : "neutral"
   const protEmotion   = isJake ? activeEmotion : "neutral"
 
@@ -433,14 +648,29 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
       {/* ── Real background image ────────────────────────────────────────── */}
       {bgImage ? (
         <>
-          <div style={{
-            position:           "absolute",
-            inset:              0,
-            zIndex:             0,
-            backgroundImage:    `url(${bgImage})`,
-            backgroundSize:     "cover",
-            backgroundPosition: "center center",
-          }} />
+          <motion.img
+            src={bgImage}
+            alt=""
+            draggable={false}
+            animate={{
+              scale: [1.02, 1.12, 1.05, 1.1, 1.02],
+              x: [0, -15, 10, -5, 0],
+              y: [0, 8, -6, 5, 0],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 25,
+              ease: "linear",
+            }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              zIndex: 0,
+            }}
+          />
           {/* Darken overlay — keeps characters readable */}
           <div style={{
             position:   "absolute",
@@ -459,18 +689,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
         }} />
       )}
 
-      {/* ── Speaker flash — radial light burst on new line ───────────────── */}
-      <div
-        key={flashKey}
-        style={{
-          position:      "absolute",
-          inset:         0,
-          zIndex:        2,
-          pointerEvents: "none",
-          background:    `radial-gradient(ellipse at ${isJake ? "72%" : "28%"} 45%, ${speakerColor.replace("0.9", "0.2")} 0%, transparent 55%)`,
-          animation:     "dlg-flash-left 0.65s ease-out both",
-        }}
-      />
+      {/* Speaker flash disabled for screen comfort */}
 
       {/* ── Location pill ────────────────────────────────────────────────── */}
       {scene.location && (
@@ -506,7 +725,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
         left:          0,
         right:         0,
         top:           "4.8rem",
-        bottom:        isMobile ? "38%" : "18%",
+        bottom:        isMobile ? "42%" : "18%",
         zIndex:        5,
         pointerEvents: "none",
         overflow:      "hidden",
@@ -515,31 +734,42 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
         {/* ── NPC (left side) ── */}
         {npcImage ? (
           <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 60, rotate: 0 }}
             animate={{
-              opacity: npcActive ? 1 : (isMobile ? 0.08 : 0.25),
+              opacity: npcActive ? 1 : (isMobile ? 0 : 0.25),
               scale: npcActive 
-                ? (npcEmotion === "excited" ? 1.04 : npcEmotion === "thinking" ? 1.01 : 1.02) 
+                ? (npcEmotion === "excited" ? 1.05 : npcEmotion === "thinking" ? 1.01 : 1.02) 
                 : 0.96,
               y: npcActive 
-                ? (npcEmotion === "excited" ? [0, -12, -4, 0] : npcEmotion === "thinking" ? [0, -4, 0] : 0) 
+                ? (npcEmotion === "excited" ? [0, -4, 0] : npcEmotion === "thinking" ? [0, -3, 0] : 0) 
                 : 15,
               x: npcActive 
-                ? (npcEmotion === "tense" ? [-5, 5, -3, 3, -1.5, 1.5, 0] : 0) 
+                ? (npcEmotion === "tense" ? [-6, 6, -4, 4, -2, 2, -1, 1, 0] : 0) 
                 : 0,
-              filter: npcActive ? "none" : "grayscale(0.4) brightness(0.65)",
+              rotate: npcActive && npcEmotion === "thinking" ? [0, -1.5, 1.5, 0] : 0,
+              filter: npcActive 
+                ? (npcEmotion === "tense" 
+                    ? "drop-shadow(0 0 25px rgba(180, 0, 255, 0.6)) drop-shadow(0 0 12px rgba(220, 20, 60, 0.6))" 
+                    : "none") 
+                : "grayscale(0.4) brightness(0.65)",
             }}
             transition={{ 
               type: "spring", 
               stiffness: 120, 
-              damping: 20,
-              x: { type: "tween", duration: 0.45, ease: "easeInOut" },
-              y: { type: "tween", duration: 0.55, ease: "easeOut" },
+              damping: 18,
+              x: { type: "tween", duration: 0.4, ease: "easeInOut" },
+              y: npcActive && npcEmotion === "excited" 
+                ? { type: "tween", ease: "easeInOut", duration: 0.5 }
+                : { type: "tween", duration: 0.55, ease: "easeOut" },
+              rotate: npcActive && npcEmotion === "thinking" 
+                ? { repeat: Infinity, duration: 4, ease: "easeInOut" }
+                : { duration: 0.3 }
             }}
             style={{
               position:   "absolute",
               bottom:     0,
-              left:       isMobile ? "1%" : "3%",
-              width:      isMobile ? "46%" : "clamp(260px, 32vw, 540px)",
+              left:       isMobile ? "10%" : "3%",
+              width:      isMobile ? "80%" : "clamp(260px, 32vw, 540px)",
               height:     "100%",
               zIndex:     npcActive ? 10 : 2,
             }}
@@ -551,143 +781,196 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
               left:       "10%",
               width:      "80%",
               height:     "65%",
-              background: `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.28)} 0%, transparent 72%)`,
+              background: npcActive
+                ? (npcEmotion === "excited"
+                    ? "radial-gradient(ellipse at center, rgba(255, 215, 0, 0.4) 0%, transparent 72%)"
+                    : npcEmotion === "tense"
+                    ? "radial-gradient(ellipse at center, rgba(220, 20, 60, 0.4) 0%, transparent 72%)"
+                    : `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.28)} 0%, transparent 72%)`)
+                : "transparent",
               animation:  npcActive ? "dlg-speaker-glow 2.2s ease-in-out infinite" : "none",
               opacity:    npcActive ? 1 : 0,
-              transition: "opacity 0.55s ease",
+              transition: "opacity 0.55s ease, background 0.55s ease",
               zIndex:     0,
             }} />
-            {/* Character image — breathes when inactive, talks when active */}
-            <img
-              src={npcImage}
-              alt=""
-              draggable={false}
-              className={npcActive ? "char-talk" : "char-breathe"}
-              style={{
-                position:        "absolute",
-                bottom:          0,
-                left:            0,
-                width:           "100%",
-                height:          "100%",
-                objectFit:       "contain",
-                objectPosition:  "bottom center",
-                maskImage:       charMask,
-                WebkitMaskImage: charMask,
-                zIndex:          1,
-                transformOrigin: "bottom center",
-              } as React.CSSProperties}
-            />
+            {/* Aspect-ratio matched container to align mouth coordinates exactly */}
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              aspectRatio: "1/1",
+              zIndex: 1,
+            }}>
+              {/* Character image — breathes when inactive, talks when active and typing */}
+              <div 
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  transformOrigin: "bottom center",
+                }}
+              >
+                <CharacterImage
+                  baseSrc={npcImage}
+                  emotion={npcEmotion}
+                  alt=""
+                  className={npcEmotion === "excited"
+                    ? "char-react-correct"
+                    : npcEmotion === "tense"
+                    ? "char-react-wrong"
+                    : (npcActive && !textDone ? "char-talk" : "char-breathe")}
+                  style={{
+                    position:        "absolute",
+                    bottom:          0,
+                    left:            0,
+                    width:           "100%",
+                    height:          "100%",
+                    objectFit:       "contain",
+                    objectPosition:  "bottom center",
+                    maskImage:       charMask,
+                    WebkitMaskImage: charMask,
+                    zIndex:          1,
+                    transformOrigin: "bottom center",
+                  } as React.CSSProperties}
+                />
+              </div>
+            </div>
           </motion.div>
         ) : (
-          /* Fallback — large glowing AI orb when no portrait image */
-          <motion.div
-            className={npcActive ? "char-talk" : "char-breathe"}
-            animate={{
-              opacity: npcActive ? 1 : (isMobile ? 0.08 : 0.25),
-              scale: npcActive 
-                ? (npcEmotion === "excited" ? 1.04 : npcEmotion === "thinking" ? 1.01 : 1.02) 
-                : 0.96,
-              y: npcActive 
-                ? (npcEmotion === "excited" ? [0, -12, -4, 0] : npcEmotion === "thinking" ? [0, -4, 0] : 0) 
-                : 15,
-              x: npcActive 
-                ? (npcEmotion === "tense" ? [-5, 5, -3, 3, -1.5, 1.5, 0] : 0) 
-                : 0,
-            }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 120, 
-              damping: 20,
-              x: { type: "tween", duration: 0.45, ease: "easeInOut" },
-              y: { type: "tween", duration: 0.55, ease: "easeOut" },
-            }}
+          <div
+            className={npcEmotion === "excited"
+              ? "char-react-correct"
+              : npcEmotion === "tense"
+              ? "char-react-wrong"
+              : (npcActive && !textDone ? "char-talk" : "char-breathe")}
             style={{
               position:      "absolute",
               bottom:        "15%",
-              left:          isMobile ? "3%" : "5%",
-              width:         isMobile ? "40vw" : "clamp(160px, 18vw, 280px)",
-              height:         isMobile ? "40vw" : "clamp(160px, 18vw, 280px)",
+              left:          isMobile ? "10%" : "5%",
+              width:         isMobile ? "80vw" : "clamp(160px, 18vw, 280px)",
+              height:         isMobile ? "80vw" : "clamp(160px, 18vw, 280px)",
               zIndex:        npcActive ? 10 : 2,
-            }}>
-            {/* Outer ambient pulse */}
-            <div style={{
-              position:      "absolute",
-              inset:         "-30%",
-              borderRadius:  "50%",
-              background:    `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.18)} 0%, transparent 70%)`,
-              animation:     npcActive ? "dlg-speaker-glow 2.4s ease-in-out infinite" : "none",
-            }} />
-            {/* Inner orb body */}
-            <div style={{
-              position:      "absolute",
-              inset:         0,
-              borderRadius:  "50%",
-              background:    `radial-gradient(circle at 38% 35%, ${getTranslucentBg(npc.color, 0.55)} 0%, ${getTranslucentBg(npc.color, 0.18)} 40%, transparent 72%)`,
-              border:        `1.5px solid ${getTranslucentBg(npc.color, 0.45)}`,
-              boxShadow:     npcActive
-                ? `0 0 60px ${getTranslucentBg(npc.color, 0.5)}, inset 0 0 30px ${getTranslucentBg(npc.color, 0.2)}`
-                : "none",
-              transition:    "box-shadow 0.5s ease",
-              backdropFilter:"blur(2px)",
-            }} />
-            {/* Highlight specular */}
-            <div style={{
-              position:    "absolute",
-              top:         "14%",
-              left:        "20%",
-              width:       "40%",
-              height:      "28%",
-              borderRadius:"50%",
-              background:  `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.7)} 0%, transparent 100%)`,
-              filter:      "blur(6px)",
-            }} />
-            {/* Initials label */}
-            <div style={{
-              position:       "absolute",
-              inset:          0,
-              display:        "flex",
-              alignItems:     "center",
-              justifyContent: "center",
-              fontFamily:     "Inter, sans-serif",
-              fontWeight:     900,
-              fontSize:       "clamp(1.4rem, 3.5vw, 2.2rem)",
-              color:          npc.color,
-              textShadow:     `0 0 20px ${npc.color}`,
-              letterSpacing:  "0.05em",
-            }}>
-              {npcInitial}
-            </div>
-          </motion.div>
+              transformOrigin: "bottom center",
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 60 }}
+              animate={{
+                opacity: npcActive ? 1 : (isMobile ? 0 : 0.25),
+                scale: npcActive 
+                  ? (npcEmotion === "excited" ? 1.05 : npcEmotion === "thinking" ? 1.01 : 1.02) 
+                  : 0.96,
+                y: npcActive 
+                  ? (npcEmotion === "excited" ? [0, -4, 0] : npcEmotion === "thinking" ? [0, -3, 0] : 0) 
+                  : 15,
+                x: npcActive 
+                  ? (npcEmotion === "tense" ? [-6, 6, -4, 4, -2, 2, -1, 1, 0] : 0) 
+                  : 0,
+              }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 120, 
+                damping: 18,
+                x: { type: "tween", duration: 0.4, ease: "easeInOut" },
+                y: npcActive && npcEmotion === "excited" 
+                  ? { type: "tween", ease: "easeInOut", duration: 0.5 }
+                  : { type: "tween", duration: 0.55, ease: "easeOut" }
+              }}
+              style={{
+                position: "absolute",
+                inset: 0,
+              }}>
+              {/* Outer ambient pulse */}
+              <div style={{
+                position:      "absolute",
+                inset:         "-30%",
+                borderRadius:  "50%",
+                background:    `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.18)} 0%, transparent 70%)`,
+                animation:     npcActive ? "dlg-speaker-glow 2.4s ease-in-out infinite" : "none",
+              }} />
+              {/* Inner orb body */}
+              <div style={{
+                position:      "absolute",
+                inset:         0,
+                borderRadius:  "50%",
+                background:    `radial-gradient(circle at 38% 35%, ${getTranslucentBg(npc.color, 0.55)} 0%, ${getTranslucentBg(npc.color, 0.18)} 40%, transparent 72%)`,
+                border:        `1.5px solid ${getTranslucentBg(npc.color, 0.45)}`,
+                boxShadow:     npcActive
+                  ? `0 0 60px ${getTranslucentBg(npc.color, 0.5)}, inset 0 0 30px ${getTranslucentBg(npc.color, 0.2)}`
+                  : "none",
+                transition:    "box-shadow 0.5s ease",
+                backdropFilter:"blur(2px)",
+              }} />
+              {/* Highlight specular */}
+              <div style={{
+                position:    "absolute",
+                top:         "14%",
+                left:        "20%",
+                width:       "40%",
+                height:      "28%",
+                borderRadius:"50%",
+                background:  `radial-gradient(ellipse at center, ${getTranslucentBg(npc.color, 0.7)} 0%, transparent 100%)`,
+                filter:      "blur(6px)",
+              }} />
+              {/* Initials label */}
+              <div style={{
+                position:       "absolute",
+                inset:          0,
+                display:        "flex",
+                alignItems:     "center",
+                justifyContent: "center",
+                fontFamily:     "Inter, sans-serif",
+                fontWeight:     900,
+                fontSize:       "clamp(1.4rem, 3.5vw, 2.2rem)",
+                color:          npc.color,
+                textShadow:     `0 0 20px ${npc.color}`,
+                letterSpacing:  "0.05em",
+              }}>
+                {npcInitial}
+              </div>
+            </motion.div>
+          </div>
         )}
 
         {/* ── Protagonist (right side) ── */}
         {protagonistImage && (
           <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 60, rotate: 0 }}
             animate={{
-              opacity: isJake ? 1 : (isMobile ? 0.08 : 0.25),
+              opacity: isJake ? 1 : (isMobile ? 0 : 0.25),
               scale: isJake 
-                ? (protEmotion === "excited" ? 1.04 : protEmotion === "thinking" ? 1.01 : 1.02) 
+                ? (protEmotion === "excited" ? 1.05 : protEmotion === "thinking" ? 1.01 : 1.02) 
                 : 0.96,
               y: isJake 
-                ? (protEmotion === "excited" ? [0, -12, -4, 0] : protEmotion === "thinking" ? [0, -4, 0] : 0) 
+                ? (protEmotion === "excited" ? [0, -4, 0] : protEmotion === "thinking" ? [0, -3, 0] : 0) 
                 : 15,
               x: isJake 
-                ? (protEmotion === "tense" ? [-5, 5, -3, 3, -1.5, 1.5, 0] : 0) 
+                ? (protEmotion === "tense" ? [-6, 6, -4, 4, -2, 2, -1, 1, 0] : 0) 
                 : 0,
-              filter: isJake ? "none" : "grayscale(0.4) brightness(0.65)",
+              rotate: isJake && protEmotion === "thinking" ? [0, 1.5, -1.5, 0] : 0,
+              filter: isJake 
+                ? (protEmotion === "tense" 
+                    ? "drop-shadow(0 0 25px rgba(0, 212, 240, 0.6)) drop-shadow(0 0 12px rgba(180, 0, 255, 0.6))" 
+                    : "none") 
+                : "grayscale(0.4) brightness(0.65)",
             }}
             transition={{ 
               type: "spring", 
               stiffness: 120, 
-              damping: 20,
-              x: { type: "tween", duration: 0.45, ease: "easeInOut" },
-              y: { type: "tween", duration: 0.55, ease: "easeOut" },
+              damping: 18,
+              x: { type: "tween", duration: 0.4, ease: "easeInOut" },
+              y: isJake && protEmotion === "excited" 
+                ? { type: "tween", ease: "easeInOut", duration: 0.5 }
+                : { type: "tween", duration: 0.55, ease: "easeOut" },
+              rotate: isJake && protEmotion === "thinking" 
+                ? { repeat: Infinity, duration: 4, ease: "easeInOut" }
+                : { duration: 0.3 }
             }}
             style={{
               position:   "absolute",
               bottom:     0,
-              right:      isMobile ? "1%" : "3%",
-              width:      isMobile ? "46%" : "clamp(260px, 32vw, 540px)",
+              right:      isMobile ? "10%" : "3%",
+              width:      isMobile ? "80%" : "clamp(260px, 32vw, 540px)",
               height:     "100%",
               zIndex:     isJake ? 10 : 2,
             }}
@@ -699,32 +982,60 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
               right:      "10%",
               width:      "80%",
               height:     "65%",
-              background: `radial-gradient(ellipse at center, ${getTranslucentBg(protColor, 0.28)} 0%, transparent 72%)`,
+              background: isJake
+                ? (protEmotion === "excited"
+                    ? "radial-gradient(ellipse at center, rgba(255, 215, 0, 0.4) 0%, transparent 72%)"
+                    : protEmotion === "tense"
+                    ? "radial-gradient(ellipse at center, rgba(220, 20, 60, 0.4) 0%, transparent 72%)"
+                    : `radial-gradient(ellipse at center, ${getTranslucentBg(protColor, 0.28)} 0%, transparent 72%)`)
+                : "transparent",
               animation:  isJake ? "dlg-speaker-glow 2.2s ease-in-out infinite" : "none",
               opacity:    isJake ? 1 : 0,
-              transition: "opacity 0.55s ease",
+              transition: "opacity 0.55s ease, background 0.55s ease",
               zIndex:     0,
             }} />
-            {/* Character image — breathes when inactive, talks when active */}
-            <img
-              src={protagonistImage}
-              alt={protName}
-              draggable={false}
-              className={isJake ? "char-talk" : "char-breathe"}
-              style={{
-                position:        "absolute",
-                bottom:          0,
-                right:           0,
-                width:           "100%",
-                height:          "100%",
-                objectFit:       "contain",
-                objectPosition:  "bottom center",
-                maskImage:       charMask,
-                WebkitMaskImage: charMask,
-                zIndex:          1,
-                transformOrigin: "bottom center",
-              }}
-            />
+            {/* Aspect-ratio matched container to align mouth coordinates exactly */}
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              width: "100%",
+              aspectRatio: "1/1",
+              zIndex: 1,
+            }}>
+              {/* Character image — breathes when inactive, talks when active and typing */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  transformOrigin: "bottom center",
+                }}
+              >
+                <CharacterImage
+                  baseSrc={protagonistImage}
+                  emotion={protEmotion}
+                  alt={protName}
+                  className={protEmotion === "excited"
+                    ? "char-react-correct"
+                    : protEmotion === "tense"
+                    ? "char-react-wrong"
+                    : (isJake && !textDone ? "char-talk" : "char-breathe")}
+                  style={{
+                    position:        "absolute",
+                    bottom:          0,
+                    right:           0,
+                    width:           "100%",
+                    height:          "100%",
+                    objectFit:       "contain",
+                    objectPosition:  "bottom center",
+                    maskImage:       charMask,
+                    WebkitMaskImage: charMask,
+                    zIndex:          1,
+                    transformOrigin: "bottom center",
+                  }}
+                />
+              </div>
+            </div>
           </motion.div>
         )}
 
@@ -756,14 +1067,14 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
 
       </div>
 
-      {/* ── Chat panel — bottom 40% ───────────────────────────────────────── */}
+      {/* ── Chat panel — bottom 40-45% ───────────────────────────────────────── */}
       <div style={{
         position:       "absolute",
         bottom:         0,
         left:           0,
         right:          0,
-        height:         "40%",
-        zIndex:         10,
+        height:         isMobile ? "45%" : "40%",
+        zIndex:         20,
         display:        "flex",
         flexDirection:  "column",
         background:     "linear-gradient(180deg, rgba(6,4,14,0) 0%, rgba(6,4,14,0.88) 14%, rgba(6,4,14,0.97) 100%)",
@@ -826,13 +1137,10 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
             )
           })}
 
-          {/* ── Active line — springs in ───────────────────────────────────── */}
+          {/* ── Active line — springs in from speaker direction ────────────── */}
           <AnimatePresence mode="wait">
-            <motion.div
+            <div
               key={lineIndex}
-              initial={{ opacity: 0, y: 14, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0,  scale: 1    }}
-              transition={{ type: "spring", stiffness: 520, damping: 28, mass: 0.8 }}
               style={{
                 display:       "flex",
                 flexDirection: activeCfg.right ? "row-reverse" : "row",
@@ -840,7 +1148,7 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
                 gap:           "0.42rem",
               }}
             >
-              {/* Avatar badge */}
+              {/* Avatar badge — pops in slightly before the bubble */}
               <div style={{
                 width:"26px", height:"26px", borderRadius:"50%", flexShrink:0,
                 background:  speakerColor.replace("0.9", "0.18"),
@@ -849,18 +1157,20 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
                 fontSize:"0.48rem", fontWeight:800, color:speakerColor,
                 fontFamily:"Inter, sans-serif",
                 boxShadow: `0 0 14px ${speakerColor.replace("0.9", "0.3")}`,
+                animation: "dlg-bubble-land-" + (activeCfg.right ? "right" : "left") + " 0.38s cubic-bezier(0.34,1.3,0.64,1) both",
               }}>
                 {activeCfg.init}
               </div>
 
-              {/* Bubble */}
+              {/* Bubble — directional spring land from speaker's side */}
               <div style={{
                 background:   activeCfg.bg,
                 border:       `1.5px solid ${speakerColor.replace("0.9", "0.4")}`,
                 borderRadius: activeCfg.right ? "14px 3px 14px 14px" : "3px 14px 14px 14px",
                 padding:      "0.58rem 0.9rem",
-                maxWidth:     "78%",
+                maxWidth:     isMobile ? "92%" : "78%",
                 boxShadow:    `0 0 24px ${speakerColor.replace("0.9", "0.14")}`,
+                animation: "dlg-bubble-land-" + (activeCfg.right ? "right" : "left") + " 0.42s cubic-bezier(0.34,1.56,0.64,1) both",
               }}>
                 <div style={{
                   fontFamily:    "Inter, sans-serif",
@@ -892,67 +1202,97 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
                   )}
                 </p>
               </div>
-            </motion.div>
+            </div>
           </AnimatePresence>
           <div ref={bottomRef} />
         </div>
 
-        {/* ── Bottom bar: pips + hint ───────────────────────────────────── */}
+        {/* ── Bottom bar: pips + auto-advance progress bar ─────────────── */}
         <div style={{
-          padding:        "0.42rem 1.2rem 1.1rem",
+          padding:        "0.32rem 1.2rem 0.85rem",
           display:        "flex",
-          alignItems:     "center",
-          justifyContent: "center",
+          flexDirection:  "column",
+          gap:            "0.4rem",
           borderTop:      `1px solid ${speakerColor.replace("0.9", "0.11")}`,
           position:       "relative",
         }}>
-          <div style={{ position: "absolute", left: "1.2rem", display: "flex", gap: "4px", alignItems: "center" }}>
-            {lines.map((_, i) => (
-              <div key={i} style={{
-                height:      "3px",
-                width:       i === lineIndex ? "16px" : "5px",
-                borderRadius:"2px",
-                background:  i < lineIndex
-                  ? speakerColor.replace("0.9", "0.38")
-                  : i === lineIndex
-                  ? speakerColor
-                  : "rgba(255,255,255,0.11)",
-                transition:  "all 0.3s ease",
-              }} />
-            ))}
+
+          {/* Auto-advance progress bar — thin glowing line sweeping across */}
+          <div style={{ width: "100%", height: "2px", background: "rgba(255,255,255,0.06)", borderRadius: "2px", overflow: "hidden" }}>
+            <div style={{
+              height:     "100%",
+              width:      `${autoProgress}%`,
+              background: `linear-gradient(90deg, ${speakerColor}, ${speakerColor.replace("0.9","0.5")})`,
+              borderRadius: "2px",
+              boxShadow:  `0 0 6px ${speakerColor}`,
+              transition: autoProgress === 0 ? "none" : "width 0.05s linear",
+            }} />
           </div>
-          {/* Tap-to-continue — clear pulsing pill so it's never missed */}
-          <motion.div
-            animate={textDone
-              ? { opacity: [0.75, 1, 0.75], scale: [1, 1.03, 1] }
-              : { opacity: 0, scale: 1 }}
-            transition={textDone
-              ? { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
-              : { duration: 0.28 }}
-            style={{
-              display:        "flex",
-              alignItems:     "center",
-              gap:            "0.4rem",
-              fontFamily:     "Inter, sans-serif",
-              fontSize:       "0.74rem",
-              fontWeight:     700,
-              letterSpacing:  "0.06em",
-              color:          speakerColor,
-              background:     getTranslucentBg(speakerColor, 0.12),
-              border:         `1px solid ${getTranslucentBg(speakerColor, 0.45)}`,
-              borderRadius:   "100px",
-              padding:        "0.4rem 0.95rem",
-              boxShadow:      `0 0 18px ${getTranslucentBg(speakerColor, 0.25)}`,
-              pointerEvents:  "none",
-              whiteSpace:     "nowrap",
-            }}
-          >
-            Tap anywhere to continue
-            <span style={{ fontSize: "0.95rem" }}>→</span>
-          </motion.div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {/* Progress pips */}
+            <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+              {lines.map((_, i) => (
+                <div key={i} style={{
+                  height:      "3px",
+                  width:       i === lineIndex ? "16px" : "5px",
+                  borderRadius:"2px",
+                  background:  i < lineIndex
+                    ? speakerColor.replace("0.9", "0.38")
+                    : i === lineIndex
+                    ? speakerColor
+                    : "rgba(255,255,255,0.11)",
+                  transition:  "all 0.3s ease",
+                }} />
+              ))}
+            </div>
+
+            {/* Right side: tap hint + Skip All button */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              {/* Tap-to-advance hint */}
+              <div style={{
+                fontFamily:   "Inter, sans-serif",
+                fontSize:     "0.58rem",
+                fontWeight:   600,
+                letterSpacing:"0.08em",
+                color:        speakerColor,
+                opacity:      textDone ? 0.45 : 0,
+                pointerEvents:"none",
+                whiteSpace:   "nowrap",
+                transition:   "opacity 0.3s",
+              }}>
+                tap to advance →
+              </div>
+
+              {/* Skip All button — always visible, completes dialogue instantly */}
+              <button
+                onClick={e => { e.stopPropagation(); onComplete() }}
+                style={{
+                  fontFamily:    "Inter, sans-serif",
+                  fontSize:      "0.58rem",
+                  fontWeight:    700,
+                  letterSpacing: "0.08em",
+                  color:         "rgba(240,238,255,0.42)",
+                  background:    "rgba(255,255,255,0.05)",
+                  border:        "1px solid rgba(255,255,255,0.1)",
+                  borderRadius:  "8px",
+                  padding:       "0.22rem 0.65rem",
+                  cursor:        "pointer",
+                  whiteSpace:    "nowrap",
+                  transition:    "color 0.2s, background 0.2s",
+                  flexShrink:    0,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = "rgba(240,238,255,0.8)"; e.currentTarget.style.background = "rgba(255,255,255,0.1)" }}
+                onMouseLeave={e => { e.currentTarget.style.color = "rgba(240,238,255,0.42)"; e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
+              >
+                Skip All ⚡
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
   )
 }
+

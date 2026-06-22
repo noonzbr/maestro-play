@@ -15,8 +15,9 @@ export type DialogueLine = {
   speaker: string
   /** "protagonist" = right-side character (works for any game hero, not just Jake) */
   avatar: "jake" | "protagonist" | "npc"
-  npcKey?: "default" | "senora_vega" | "tyler" | "ai"
+  npcKey?: "default" | "senora_vega" | "tyler" | "ai" | "jake" | "zoe" | "carlos" | "aria" | "jordan" | "kai" | "priya" | "alex" | "luna" | "sam" | "vera" | "maya" | "nova"
   text: string
+  emotion?: "neutral" | "excited" | "thinking" | "tense"
 }
 
 /** One row in an AI model comparison table */
@@ -53,6 +54,7 @@ export type Choice = {
   correct?: boolean
   feedback?: string
   wrongFeedback?: string   // optional wrong-answer-specific elaboration (overrides feedback when wrong)
+  wrongStoryText?: string  // optional story-driven reaction narrative when player chooses this wrong answer
   breakdown?: ChoiceBreakdown[]  // annotated phrases shown after correct reveal
   /** Scene ID to jump to after this choice is selected (overrides sequential index advance) */
   leadsTo?: string

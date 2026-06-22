@@ -212,78 +212,157 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
         </p>
       </div>
 
-      {/* ── Your Sequence (2x2 Grid) ────────────────────────────────── */}
+      {/* ── Your Sequence (Music Staff Sheet) ─────────────────────────── */}
       <div style={{ marginBottom: "1rem" }}>
         <div style={{
           fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.78rem",
           letterSpacing: "0.2em", textTransform: "uppercase",
           color: "rgba(240,238,255,0.35)", marginBottom: "0.4rem",
         }}>
-          Your Sequence
+          Composition Staff
         </div>
 
-        {/* Sequence slots in a 2x2 grid */}
+        {/* Sequence slots styled as a music sheet staff container */}
         <div
           key={shakeKey}
           style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.45rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.6rem",
             animation: isWrong ? `order-shake 0.55s ease both` : undefined,
+            position: "relative",
+            background: "rgba(8, 6, 15, 0.45)",
+            border: "1px solid rgba(255, 255, 255, 0.06)",
+            borderRadius: "16px",
+            padding: "1rem 1rem 1rem 4.2rem",
+            overflow: "hidden",
+            boxShadow: "inset 0 4px 24px rgba(0, 0, 0, 0.3)",
           }}
         >
+          {/* Glowing music staff lines running across the background */}
+          <div style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            padding: "1.2rem 0",
+            pointerEvents: "none",
+            opacity: 0.35,
+          }}>
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div key={idx} style={{
+                height: "1px",
+                background: `linear-gradient(90deg, rgba(${accentRgb}, 0) 0%, rgba(${accentRgb}, 0.5) 10%, rgba(${accentRgb}, 0.5) 90%, rgba(${accentRgb}, 0) 100%)`,
+                width: "100%",
+              }} />
+            ))}
+          </div>
+
+          {/* Giant glowing Treble Clef absolute-positioned on the left */}
+          <div style={{
+            position: "absolute",
+            left: "0.95rem",
+            top: "50%",
+            transform: "translateY(-50%)",
+            pointerEvents: "none",
+            userSelect: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <span style={{
+              fontSize: "4.2rem",
+              fontFamily: "serif",
+              color: accentColor,
+              textShadow: `0 0 16px rgba(${accentRgb}, 0.6)`,
+              lineHeight: 1,
+            }}>
+              𝄞
+            </span>
+          </div>
+
           {sequence.map((item, idx) => {
             const isWrongPos = wrongIndices.has(idx)
             return (
               <motion.button
                 key={item.id}
-                initial={{ opacity: 0, x: -10, scale: 0.97 }}
+                initial={{ opacity: 0, x: -15, scale: 0.97 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ type: "spring", stiffness: 380, damping: 28, delay: idx * 0.04 }}
                 onClick={() => removeFromSequence(item, idx)}
                 style={{
                   width: "100%", textAlign: "left", cursor: isCorrect ? "default" : "pointer",
                   display: "flex", alignItems: "center", gap: "0.6rem",
-                  height: "72px",
+                  height: "64px",
+                  position: "relative",
+                  zIndex: 2,
                   background: isCorrect
-                    ? `rgba(${accentRgb},0.1)`
+                    ? `linear-gradient(90deg, rgba(${accentRgb}, 0.16) 0%, rgba(${accentRgb}, 0.06) 100%)`
                     : isWrongPos
-                    ? "rgba(255,179,71,0.08)"
-                    : "rgba(255,255,255,0.05)",
+                    ? "linear-gradient(90deg, rgba(255, 179, 71, 0.12) 0%, rgba(255, 179, 71, 0.04) 100%)"
+                    : "linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%)",
                   border: isCorrect
-                    ? `1.5px solid rgba(${accentRgb},0.55)`
+                    ? `1.5px solid rgba(${accentRgb}, 0.6)`
                     : isWrongPos
-                    ? "1.5px solid rgba(255,179,71,0.55)"
-                    : "1.5px solid rgba(255,255,255,0.14)",
+                    ? "1.5px solid rgba(255, 179, 71, 0.6)"
+                    : "1.5px solid rgba(255, 255, 255, 0.12)",
                   borderRadius: "12px",
-                  padding: "0.5rem 0.75rem",
+                  padding: "0.4rem 0.75rem",
                   boxShadow: isCorrect
-                    ? `0 0 0 0 rgba(${accentRgb},0)`
+                    ? `0 0 16px rgba(${accentRgb}, 0.15)`
+                    : isWrongPos
+                    ? "0 0 16px rgba(255, 179, 71, 0.1)"
                     : "none",
                   animation: isCorrect ? "order-success-glow 2.8s ease-in-out infinite" : undefined,
                   transition: "background 0.25s ease, border-color 0.25s ease",
                 }}
               >
-                {/* Position badge */}
-                <div style={{
-                  width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.85rem",
-                  background: isCorrect
-                    ? `rgba(${accentRgb},0.2)`
-                    : isWrongPos
-                    ? "rgba(255,179,71,0.18)"
-                    : "rgba(255,255,255,0.08)",
-                  color: isCorrect
-                    ? accentColor
-                    : isWrongPos
-                    ? "#ffb347"
-                    : "rgba(240,238,255,0.5)",
-                  border: isCorrect
-                    ? `1px solid rgba(${accentRgb},0.4)`
-                    : isWrongPos
-                    ? "1px solid rgba(255,179,71,0.4)"
-                    : "1px solid rgba(255,255,255,0.12)",
-                }}>
-                  {idx + 1}
+                {/* Note head + note stem icon */}
+                <div style={{ position: "relative", width: "30px", height: "32px", flexShrink: 0, marginRight: "0.3rem" }}>
+                  {/* Note Head */}
+                  <div style={{
+                    width: "24px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 900,
+                    fontSize: "0.75rem",
+                    transform: "rotate(-18deg) translateY(8px)",
+                    background: isCorrect
+                      ? `linear-gradient(135deg, ${accentColor}, #e040fb)`
+                      : isWrongPos
+                      ? "linear-gradient(135deg, #ffb347, #ff9800)"
+                      : "rgba(255, 255, 255, 0.18)",
+                    color: isCorrect || isWrongPos ? "#fff" : "rgba(240, 238, 255, 0.7)",
+                    border: `1px solid ${isCorrect ? accentColor : isWrongPos ? "#ffb347" : "rgba(255,255,255,0.25)"}`,
+                    boxShadow: isCorrect
+                      ? `0 0 8px ${accentColor}`
+                      : isWrongPos
+                      ? "0 0 8px rgba(255, 179, 71, 0.5)"
+                      : "none",
+                  }}>
+                    {idx + 1}
+                  </div>
+                  {/* Note Stem */}
+                  <div style={{
+                    position: "absolute",
+                    top: "2px",
+                    right: "5px",
+                    width: "2px",
+                    height: "16px",
+                    background: isCorrect
+                      ? accentColor
+                      : isWrongPos
+                      ? "#ffb347"
+                      : "rgba(255,255,255,0.45)",
+                  }} />
                 </div>
 
                 {/* Item text */}
@@ -297,10 +376,10 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
                     : isWrongPos
                     ? "#ffb347"
                     : "rgba(240,238,255,0.9)",
-                  lineHeight: 1.3,
+                  lineHeight: 1.25,
                   flex: 1,
                   display: "-webkit-box",
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                 }}>
@@ -328,27 +407,48 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
               style={{
                 display: "flex", alignItems: "center", gap: "0.6rem",
                 background: "rgba(255,255,255,0.02)",
-                border: "1.5px dashed rgba(255,255,255,0.1)",
+                border: "1.5px dashed rgba(255,255,255,0.08)",
                 borderRadius: "12px",
-                padding: "0.5rem 0.75rem",
-                height: "72px",
-                opacity: 0.55,
+                padding: "0.4rem 0.75rem",
+                height: "64px",
+                opacity: 0.45,
                 animation: `order-item-in 0.3s ${(sequence.length + i) * 0.06}s ease both`,
+                position: "relative",
+                zIndex: 2,
               }}
             >
-              <div style={{
-                width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.85rem",
-                background: "rgba(255,255,255,0.04)",
-                color: "rgba(240,238,255,0.2)",
-                border: "1px dashed rgba(255,255,255,0.12)",
-              }}>
-                {sequence.length + i + 1}
+              <div style={{ position: "relative", width: "30px", height: "32px", flexShrink: 0, marginRight: "0.3rem" }}>
+                {/* Dashed Note Head */}
+                <div style={{
+                  width: "24px",
+                  height: "18px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 900,
+                  fontSize: "0.75rem",
+                  transform: "rotate(-18deg) translateY(8px)",
+                  background: "rgba(255, 255, 255, 0.02)",
+                  color: "rgba(240, 238, 255, 0.25)",
+                  border: "1px dashed rgba(255, 255, 255, 0.2)",
+                }}>
+                  {sequence.length + i + 1}
+                </div>
+                {/* Note Stem */}
+                <div style={{
+                  position: "absolute",
+                  top: "2px",
+                  right: "5px",
+                  width: "2px",
+                  height: "16px",
+                  background: "rgba(255, 255, 255, 0.15)",
+                }} />
               </div>
               <span style={{
                 fontFamily: "Inter, sans-serif", fontSize: "0.95rem",
-                color: "rgba(240,238,255,0.2)", letterSpacing: "0.06em",
+                color: "rgba(240,238,255,0.15)", letterSpacing: "0.06em",
               }}>
                 —
               </span>
@@ -357,7 +457,7 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
         </div>
       </div>
 
-      {/* ── Available Items (2x2 Grid) ──────────────────────────────── */}
+      {/* ── Available Items (Music Tray) ────────────────────────────── */}
       <AnimatePresence>
         {available.length > 0 && (
           <motion.div
@@ -370,7 +470,7 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
               letterSpacing: "0.2em", textTransform: "uppercase",
               color: "rgba(240,238,255,0.35)", marginBottom: "0.4rem",
             }}>
-              Available
+              Available Notes
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.45rem" }}>
@@ -387,11 +487,11 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
                     style={{
                       width: "100%", textAlign: "left", cursor: "pointer",
                       display: "flex", alignItems: "center", gap: "0.6rem",
-                      height: "72px",
-                      background: "rgba(255,255,255,0.04)",
+                      height: "68px",
+                      background: "rgba(255,255,255,0.03)",
                       border: `1.5px solid rgba(${accentRgb},0.22)`,
                       borderRadius: "12px",
-                      padding: "0.5rem 0.75rem",
+                      padding: "0.4rem 0.75rem",
                       transition: "background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
                     }}
                     onMouseEnter={e => {
@@ -400,21 +500,26 @@ export default function OrderingScene({ scene, onComplete, accentColor = "#00d4f
                       e.currentTarget.style.boxShadow = `0 0 16px rgba(${accentRgb},0.15)`
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.04)"
+                      e.currentTarget.style.background = "rgba(255,255,255,0.03)"
                       e.currentTarget.style.borderColor = `rgba(${accentRgb},0.22)`
                       e.currentTarget.style.boxShadow = "none"
                     }}
                   >
                     <div style={{
-                      width: "24px", height: "24px", borderRadius: "50%", flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center",
+                      width: "24px",
+                      height: "24px",
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                       background: `rgba(${accentRgb},0.1)`,
                       border: `1px solid rgba(${accentRgb},0.25)`,
+                      color: accentColor,
+                      fontSize: "0.85rem",
+                      boxShadow: `0 0 8px rgba(${accentRgb}, 0.25)`,
                     }}>
-                      <span style={{
-                        fontFamily: "Inter, sans-serif", fontSize: "0.8rem",
-                        color: accentColor, opacity: 0.7,
-                      }}>+</span>
+                      ♫
                     </div>
 
                     <span style={{

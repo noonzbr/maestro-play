@@ -109,6 +109,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "GPT-4o is a multimodal model — it handles text, images, code, voice, and can browse the web and generate images via DALL-E. That 'o' stands for 'omni.'",
+          wrongFeedback: "GPT-4o's 'o' stands for **Omni** — it unifies text, vision, voice, code, and image generation into one **multimodal** model, far beyond text alone.",
+          wrongStoryText: "Alex blinks at Mia's screen. The console whispers: 'You've been using one pawn while a whole board waited.'",
         },
         {
           label: "B",
@@ -123,6 +125,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "GPT-4o defaults to a broadly acceptable style — which is why two people using it identically get similar-sounding output. You have to specialise it deliberately.",
+          wrongFeedback: "GPT-4o defaults to a broad, neutral style — real differentiation comes from **deliberate prompting** and **system instructions**, not automatic personalisation.",
+          wrongStoryText: "Alex leans back, humbled. The screen glows steadily: 'Same tool. Same output. The difference was always in the direction given.'",
         },
         {
           label: "D",
@@ -130,6 +134,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Web browsing is one optional capability. GPT-4o works across all its core functions without a live internet connection, though browsing requires it.",
+          wrongFeedback: "Web browsing is just one **optional capability** of GPT-4o — its core **multimodal functions** like vision, code, and voice work without a live internet connection.",
+          wrongStoryText: "Alex frowns at the screen. Mia closes the browser tab. ChatGPT answers anyway — steady, unfazed, still fully alive.",
         },
       ],
       xpAward: 100,
@@ -157,6 +163,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Saved conversations just resume context. A Custom GPT is a persistent application with pre-loaded instructions, knowledge, and rules that apply to every new conversation you start with it.",
+          wrongFeedback: "Saved chats only resume previous context; a **Custom GPT** is a persistent **mini-application** with pre-loaded instructions and knowledge files active from the very first message.",
+          wrongStoryText: "Alex opens an old saved chat. It's just frozen history. Mia's Custom GPT hums to life — already knowing everything, ready before Alex types a word.",
         },
         {
           label: "B",
@@ -171,6 +179,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Plugins (now largely replaced by GPT actions) connected external services. A Custom GPT primarily customises behaviour and knowledge — it works with ChatGPT's existing capabilities, not new ones.",
+          wrongFeedback: "**Custom GPTs** configure behaviour and inject knowledge — they work within existing capabilities, unlike **Actions**, which connect to external APIs and services.",
+          wrongStoryText: "Alex clicks through menus hunting for a plugin. Mia points quietly to the GPT Builder. 'It was never about adding power,' she says. 'It was about focusing it.'",
         },
         {
           label: "D",
@@ -178,6 +188,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Custom GPTs are available to ChatGPT Plus, Team, and Enterprise users. They're a configuration feature, not a billing tier — you build them inside the GPT Builder.",
+          wrongFeedback: "**Custom GPTs** are a **configuration feature** inside ChatGPT Plus — you build them using the **GPT Builder**, not by upgrading to a higher billing tier.",
+          wrongStoryText: "Alex checks the subscription page twice, finding nothing new. Mia taps the Explore button instead. The GPT Builder opens — free of charge, waiting patiently.",
         },
       ],
       xpAward: 150,
@@ -240,6 +252,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Response speed is unrelated to Canvas mode. Canvas solves a workflow problem — keeping your document persistent and editable — not a speed problem.",
+          wrongFeedback: "**Canvas** is a **persistent document workspace** — it solves version-loss and workflow fragmentation, not response latency or processing speed.",
+          wrongStoryText: "Alex watches the timer. The response arrives at the same speed. Mia smiles: 'Canvas wasn't built to go faster — it was built so you never lose your place.'",
         },
         {
           label: "B",
@@ -254,6 +268,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Canvas is a native ChatGPT editing environment — it doesn't sync to external document editors. It's a self-contained workspace inside the ChatGPT interface.",
+          wrongFeedback: "**Canvas** is a self-contained workspace inside ChatGPT — it doesn't sync with Google Docs or Word; it replaces the need to copy-paste between external editors.",
+          wrongStoryText: "Alex reaches for the Google Docs tab out of habit. Mia closes it gently. 'Everything you need,' she says, 'is already on the right side of this screen.'",
         },
         {
           label: "D",
@@ -261,6 +277,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Canvas is a single-user editing environment. Real-time collaboration is handled by tools like Google Docs — Canvas is for your own multi-draft iteration workflow with ChatGPT.",
+          wrongFeedback: "**Canvas** is a single-user **iterative editing environment** — real-time team collaboration belongs to tools like Google Docs, not this focused personal workspace.",
+          wrongStoryText: "Alex looks around for a share button. There isn't one. The document glows quietly on the right — built for one focused mind, one clear draft at a time.",
         },
       ],
       xpAward: 100,
@@ -289,6 +307,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Reading a file name reveals nothing about its contents. Code Interpreter actually parses the data, runs calculations, and computes results — it doesn't guess from metadata.",
+          wrongFeedback: "**Code Interpreter** actually parses and executes real **Python** on your data — it reads file contents row by row, not metadata like a file name.",
+          wrongStoryText: "Alex smirks at the file name: 'sales_final_v3.' ChatGPT ignores it entirely — already deep inside 500 rows, calculating truths the filename could never tell.",
         },
         {
           label: "B",
@@ -303,6 +323,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Code Interpreter runs in a sandbox and doesn't have live integrations with external apps. It produces downloadable files — charts, CSVs, reports — which you then use wherever you need.",
+          wrongFeedback: "**Code Interpreter** runs in an isolated **sandbox** — it creates downloadable files but has no live connection to external apps like Google Sheets.",
+          wrongStoryText: "Alex frowns. The console reads: 'I can hand you the report — but I can't walk it over to Google for you.'",
         },
         {
           label: "D",
@@ -310,6 +332,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "ChatGPT does not retain file contents across conversations by default. Each session is fresh unless you use a Custom GPT with uploaded knowledge files or explicitly re-upload.",
+          wrongFeedback: "**Session Memory** isn't automatic — ChatGPT starts fresh each conversation, so your uploaded data doesn't persist without re-uploading or a **Custom GPT**.",
+          wrongStoryText: "Alex pauses. The screen blinks: 'I analyzed it brilliantly — but tomorrow, I won't remember a single row.'",
         },
       ],
       xpAward: 150,
@@ -332,6 +356,19 @@ export const game8: Game = {
       xpAward: 150,
     },
 
+    // ── NEAR-TRANSFER: Same Tool, Different Report ────────────────────────────
+    {
+      id:       "w8-near-transfer",
+      type:     "learn",
+      location: "HOME OFFICE · SUNDAY · 2:00 PM",
+      xpAward:  0,
+      concept: {
+        title: "Same Tool. Different Report.",
+        body:  "David, a junior data analyst, spent every Friday morning cleaning CSV exports, compiling sales trends, and formatting them into a PDF report for executives. It was a repetitive, three-hour chore. Instead of writing custom code manually, David built a Custom GPT called 'Sales Insight Engine' equipped with his team's specific KPI formulas. Now, he simply uploads the raw CSVs. The Custom GPT automatically cleans the data, runs the analysis, creates beautiful charts, and drafts the executive summary using his predefined business rules. David went from three hours of manual cleaning to three minutes of verification. Same ChatGPT. Completely different productivity.",
+      },
+      learnHighlight: "When you move beyond basic chat prompts and build custom tools with automated execution, you change the nature of your daily work.",
+    },
+
     // ── SCENE 6 (BOSS) ───────────────────────────────────────────────────────
     {
       id: "w8-s6",
@@ -351,6 +388,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Real-time, location-specific factual lookups are where Google Search dominates. ChatGPT with browsing can do this, but it's slower and less reliable than a direct search. Use the right tool for the right job.",
+          wrongFeedback: "Real-time, location-specific lookups are a **retrieval task** — Google Search wins here. ChatGPT shines at **reasoning and synthesis**, not live local facts.",
+          wrongStoryText: "Alex hesitates. Mia smiles quietly: 'You'd ask a conductor to find your keys? Use the right tool, Alex.'",
         },
         {
           label: "B",
@@ -358,6 +397,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "A simple definition lookup is a retrieval task — Google Search, a legal dictionary, or Wikipedia handles this faster and more reliably. ChatGPT adds value when reasoning, synthesis, or computation is required.",
+          wrongFeedback: "Simple definitions are pure **retrieval** — a dictionary or Google handles this faster. ChatGPT's edge is **reasoning and synthesis**, not looking facts up.",
+          wrongStoryText: "Alex winces. Mia taps the board: 'A scalpel is precise — but not for every cut. Know your tools.'",
         },
         {
           label: "C",
@@ -372,6 +413,8 @@ export const game8: Game = {
           correct: false,
           feedback:
             "Live inventory data requires a real-time connection to a retailer's system. Google Search or the retailer's own site is faster and more accurate. ChatGPT excels at reasoning and computation — not live inventory lookups.",
+          wrongFeedback: "Live inventory is **real-time external data** — ChatGPT can't access retailer systems. Use Google or the retailer's site; save ChatGPT for **computation and reasoning**.",
+          wrongStoryText: "Alex shakes her head slowly. The screen pulses: 'I reason beautifully — but I can't see inside a warehouse.'",
         },
       ],
       xpAward: 250,
@@ -448,6 +491,7 @@ export const game8: Game = {
             correct: false,
             feedback: "Claude reasons brilliantly about data — but it can't execute code or generate charts directly. Alex would need to describe the data manually rather than uploading her CSV and having it analyzed live. That's the key gap here.",
             wrongFeedback: "Claude reasons brilliantly about data — but it can't execute code or generate charts directly. Alex would need to describe the data manually rather than uploading her CSV and having it analyzed live. That's the key gap here.",
+          wrongStoryText: "Alex uploads the file. Nothing runs. The terminal whispers: 'I can think about your data — but I can't touch it.'",
           },
           {
             label: "B",
@@ -461,6 +505,7 @@ export const game8: Game = {
             correct: false,
             feedback: "Gemini's Sheets integration is useful for Google-native workflows, but it's more about assisting within Sheets than running full analytical pipelines. For a full CSV-to-charts data session, ChatGPT's Code Interpreter has a more direct workflow.",
             wrongFeedback: "Gemini's Sheets integration is useful for Google-native workflows, but it's more about assisting within Sheets than running full analytical pipelines. For a full CSV-to-charts data session, ChatGPT's Code Interpreter has a more direct workflow.",
+          wrongStoryText: "Alex waits. The Sheets cell blinks endlessly. Mia calls over: 'It helps inside the doc — it doesn't build the lab.'",
           },
         ],
       },

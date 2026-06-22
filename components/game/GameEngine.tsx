@@ -20,12 +20,13 @@ import { useSoundEngine, SoundMood } from "./SoundEngine"
 import AchievementToast, { AchievementId } from "./AchievementToast"
 import XPBurstLottie from "./XPBurstLottie"
 import TutorBot from "./TutorBot"
-import { playVoiceBlip } from "./NovelScene"
+import { playVoiceBlip, resolveNpcKey } from "./NovelScene"
+import StoryMap from "./StoryMap"
 import { useAuth } from "@/context/AuthContext"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 
 type Props = { game: Game }
-type GameState = "brand-video" | "video" | "story" | "intro" | "koda-intro" | "playing" | "answered" | "felipe-transition" | "felipe" | "complete"
+type GameState = "brand-video" | "video" | "story" | "intro" | "koda-intro" | "playing" | "answered" | "felipe-transition" | "felipe" | "complete" | "out-of-lives"
 
 /** Find a scene's array index by its id field (returns -1 if not found) */
 function findSceneIndexById(scenes: { id: string }[], id: string): number {
@@ -174,6 +175,7 @@ export default function GameEngine({ game: initialGame }: Props) {
   const [lives,        setLives]        = useState(3)
   const [showBurst,    setShowBurst]    = useState(false)
   const [showXpBurst,  setShowXpBurst]  = useState(false)
+  const [showMap,      setShowMap]      = useState(false)
   const [burstKey,     setBurstKey]     = useState(0)
   const [dialogueDone,   setDialogueDone]   = useState(false)
   const [completedDialogueSceneIndex, setCompletedDialogueSceneIndex] = useState<number | null>(null)
@@ -181,6 +183,7 @@ export default function GameEngine({ game: initialGame }: Props) {
   const [isMuted,        setIsMuted]        = useState(false)
   // undefined = idle/not needed, null = loading, "" = error/empty, string = AI text
   const [aiElaboration,  setAiElaboration]  = useState<string | null | undefined>(undefined)
+  const [codaReviewStep, setCodaReviewStep] = useState(false)
   const [mounted,        setMounted]        = useState(false)
   const [playerName,     setPlayerName]     = useState("")
   /** Briefly true after a wrong answer — signals TutorBot to nudge */
@@ -193,6 +196,46 @@ export default function GameEngine({ game: initialGame }: Props) {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null)
   /** Key to re-trigger character reaction animation on each answer */
   const [reactionKey,    setReactionKey]    = useState(0)
+  
+  const [shouldShake, setShouldShake] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [portraitSrc, setPortraitSrc] = useState(game.characterImage)
+  const [charTalking, setCharTalking] = useState(false)
+  const [showBossArena, setShowBossArena] = useState(false)
+  const engineRootRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  useEffect(() => {
+    if (!game.characterImage) return
+    const getEmotionUrl = (src: string, emo: string) => {
+      if (emo === "neutral" || !src) return src
+      const urlParts = src.split('?')
+      const path = urlParts[0]
+      const query = urlParts[1] ? `?${urlParts[1]}` : ''
+      if (path.toLowerCase().endsWith('.png')) {
+        const mainPath = path.substring(0, path.length - 4)
+        return `${mainPath}_${emo}.png${query}`
+      }
+      return src
+    }
+
+    let activeEmotion: "neutral" | "excited" | "tense" = "neutral"
+    if (state === "answered") {
+      if (lastAnswerCorrect === true) {
+        activeEmotion = "excited"
+      } else if (lastAnswerCorrect === false) {
+        activeEmotion = "tense"
+      }
+    }
+    setPortraitSrc(getEmotionUrl(game.characterImage, activeEmotion))
+  }, [game.characterImage, state, lastAnswerCorrect])
+
   const abortRef = useRef<AbortController | null>(null)
   const introCanvasRef = useRef<HTMLCanvasElement | null>(null)
 
@@ -201,40 +244,29 @@ export default function GameEngine({ game: initialGame }: Props) {
   const [kodaTypedText,  setKodaTypedText]  = useState("")
   const [kodaTypingDone, setKodaTypingDone] = useState(false)
   const [fastText,       setFastText]       = useState(false)
+  const [kodaAutoProgress, setKodaAutoProgress] = useState(0)
 
   const KODA_INTRO_BEATS = (() => {
-    if (game.week === 1) {
+    if (game.week === 1 || game.week === 13) {
       return [
-        { speaker: "SYSTEM", text: "Beep boop! 📡 Connection established. Initiating Socratic Companion Protocol..." },
-        { speaker: "Coda", text: "Greetings, Conductor! I am Coda, your personal Socratic AI Tutor companion. Felipe Maestro has activated me as the operational guide for your Westbrook Heights journey." },
-        { speaker: "Coda", text: "My style is different: I will NEVER hand you direct answers. That is a shortcut. Instead, I'll guide you with socratic questions, analogies, and anti-pattern warnings to unlock your own insights." },
-        { speaker: "Coda", text: "However, if you're completely stuck, you can type 'give me the answer' in our chat. You have exactly 3 direct answers per session. Use them wisely!" },
-        { speaker: "Coda", text: "Note my strict constraint: during active quiz choices and boss battles, I am locked. You must solve them using your own judgment! The Maestro demands solo excellence." },
-        { speaker: "Felipe", text: "Exactly, Conductor. I am Felipe Maestro, the Director of the Westbrook Heights Campaign, and I am monitoring your progress closely." },
-        { speaker: "Felipe", text: "I have mapped out four distinct learning tracks. Every choice you make branches your story, and every wrong answer will trigger a direct reframe from me. Your ultimate goal is to conquer the boss exams and converge at Maya's Prompt Lab." },
-        { speaker: "Coda", text: "You can open a chat with me at any time by tapping my icon at the bottom-left of the screen during gameplay. Are you ready to begin your quest?" }
+        {
+          speaker: "Coda & Felipe",
+          text: "Welcome, Conductor! I'm Coda, your AI guide, and this is Felipe. Tap my icon for Socratic clues if you get stuck. Let's begin!"
+        }
       ]
     }
 
     const characterName = game.characterName ?? "the team"
     const topic = game.title
 
-    let trackInfo = "this track"
-    if (game.week >= 2 && game.week <= 4) trackInfo = "Track A (AI Fundamentals)"
-    else if (game.week >= 5 && game.week <= 7) trackInfo = "Track B (Claude Ecosystem)"
-    else if (game.week >= 8 && game.week <= 10) trackInfo = "Track C (ChatGPT & Gemini)"
-    else if (game.week >= 11 && game.week <= 12) trackInfo = "Track D (Microsoft Copilot)"
-    else if (game.week === 13) trackInfo = "the Conductor's Alternate Path"
-    else if (game.week === 14) trackInfo = "Maya's Prompt Lab"
-    else if (game.week === 15) trackInfo = "Vera's Design Systems Audit"
-
     return [
-      { speaker: "SYSTEM", text: `Beep boop! 📡 Connection established. Syncing Coda Socratic engine for Game ${game.week}...` },
-      { speaker: "Coda", text: `Welcome back, Conductor! We are standing by to help ${characterName} resolve a critical AI engineering bottleneck: "${topic}".` },
-      { speaker: "Felipe", text: `I am monitoring your performance on ${trackInfo}. Keep in mind: precision is everything. If you falter, my feedback overlays are active to re-center your conductor mindset.` },
-      { speaker: "Coda", text: `Our Socratic channel is open. Tap my icon at the bottom-left if you need help analyzing the concepts, but remember: choices and boss questions are strictly solo. Let's begin!` }
+      {
+        speaker: "Coda & Felipe",
+        text: `Welcome back! We are ready to help solve the AI bottleneck: "${topic}". Let's begin!`
+      }
     ]
   })()
+
 
   useEffect(() => {
     if (state !== "koda-intro") return
@@ -511,6 +543,58 @@ export default function GameEngine({ game: initialGame }: Props) {
   const sound       = useSoundEngine()
   const { user }    = useAuth()
 
+  useEffect(() => {
+    sound.updateGameState?.(streakCount, lives)
+  }, [streakCount, lives, sound])
+
+  const handleNextKodaBeat = useCallback(() => {
+    sound.playClick()
+    setFastText(false)
+    if (kodaBeatIndex + 1 < KODA_INTRO_BEATS.length) {
+      setKodaBeatIndex(i => i + 1)
+    } else {
+      sound.playTransition()
+      setState("playing")
+    }
+  }, [kodaBeatIndex, KODA_INTRO_BEATS.length, sound])
+
+  // Auto-advance koda-intro when typing is done
+  useEffect(() => {
+    if (state !== "koda-intro" || !kodaTypingDone) {
+      setKodaAutoProgress(0)
+      return
+    }
+    const text = KODA_INTRO_BEATS[kodaBeatIndex]?.text ?? ""
+    const words = text.split(/\s+/).length
+    const ms = Math.max(3000, words * 250) // ~240 words per minute, min 3s
+
+    let start: number | null = null
+    let rafId: number
+    let timerId: NodeJS.Timeout
+
+    const tick = (timestamp: number) => {
+      if (!start) start = timestamp
+      const elapsed = timestamp - start
+      const pct = Math.min(100, (elapsed / ms) * 100)
+      setKodaAutoProgress(pct)
+      if (elapsed < ms) {
+        rafId = requestAnimationFrame(tick)
+      }
+    }
+
+    rafId = requestAnimationFrame(tick)
+
+    timerId = setTimeout(() => {
+      handleNextKodaBeat()
+    }, ms)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      clearTimeout(timerId)
+      setKodaAutoProgress(0)
+    }
+  }, [state, kodaTypingDone, kodaBeatIndex, handleNextKodaBeat, KODA_INTRO_BEATS])
+
   /* ── Boss entrance GSAP overlay ─────────────────────────────────────── */
   const bossOverlayRef = useRef<HTMLDivElement | null>(null)
   const prevSceneType  = useRef<string>("")
@@ -599,9 +683,32 @@ export default function GameEngine({ game: initialGame }: Props) {
       .heart-active:hover {
         transform: scale(1.2);
       }
+      @keyframes screen-shake {
+        0%,100% { transform: translateX(0); }
+        15%     { transform: translateX(-8px) translateY(3px); }
+        30%     { transform: translateX(8px)  translateY(-3px); }
+        45%     { transform: translateX(-5px) translateY(2px); }
+        60%     { transform: translateX(5px)  translateY(-1px); }
+        75%     { transform: translateX(-2px) translateY(1px); }
+      }
+      @keyframes correct-flash {
+        0%   { opacity: 0; }
+        20%  { opacity: 0.22; }
+        100% { opacity: 0; }
+      }
+      @keyframes wrong-flash {
+        0%   { opacity: 0; }
+        25%  { opacity: 0.28; }
+        100% { opacity: 0; }
+      }
+      @keyframes wm-next-pulse {
+        0%,100% { box-shadow: 0 0 18px var(--nc, rgba(0,212,240,0.3)); }
+        50%     { box-shadow: 0 0 36px var(--nc, rgba(0,212,240,0.6)); }
+      }
     `
     document.head.appendChild(style)
   }, [])
+
 
   /* ── audio hooks ─────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -625,8 +732,14 @@ export default function GameEngine({ game: initialGame }: Props) {
       // ── Boss entrance cinematic via GSAP ──
       if (prevSceneType.current !== "boss" && bossOverlayRef.current) {
         const el = bossOverlayRef.current
-        gsap.timeline()
-          .set(el, { opacity: 0, display: "block" })
+        const shakeTarget = engineRootRef.current
+        const tl = gsap.timeline()
+        if (shakeTarget) {
+          // Pre-entrance stage shake: translateX(±3px) alternating, 5 cycles, 400ms
+          tl.to(shakeTarget, { x: -3, duration: 0.04, yoyo: true, repeat: 9, ease: "rough" })
+            .to(shakeTarget, { x: 0, duration: 0.04 })
+        }
+        tl.set(el, { opacity: 0, display: "block" })
           .to(el, { opacity: 1, duration: 0.18, ease: "power2.in" })
           .to(el, { opacity: 0, duration: 0.55, ease: "power3.out", delay: 0.12 })
           .set(el, { display: "none" })
@@ -639,7 +752,21 @@ export default function GameEngine({ game: initialGame }: Props) {
   }, [sceneIndex, state])
 
   useEffect(() => {
-    if (state === "complete") sound.fadeVolumeTo(0.55, 2500)
+    if (state === "playing" && currentScene?.type === "boss") {
+      if (prevSceneType.current !== "boss") {
+        setShowBossArena(false)
+        const t = setTimeout(() => setShowBossArena(true), 400)
+        return () => clearTimeout(t)
+      } else {
+        setShowBossArena(true)
+      }
+    } else {
+      setShowBossArena(false)
+    }
+  }, [sceneIndex, state, currentScene])
+
+  useEffect(() => {
+    if (state === "complete") sound.fadeVolumeTo(0.02, 2500)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
@@ -881,6 +1008,8 @@ export default function GameEngine({ game: initialGame }: Props) {
     } else {
       sound.playWrong()
       setStreakCount(0)
+      setShouldShake(true)
+      setTimeout(() => setShouldShake(false), 500)
       // Nudge the tutor bot — player may need help
       setPlayerStuck(true)
       setTimeout(() => setPlayerStuck(false), 100)
@@ -928,13 +1057,13 @@ export default function GameEngine({ game: initialGame }: Props) {
     setTimeout(() => setShowXpBurst(false), 1500)
   }, [state, currentScene, streakCount, sound, sceneIndex, totalScenes, game.scenes, game.felipeOutroVideo])
 
-  const handleNext = useCallback(() => {
-    sound.playClick()
-    // Cancel any in-flight elaboration fetch and reset state
-    abortRef.current?.abort()
-    abortRef.current = null
-    setAiElaboration(undefined)
+  /* ── Routes through Felipe transition + outro, or straight to EndScreen ───── */
+  const completeGame = useCallback(() => {
+    if (game.felipeOutroVideo) setState("felipe-transition")
+    else setState("complete")
+  }, [game.felipeOutroVideo])
 
+  const advanceScene = useCallback(() => {
     // Award XP for passive scenes and completed puzzles (revelation, learn, handoff, match, order, construct)
     if (
       currentScene.type === "revelation" ||
@@ -970,13 +1099,24 @@ export default function GameEngine({ game: initialGame }: Props) {
       const targetIndex = findSceneIndexById(game.scenes, pendingLeadsTo)
       setPendingLeadsTo(null)
       if (targetIndex !== -1) {
+        const targetScene = game.scenes[targetIndex]
+        if (targetScene.type === "consequence") {
+          // Skip consequence scene and jump straight to felipe scene
+          const nextIndex = targetIndex + 1
+          if (nextIndex < game.scenes.length) {
+            sound.playTransition()
+            setSceneIndex(nextIndex)
+            setSelectedLabel(null)
+            setState("playing")
+            return
+          }
+        }
         sound.playTransition()
         setSceneIndex(targetIndex)
         setSelectedLabel(null)
         setState("playing")
         return
       }
-      // If ID not found, fall through to sequential advance (graceful degradation)
     }
 
     if (sceneIndex + 1 >= totalScenes) { completeGame(); return }
@@ -992,20 +1132,26 @@ export default function GameEngine({ game: initialGame }: Props) {
     }
 
     sound.playTransition()
-    // AnimatePresence handles the visual transition — just update the index
-    // NOTE: do NOT call setLastXp(0) here — React batches it with the XP award
-    // above, causing the burst to always show 0. lastXp resets naturally after
-    // the burst animation hides (showXpBurst becomes false after 1500ms).
     setSceneIndex(i => i + 1)
     setSelectedLabel(null)
     setState("playing")
-  }, [sceneIndex, totalScenes, currentScene, sound, game.scenes, quizTotal, quizCorrect, pendingLeadsTo])
+  }, [sceneIndex, totalScenes, currentScene, sound, game.scenes, quizTotal, quizCorrect, pendingLeadsTo, completeGame])
 
-  /* ── Routes through Felipe transition + outro, or straight to EndScreen ───── */
-  const completeGame = useCallback(() => {
-    if (game.felipeOutroVideo) setState("felipe-transition")
-    else setState("complete")
-  }, [game.felipeOutroVideo])
+  const handleNext = useCallback(() => {
+    sound.playClick()
+    // Cancel any in-flight elaboration fetch and reset state
+    abortRef.current?.abort()
+    abortRef.current = null
+    setAiElaboration(undefined)
+
+    // Check if player ran out of lives
+    if (lives <= 0) {
+      setState("out-of-lives")
+      return
+    }
+
+    advanceScene()
+  }, [lives, advanceScene, sound])
 
   const handleBossComplete = useCallback((xpEarned: number) => {
     sound.playClick()
@@ -1064,7 +1210,7 @@ export default function GameEngine({ game: initialGame }: Props) {
     sound.playClick()
     try { localStorage.setItem("maestro_track_selected", trackId) } catch {}
     sound.playTransition()
-    window.location.href = `/game/${nextGameSlug}`
+    window.location.href = `/games/${nextGameSlug}`
   }, [sound])
 
   /* ── Consequence scenes auto-advance after 5s ────────────────────────── */
@@ -1173,21 +1319,345 @@ export default function GameEngine({ game: initialGame }: Props) {
     )
   }
 
+  if (state === "out-of-lives") {
+    const conceptTitle = currentScene?.concept?.title || "AI Prompt Construction"
+    const conceptBody = currentScene?.concept?.body || "AI responses depend entirely on the context and specificity you provide. Give it clear instructions, boundaries, and a persona to act from."
+
+    const handleRefillXp = () => {
+      sound.playClick()
+      setTotalXp(prev => Math.max(0, prev - 50))
+      setLives(3)
+      try {
+        localStorage.setItem("maestro_lives", "3")
+        window.dispatchEvent(new StorageEvent("storage", { key: "maestro_lives" }))
+      } catch {}
+      advanceScene()
+    }
+
+    const handleCodaResolve = () => {
+      sound.playClick()
+      setLives(3)
+      try {
+        localStorage.setItem("maestro_lives", "3")
+        window.dispatchEvent(new StorageEvent("storage", { key: "maestro_lives" }))
+      } catch {}
+      setCodaReviewStep(false)
+      advanceScene()
+    }
+
+    const handleRestartChapter = () => {
+      sound.playClick()
+      setSceneIndex(0)
+      setLives(3)
+      try {
+        localStorage.setItem("maestro_lives", "3")
+        window.dispatchEvent(new StorageEvent("storage", { key: "maestro_lives" }))
+      } catch {}
+      setStreakCount(0)
+      setState("playing")
+    }
+
+    return (
+      <div style={{
+        height: "100vh",
+        background: "#08060f",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1.5rem",
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        {/* Shimmering grid background */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+          backgroundPosition: "center",
+          opacity: 0.35,
+          pointerEvents: "none",
+        }} />
+        
+        {/* Glow ambient spots */}
+        <div style={{
+          position: "absolute",
+          width: "40vw",
+          height: "40vw",
+          top: "10%",
+          left: "30%",
+          background: codaReviewStep ? "radial-gradient(circle, rgba(0, 212, 240, 0.08) 0%, transparent 70%)" : "radial-gradient(circle, rgba(255, 75, 75, 0.08) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }} />
+
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes heart-broken-shake {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            15% { transform: scale(1.08) rotate(-6deg); }
+            30% { transform: scale(0.96) rotate(4deg); }
+            45% { transform: scale(1.04) rotate(-3deg); }
+            60% { transform: scale(0.98) rotate(2deg); }
+            75% { transform: scale(1.02) rotate(-1deg); }
+          }
+        `}} />
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 350, damping: 28 }}
+          style={{
+            width: "100%",
+            maxWidth: "480px",
+            background: "rgba(13, 10, 25, 0.75)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            border: codaReviewStep ? "1px solid rgba(0, 212, 240, 0.22)" : "1px solid rgba(255, 75, 75, 0.22)",
+            borderRadius: "24px",
+            padding: "2.5rem 2rem",
+            boxShadow: codaReviewStep ? "0 0 50px rgba(0, 212, 240, 0.08), 0 20px 50px rgba(0,0,0,0.5)" : "0 0 50px rgba(255, 75, 75, 0.08), 0 20px 50px rgba(0,0,0,0.5)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1.8rem",
+            textAlign: "center",
+            zIndex: 10,
+          }}
+        >
+          {!codaReviewStep ? (
+            <>
+              {/* Broken Heart Section */}
+              <div style={{ position: "relative" }}>
+                <span style={{
+                  fontSize: "5.5rem",
+                  display: "inline-block",
+                  filter: "drop-shadow(0 0 24px rgba(255, 75, 75, 0.5))",
+                  animation: "heart-broken-shake 1.8s ease-in-out infinite",
+                  lineHeight: 1,
+                  userSelect: "none"
+                }}>
+                  💔
+                </span>
+              </div>
+
+              {/* Title and Message */}
+              <div>
+                <h1 style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 900,
+                  fontSize: "1.75rem",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  background: "linear-gradient(90deg, #ff4b4b, #e040fb)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  margin: "0 0 0.6rem 0",
+                }}>
+                  HEARTS EMPTY
+                </h1>
+                <p style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: "0.92rem",
+                  color: "rgba(240, 238, 255, 0.82)",
+                  lineHeight: 1.55,
+                  margin: 0,
+                }}>
+                  You&apos;ve run out of lives on this chapter. Every maestro makes mistakes — the key is how you choose to recover.
+                </p>
+              </div>
+
+              {/* Recovery Action Options */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", width: "100%" }}>
+                {/* 1. Spend 50 XP (if possible) */}
+                <button
+                  onClick={handleRefillXp}
+                  disabled={totalXp < 50}
+                  style={{
+                    width: "100%",
+                    padding: "0.95rem",
+                    borderRadius: "14px",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: totalXp >= 50 ? "#08060f" : "rgba(255,255,255,0.25)",
+                    background: totalXp >= 50 
+                      ? "linear-gradient(90deg, #ff4b4b, #ff7b00)"
+                      : "rgba(255,255,255,0.04)",
+                    border: totalXp >= 50 ? "none" : "1px solid rgba(255,255,255,0.06)",
+                    cursor: totalXp >= 50 ? "pointer" : "not-allowed",
+                    boxShadow: totalXp >= 50 ? "0 4px 20px rgba(255,75,75,0.25)" : "none",
+                    transition: "transform 0.15s, filter 0.15s",
+                  }}
+                  onMouseEnter={e => { if (totalXp >= 50) { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.filter = "brightness(1.08)" } }}
+                  onMouseLeave={e => { if (totalXp >= 50) { e.currentTarget.style.transform = ""; e.currentTarget.style.filter = "" } }}
+                >
+                  Spend 50 XP to Refill Hearts
+                </button>
+                <span style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: "0.74rem",
+                  color: "rgba(240,238,255,0.4)",
+                  marginTop: "-0.4rem"
+                }}>
+                  You currently have {totalXp} XP {totalXp < 50 && "(Need 50 XP)"}
+                </span>
+
+                {/* 2. Review with Coda */}
+                <button
+                  onClick={() => { sound.playClick(); setCodaReviewStep(true); }}
+                  style={{
+                    width: "100%",
+                    padding: "0.95rem",
+                    borderRadius: "14px",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.95rem",
+                    color: "#fff",
+                    background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                    border: "none",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 24px rgba(0,212,240,0.25)",
+                    transition: "transform 0.15s, filter 0.15s",
+                    marginTop: "0.4rem"
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.filter = "brightness(1.08)" }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.filter = "" }}
+                >
+                  Review Lesson with Coda (Free Refill)
+                </button>
+
+                {/* Divider */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0.6rem 0" }}>
+                  <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(240,238,255,0.25)" }}>or</span>
+                  <div style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.06)" }} />
+                </div>
+
+                {/* 3. Restart Chapter */}
+                <button
+                  onClick={handleRestartChapter}
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem",
+                    borderRadius: "12px",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 600,
+                    fontSize: "0.88rem",
+                    color: "rgba(240,238,255,0.7)",
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    cursor: "pointer",
+                    transition: "transform 0.15s, background 0.15s, border-color 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)" }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)" }}
+                >
+                  Restart Chapter
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Step 2: Coda Lesson View */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", alignSelf: "flex-start", textAlign: "left" }}>
+                <div style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  background: "rgba(0,0,0,0.4)",
+                  border: "1.5px solid var(--cyan)",
+                  boxShadow: "0 0 12px rgba(0, 212, 240, 0.4)",
+                  flexShrink: 0
+                }}>
+                  <img
+                    src="/images/ai-tutor.png"
+                    alt="Coda"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "screen", transform: "scale(1.1)" }}
+                  />
+                </div>
+                <div>
+                  <h2 style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.72rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--cyan)", margin: 0 }}>
+                    Tutor Lesson with Coda
+                  </h2>
+                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.6rem", color: "rgba(240,238,255,0.3)" }}>
+                    Closing the learning gap
+                  </span>
+                </div>
+              </div>
+
+              {/* Chat-style lesson content bubble */}
+              <div style={{
+                width: "100%",
+                padding: "1.2rem",
+                borderRadius: "16px 16px 16px 4px",
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                textAlign: "left",
+                fontFamily: "Inter, sans-serif",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.85rem",
+              }}>
+                <p style={{ margin: 0, fontSize: "0.86rem", color: "rgba(240,238,255,0.9)", lineHeight: 1.55 }}>
+                  Mistakes are just feedback in training! Here is the core concept you need to remember for this topic:
+                </p>
+                <div style={{
+                  padding: "0.85rem 1rem",
+                  background: "rgba(0, 212, 240, 0.05)",
+                  borderLeft: "3px solid var(--cyan)",
+                  borderRadius: "0 10px 10px 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.4rem"
+                }}>
+                  <span style={{ fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--cyan)" }}>
+                    {conceptTitle}
+                  </span>
+                  <p style={{ margin: 0, fontSize: "0.82rem", color: "rgba(240,238,255,0.8)", lineHeight: 1.45 }}>
+                    {conceptBody}
+                  </p>
+                </div>
+              </div>
+
+              {/* Confirm lesson button */}
+              <button
+                onClick={handleCodaResolve}
+                style={{
+                  width: "100%",
+                  padding: "1rem",
+                  borderRadius: "14px",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 700,
+                  fontSize: "0.98rem",
+                  color: "#08060f",
+                  background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 24px rgba(0,212,240,0.35)",
+                  transition: "transform 0.15s, filter 0.15s",
+                  marginTop: "0.5rem"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.filter = "brightness(1.08)" }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.filter = "" }}
+              >
+                I Understand — Continue →
+              </button>
+            </>
+          )}
+        </motion.div>
+      </div>
+    )
+  }
+
   if (state === "complete") {
     return <EndScreen game={game} totalXp={totalXp} streak={streak} choiceHistory={choiceHistory} />
   }
 
   if (state === "koda-intro") {
     const activeBeat = KODA_INTRO_BEATS[kodaBeatIndex]
-    const nextBeat = () => {
-      sound.playClick()
-      if (kodaBeatIndex + 1 < KODA_INTRO_BEATS.length) {
-        setKodaBeatIndex(i => i + 1)
-      } else {
-        sound.playTransition()
-        setState("playing")
-      }
-    }
+    const nextBeat = handleNextKodaBeat
 
     // Dynamic speaker style settings
     const isFelipe = activeBeat.speaker === "Felipe"
@@ -1230,16 +1700,26 @@ export default function GameEngine({ game: initialGame }: Props) {
         : "linear-gradient(135deg, rgba(0,212,240,0.4) 0%, rgba(224,64,251,0.4) 100%)"
 
     return (
-      <div style={{
-        height: "100vh",
-        background: "#08060f",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden"
-      }}>
+      <div
+        onClick={() => {
+          if (!kodaTypingDone) {
+            setFastText(true)
+          } else {
+            handleNextKodaBeat()
+          }
+        }}
+        style={{
+          height: "100vh",
+          background: "#08060f",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          cursor: "pointer",
+          overflow: "hidden"
+        }}
+      >
         {/* Dynamic global styles */}
         <style dangerouslySetInnerHTML={{ __html: `
           @keyframes intro-scanline {
@@ -1247,9 +1727,10 @@ export default function GameEngine({ game: initialGame }: Props) {
             100% { transform: translateY(100%); }
           }
           @keyframes intro-hologram-flicker {
-            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 0.99; filter: hue-rotate(0deg) saturate(1); }
-            20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.45; filter: hue-rotate(90deg) saturate(1.5) brightness(1.2); }
+            0%, 100% { opacity: 0.96; filter: drop-shadow(0 0 16px rgba(0, 212, 240, 0.35)); }
+            50%      { opacity: 1.0; filter: drop-shadow(0 0 32px rgba(0, 212, 240, 0.65)); }
           }
+
           @keyframes voice-bar-pulse {
             0%, 100% { height: 3px; }
             50% { height: 18px; }
@@ -1286,19 +1767,7 @@ export default function GameEngine({ game: initialGame }: Props) {
           backgroundSize: "100% 4px, 6px 100%",
           zIndex: 5,
           pointerEvents: "none",
-          opacity: 0.4,
-        }} />
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "3px",
-          background: "rgba(0, 212, 240, 0.12)",
-          boxShadow: "0 0 8px rgba(0, 212, 240, 0.3)",
-          zIndex: 6,
-          pointerEvents: "none",
-          animation: "intro-scanline 6.5s linear infinite",
+          opacity: 0.08,
         }} />
 
         {/* Ambient background glows */}
@@ -1347,7 +1816,8 @@ export default function GameEngine({ game: initialGame }: Props) {
                   mixBlendMode: isSystem || isFelipe ? "normal" : "screen",
                   transform: isSystem ? "scale(1)" : (isFelipe ? "scale(1.0)" : "scale(1.15)"),
                   objectPosition: "center",
-                  animation: isSystem ? "none" : "intro-hologram-flicker 12s infinite",
+                  animation: isSystem ? "none" : "intro-hologram-flicker 5s ease-in-out infinite",
+
                 }}
               />
             </div>
@@ -1450,6 +1920,20 @@ export default function GameEngine({ game: initialGame }: Props) {
             )}
           </p>
 
+          {/* Auto-advance progress bar — thin glowing line sweeping across */}
+          {kodaTypingDone && (
+            <div style={{ width: "100%", height: "2px", background: "rgba(255,255,255,0.06)", borderRadius: "2px", overflow: "hidden", marginTop: "0.75rem" }}>
+              <div style={{
+                height:     "100%",
+                width:      `${kodaAutoProgress}%`,
+                background: btnGradient,
+                borderRadius: "2px",
+                boxShadow:  `0 0 6px ${tagColor}`,
+                transition: kodaAutoProgress === 0 ? "none" : "width 0.05s linear",
+              }} />
+            </div>
+          )}
+
           {/* Continue button inside dialogue box */}
           {kodaTypingDone && (
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
@@ -1487,6 +1971,17 @@ export default function GameEngine({ game: initialGame }: Props) {
     )
   }
 
+  const handleSelectScene = (sceneId: string) => {
+    const idx = game.scenes.findIndex(s => s.id === sceneId)
+    if (idx !== -1) {
+      setSceneIndex(idx)
+      setState("playing")
+      setDialogueDone(false)
+      setCompletedDialogueSceneIndex(null)
+      setShowMap(false)
+    }
+  }
+
   const progressPct = (sceneIndex / totalScenes) * 100
   const isBoss      = currentScene?.type === "boss"
   const sceneBgImage = currentScene?.location ? getSceneBgImage(currentScene.location) : ""
@@ -1513,10 +2008,17 @@ export default function GameEngine({ game: initialGame }: Props) {
   }
 
   return (
-    <div style={{ height: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
+    <div ref={engineRootRef} style={{ height: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
 
       <FloatingNotes mood={currentMood} />
       <AchievementToast trigger={achievement} />
+      <StoryMap
+        isOpen={showMap}
+        onClose={() => setShowMap(false)}
+        currentSceneId={currentScene?.id}
+        accentColor={game.accentColor}
+        onSelectScene={handleSelectScene}
+      />
 
       {/* ── AI Tutor Bot — hidden during intros, endings, and boss (has own UI) ── */}
       {(state === "playing" || state === "answered") &&
@@ -1672,10 +2174,30 @@ export default function GameEngine({ game: initialGame }: Props) {
           ? "radial-gradient(ellipse at 50% 40%, rgba(0,212,240,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 60%, rgba(123,47,190,0.08) 0%, transparent 50%)"
           : "radial-gradient(ellipse at 20% 50%, rgba(0,212,240,0.04) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(123,47,190,0.06) 0%, transparent 50%)",
         transition: "background 1.2s ease",
+        animation: shouldShake ? "screen-shake 0.45s cubic-bezier(0.36,0.07,0.19,0.97)" : "none",
       }} />
+
+      {/* Correct answer flash — green */}
+      {showBurst && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 150, pointerEvents: "none",
+          background: "radial-gradient(ellipse at 50% 50%, rgba(0, 230, 118, 0.18) 0%, transparent 65%)",
+          animation: "correct-flash 0.7s ease-out forwards",
+        }} />
+      )}
+
+      {/* Wrong answer flash — red */}
+      {shouldShake && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 150, pointerEvents: "none",
+          background: "radial-gradient(ellipse at 50% 50%, rgba(255, 50, 50, 0.22) 0%, transparent 65%)",
+          animation: "wrong-flash 0.6s ease-out forwards",
+        }} />
+      )}
 
       {showBurst    && <CorrectBurst />}
       {showXpBurst && lastXp > 0 && <XPBurstLottie xp={lastXp} accent={game.accentColor ?? "#ffd740"} key={String(burstKey)} />}
+
 
       {/* Duolingo-style unified Header */}
       {state !== "intro" && state !== "felipe" && (
@@ -1753,6 +2275,26 @@ export default function GameEngine({ game: initialGame }: Props) {
             alignItems: "center",
             gap: "1.25rem",
           }}>
+            {/* Map toggle */}
+            <button
+              onClick={() => { sound.playClick(); setShowMap(true) }}
+              title="View Chapter Map"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "0.2rem",
+                fontSize: "1.25rem",
+                lineHeight: 1,
+                color: "rgba(240,238,255,0.6)",
+                transition: "color 0.2s, transform 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.15)" }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "" }}
+            >
+              🗺️
+            </button>
+
             {/* Fast Text toggle */}
             <button
               onClick={() => setFastText(prev => !prev)}
@@ -1863,6 +2405,45 @@ export default function GameEngine({ game: initialGame }: Props) {
                 );
               })}
             </div>
+
+            {/* Developer testing button: drains 1 heart per click, goes to out-of-lives at 0 */}
+            {typeof window !== "undefined" && window.location.search.includes("dev=true") && (
+              <button
+                id="dev-drain-heart"
+                onClick={() => {
+                  sound.playClick()
+                  const newLives = Math.max(0, lives - 1);
+                  setLives(newLives);
+                  try {
+                    localStorage.setItem("maestro_lives", String(newLives));
+                    window.dispatchEvent(new StorageEvent("storage", { key: "maestro_lives" }));
+                  } catch {}
+                  if (newLives === 0) {
+                    setState("out-of-lives");
+                  }
+                }}
+                style={{
+                  background: "rgba(224, 64, 251, 0.15)",
+                  border: "1px solid rgba(224, 64, 251, 0.3)",
+                  borderRadius: "12px",
+                  color: "#e040fb",
+                  fontFamily: "monospace",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  padding: "0.3rem 0.65rem",
+                  cursor: "pointer",
+                  transition: "transform 0.1s, background 0.1s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.2rem",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.background = "rgba(224, 64, 251, 0.25)" }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.background = "rgba(224, 64, 251, 0.15)" }}
+                title="Dev Tool: Drain 1 Heart. Trigger Out-of-Lives when 0."
+              >
+                🔧 DRAIN
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1881,32 +2462,42 @@ export default function GameEngine({ game: initialGame }: Props) {
             {/* Character art as cinematic backdrop */}
             {game.characterImage && (
               <>
-                {/* Full blurred atmospheric fill */}
+                {/* Scene background image (bedroom, etc) */}
+                {game.intro?.sceneImage && (
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    backgroundImage: `url(${game.intro.sceneImage})`,
+                    backgroundSize: "cover", backgroundPosition: "center",
+                    filter: "blur(0px) brightness(0.35)",
+                  }} />
+                )}
+                {/* Full blurred atmospheric fill from character */}
                 <div style={{
                   position: "absolute", inset: 0,
                   backgroundImage: `url(${game.characterImage})`,
                   backgroundSize: "cover", backgroundPosition: "center top",
-                  filter: "blur(60px) saturate(1.2) brightness(0.35)",
+                  filter: "blur(50px) saturate(1.4) brightness(0.25)",
                   transform: "scale(1.15)",
+                  mixBlendMode: "screen",
                 }} />
-                {/* Sharp character art — centered, tall */}
+                {/* Sharp character art — centered, shows full figure */}
                 <div style={{
                   position: "absolute", bottom: 0, left: "50%",
                   transform: "translateX(-50%)",
-                  height: "75vh", maxWidth: "380px", width: "100%",
-                  maskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.7) 15%, black 40%, black 70%, transparent 100%)",
-                  WebkitMaskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.7) 15%, black 40%, black 70%, transparent 100%)",
+                  height: "82vh", maxWidth: "420px", width: "100%",
+                  maskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.6) 8%, black 30%, black 72%, transparent 100%)",
+                  WebkitMaskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.6) 8%, black 30%, black 72%, transparent 100%)",
                 }}>
                   {game.protagonistVideo ? (
                     <video
                       src={game.protagonistVideo}
                       autoPlay loop muted playsInline
-                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 20%", display: "block" }}
                     />
                   ) : (
                     <img src={game.characterImage} alt={game.characterName ?? ""} draggable={false}
                       className="char-breathe"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", animation: "maestro-pulse 4s ease-in-out infinite, char-breathe 4s ease-in-out infinite", transformOrigin: "bottom center" }} />
+                      style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom center", display: "block", animation: "maestro-pulse 4s ease-in-out infinite, char-breathe 4s ease-in-out infinite", transformOrigin: "bottom center" }} />
                   )}
                 </div>
               </>
@@ -2307,7 +2898,7 @@ export default function GameEngine({ game: initialGame }: Props) {
       )}
 
       {/* ——— BOSS ARENA (5-punch battle — replaces SceneRenderer for boss scenes) ——— */}
-      {state === "playing" && currentScene?.type === "boss" && (isDialogueDoneForCurrentScene || !currentScene?.dialogue?.length) && (
+      {state === "playing" && currentScene?.type === "boss" && (isDialogueDoneForCurrentScene || !currentScene?.dialogue?.length) && showBossArena && (
         <BossArena
           scene={currentScene}
           onComplete={handleBossComplete}
@@ -2332,6 +2923,17 @@ export default function GameEngine({ game: initialGame }: Props) {
             setBurstKey(k => k + 1)
             setTimeout(() => setShowXpBurst(false), 1500)
             sound.playFireworks()
+            if (currentScene.nextLeadsTo) {
+              const targetIndex = findSceneIndexById(game.scenes, currentScene.nextLeadsTo)
+              if (targetIndex !== -1) {
+                sound.playTransition()
+                setSceneIndex(targetIndex)
+                setSelectedLabel(null)
+                setLastXp(0)
+                setState("playing")
+                return
+              }
+            }
             if (sceneIndex + 1 >= totalScenes) {
               completeGame()
             } else {
@@ -2578,7 +3180,7 @@ export default function GameEngine({ game: initialGame }: Props) {
       )}
 
       {/* ——— SCENE BACKGROUND (behind quiz/scenario content) ——— */}
-      {(state === "playing" || state === "answered") && currentScene?.type !== "prompt" && currentScene?.type !== "handoff" && currentScene?.type !== "consequence" && currentScene?.type !== "felipe" && currentScene?.type !== "track-select" && !currentScene?.dialogue?.length && sceneBgImage && (
+      {(state === "playing" || state === "answered") && currentScene?.type !== "prompt" && currentScene?.type !== "handoff" && currentScene?.type !== "consequence" && currentScene?.type !== "felipe" && currentScene?.type !== "track-select" && (!currentScene?.dialogue?.length || isDialogueDoneForCurrentScene) && sceneBgImage && (
         <>
           {/* Real anime-style background image */}
           <div style={{
@@ -2612,7 +3214,7 @@ export default function GameEngine({ game: initialGame }: Props) {
               animate="animate"
               exit="exit"
               transition={isBoss ? bossTransition : regularTransition}
-              style={(game.characterImage && !currentScene?.dialogue?.length)
+              style={(game.characterImage && !currentScene?.dialogue?.length && !isMobile)
                 ? {
                     // Two-column: text fills the LEFT, stretching right until just
                     // before Jake's column. marginRight reserves Jake's space so the
@@ -2671,6 +3273,8 @@ export default function GameEngine({ game: initialGame }: Props) {
                 accentColor={game.accentColor}
                 lastAnswerCorrect={lastAnswerCorrect}
                 fastText={fastText}
+                gameScenes={game.scenes}
+                onTalkingStateChange={setCharTalking}
               />
             </motion.div>
           </AnimatePresence>
@@ -2690,7 +3294,8 @@ export default function GameEngine({ game: initialGame }: Props) {
        currentScene?.type !== "handoff" &&
        currentScene?.type !== "consequence" &&
        currentScene?.type !== "felipe" &&
-       currentScene?.type !== "track-select" && (
+       currentScene?.type !== "track-select" &&
+       !isMobile && (
         <div
           aria-hidden="true"
           style={{
@@ -2718,36 +3323,66 @@ export default function GameEngine({ game: initialGame }: Props) {
             transition: "background 0.5s ease",
           }} />
 
-          {/* Character portrait — breathes while reading, reacts on answer */}
-          <img
-            key={reactionKey}
-            src={game.characterImage}
-            alt=""
-            draggable={false}
-            style={{
-              width:           "100%",
-              height:          "100%",
-              objectFit:       "contain",
-              objectPosition:  "bottom center",
-              maskImage:       "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%), linear-gradient(to top, black 0%, black 94%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%), linear-gradient(to top, black 0%, black 94%, transparent 100%)",
-              maskComposite:   "intersect",
-              WebkitMaskComposite: "source-in",
-              opacity:         state === "answered" ? 1 : 0.78,
-              filter:          state === "answered"
-                ? (lastAnswerCorrect
-                    ? "drop-shadow(0 0 28px rgba(88,204,2,0.7)) brightness(1.1) saturate(1.2)"
-                    : "drop-shadow(0 0 20px rgba(255,75,75,0.5)) brightness(0.85) saturate(0.7)")
-                : `drop-shadow(0 0 16px ${game.accentColor ?? "rgba(0,212,240,0.45)"}) brightness(1.0)`,
-              animation:       state === "answered"
-                ? (lastAnswerCorrect
-                    ? "char-react-correct 0.7s cubic-bezier(0.34,1.56,0.64,1) both"
-                    : "char-react-wrong 0.55s ease-in-out both")
-                : "char-breathe 4s ease-in-out infinite",
-              transformOrigin: "bottom center",
-              transition:      "opacity 0.4s ease, filter 0.4s ease",
-            }}
-          />
+          {/* Aspect-ratio matched container to align mouth coordinates exactly */}
+          <div style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "1/1",
+            zIndex: 1,
+          }}>
+            {/* Character image — breathes when idle, talks when typing, reacts on answer */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                transformOrigin: "bottom center",
+              }}
+            >
+              <AnimatePresence mode="popLayout">
+                <motion.img
+                  key={portraitSrc}
+                  src={portraitSrc}
+                  alt=""
+                  draggable={false}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: state === "answered" ? 1 : 0.78 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12, ease: "linear" }}
+                  onError={() => {
+                    if (portraitSrc !== game.characterImage) {
+                      setPortraitSrc(game.characterImage)
+                    }
+                  }}
+                  className={state === "answered"
+                    ? (lastAnswerCorrect ? "char-react-correct" : "char-react-wrong")
+                    : charTalking
+                    ? "char-talk"
+                    : "char-breathe"}
+                  style={{
+                    position:        "absolute",
+                    bottom:          0,
+                    left:            0,
+                    width:           "100%",
+                    height:          "100%",
+                    objectFit:       "contain",
+                    objectPosition:  "bottom center",
+                    maskImage:       "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%), linear-gradient(to top, black 0%, black 94%, transparent 100%)",
+                    WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%), linear-gradient(to top, black 0%, black 94%, transparent 100%)",
+                    maskComposite:   "intersect",
+                    WebkitMaskComposite: "source-in",
+                    zIndex:          1,
+                    filter:          state === "answered"
+                      ? (lastAnswerCorrect
+                          ? "drop-shadow(0 0 28px rgba(88,204,2,0.7)) brightness(1.1) saturate(1.2)"
+                          : "drop-shadow(0 0 20px rgba(255,75,75,0.5)) brightness(0.85) saturate(0.7)")
+                      : `drop-shadow(0 0 16px ${game.accentColor ?? "rgba(0,212,240,0.45)"}) brightness(1.0)`,
+                    transformOrigin: "bottom center",
+                    transition:      "filter 0.4s ease",
+                  }}
+                />
+              </AnimatePresence>
+            </div>
+          </div>
 
           {/* Character name chip — always visible so the character feels named & present */}
           {game.characterName && (

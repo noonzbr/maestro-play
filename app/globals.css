@@ -426,10 +426,8 @@ body:not(.in-game)::before {
 
 /* Idle breathing — the baseline of life. Inactive characters use this. */
 @keyframes char-breathe {
-  0%, 100% { transform: scaleY(1)     translateY(0px);    }
-  25%       { transform: scaleY(0.99)  translateY(1.5px);  }
-  50%       { transform: scaleY(0.975) translateY(3px);    }
-  75%       { transform: scaleY(0.99)  translateY(1.5px);  }
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(0.982); }
 }
 
 /* Active speaker — subtle forward lean + micro-bob while talking */
@@ -582,7 +580,7 @@ body:not(.in-game)::before {
 
 /* ── Utility classes for applying character animations ───────────────────── */
 
-.char-breathe      { animation: char-breathe  4s  ease-in-out infinite; transform-origin: bottom center; }
+.char-breathe      { animation: char-breathe  4.2s  ease-in-out infinite; transform-origin: bottom center; }
 .char-talk         { animation: char-talk     2.4s ease-in-out infinite; transform-origin: bottom center; }
 .char-idle-bob     { animation: char-idle-bob 3.8s ease-in-out infinite; }
 .char-line-enter   { animation: char-line-enter 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
@@ -620,3 +618,18 @@ body:not(.in-game)::before {
     grid-template-columns: repeat(5, 1fr);
   }
 }
+
+/* ── Mobile & Touch System Optimizations ── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a, button, select, input, [role="button"], .interactive-element {
+  touch-action: manipulation;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+

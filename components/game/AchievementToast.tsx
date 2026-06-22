@@ -79,35 +79,35 @@ export default function AchievementToast({ trigger }: Props) {
     timerRef.current = setTimeout(() => {
       setVisible(false)
       setTimeout(() => setCurrent(null), 500)
-    }, 2200)
+    }, 5000)
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [queue, visible])
 
   if (!current) return null
   const ach = ACHIEVEMENTS[current]
 
+  function dismiss() {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setVisible(false)
+    setTimeout(() => setCurrent(null), 450)
+  }
+
   return (
     <div
-      onClick={() => {
-        if (timerRef.current) clearTimeout(timerRef.current)
-        setVisible(false)
-        setTimeout(() => setCurrent(null), 400)
-      }}
       style={{
         position:       "fixed",
         bottom:         "5.5rem",
         right:          "1.25rem",
         zIndex:         350,
         minWidth:       "260px",
-        maxWidth:       "300px",
+        maxWidth:       "310px",
         background:     "rgba(6,4,14,0.97)",
         border:         `1px solid ${ach.color}55`,
         borderLeft:     `3px solid ${ach.color}`,
         borderRadius:   "14px",
-        padding:        "0.9rem 1.1rem",
+        padding:        "0.9rem 1.1rem 0.9rem 1.1rem",
         backdropFilter: "blur(24px)",
         boxShadow:      `0 0 48px ${ach.color}18, 0 12px 40px rgba(0,0,0,0.6)`,
-        cursor:         "pointer",
         overflow:       "hidden",
         animation:      visible
           ? "ach-in 0.55s cubic-bezier(0.34,1.4,0.64,1) both"
@@ -123,7 +123,36 @@ export default function AchievementToast({ trigger }: Props) {
         pointerEvents:"none",
       }} />
 
-      <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", position:"relative" }}>
+      {/* ✕ Close button */}
+      <button
+        onClick={dismiss}
+        aria-label="Dismiss achievement"
+        style={{
+          position:        "absolute",
+          top:             "0.5rem",
+          right:           "0.55rem",
+          background:      "rgba(255,255,255,0.07)",
+          border:          "1px solid rgba(255,255,255,0.12)",
+          borderRadius:    "50%",
+          width:           "22px",
+          height:          "22px",
+          display:         "flex",
+          alignItems:      "center",
+          justifyContent:  "center",
+          cursor:          "pointer",
+          color:           "rgba(255,255,255,0.55)",
+          fontSize:        "0.7rem",
+          lineHeight:      1,
+          zIndex:          2,
+          transition:      "background 0.15s, color 0.15s",
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)"; (e.currentTarget as HTMLButtonElement).style.color = "#fff" }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.07)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.55)" }}
+      >
+        ✕
+      </button>
+
+      <div style={{ display:"flex", alignItems:"center", gap:"0.75rem", position:"relative", paddingRight:"1.2rem" }}>
         {/* Icon */}
         <div style={{
           width:         "44px",

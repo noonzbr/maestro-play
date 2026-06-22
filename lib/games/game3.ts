@@ -72,6 +72,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Quantity over quality is a trap. Auto-drafting 47 emails without context would produce generic, possibly damaging responses — especially on a client crisis. AI amplifies your judgment; it doesn't replace it.",
+          wrongStoryText: "Carlos slumps. 'Quantity over quality is a trap. Auto-drafting 47 client emails without context is a recipe for a disaster.'",
+          wrongFeedback: "**AI Amplification** requires your judgment first — auto-drafting without triage risks a generic response to a crisis that needs precision.",
         },
         {
           label: "B",
@@ -86,6 +88,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Not an AI problem — a prioritization problem. And some of those meeting requests may be from the board. Claude can help you decide which to accept, decline, or delegate.",
+          wrongStoryText: "Carlos sighs. 'We can't just delete client meeting requests. We need to prioritize.'",
+          wrongFeedback: "**AI-Assisted Triage** reveals which meetings matter — deleting without context could remove the most important conversation of your week.",
         },
         {
           label: "D",
@@ -93,6 +97,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "The presentation matters, but the client crisis may need a response before you start. Triage reveals the sequence. Sequence determines outcomes.",
+          wrongStoryText: "Carlos shakes his head. 'Creating a presentation first doesn't solve the immediate client crisis.'",
+          wrongFeedback: "**Task Sequencing** is where AI earns its value — triage first reveals whether the crisis must be handled before the presentation begins.",
         },
       ],
       xpAward: 150,
@@ -126,7 +132,9 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Prompt A will produce a generic, forgettable apology that could be from any company to any client. You'll spend 20 minutes editing it into shape. Brevity in prompting is a false economy.",
+          wrongStoryText: "Carlos winces. 'A shorter prompt gets us a generic apology. You'll spend twice as long editing it.'",
           leadsTo: "w3-s2-consequence",
+          wrongFeedback: "**Prompt Specificity** isn't length for its own sake — rich context collapses editing time and produces output that's actually ready to send.",
         },
         {
           label: "B",
@@ -143,6 +151,8 @@ export const game3: Game = {
           feedback:
             "AI doesn't replace your voice — it amplifies it. With Prompt B, Claude drafts in your direction. You review, adjust tone, and sign. Professionals who write everything from scratch are leaving 3 hours on the table every day.",
           leadsTo: "w3-s2-consequence",
+          wrongFeedback: "AI **amplifies your voice** — it doesn't replace it; professionals who skip AI drafts lose hours they could spend on strategy.",
+          wrongStoryText: "Carlos closes the AI window. Three hours later, he's still rewriting the same paragraph. The client waits.",
         },
         {
           label: "D",
@@ -151,6 +161,8 @@ export const game3: Game = {
           feedback:
             "Constraints are the point. You don't want a creative apology email. You want an accurate, professional, relationship-preserving one. Constraints focus AI on the result you actually need.",
           leadsTo: "w3-s2-consequence",
+          wrongFeedback: "**Prompt Constraints** aren't limits — they're your blueprint; a focused AI output beats a creative one when relationships are on the line.",
+          wrongStoryText: "Carlos picks Prompt A. The draft arrives warm but vague — no specifics, no fix timeline. He starts over from scratch.",
         },
       ],
       xpAward: 150,
@@ -201,6 +213,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "AI informs decisions — it doesn't make them. Start with execution tasks, not strategic judgment calls. Use the hours AI saves you to think more deeply about the decisions that matter.",
+          wrongStoryText: "Carlos crosses his arms. 'Starting with strategic decisions is dangerous. Automate execution first, keep strategy human.'",
+          wrongFeedback: "AI **informs strategic decisions** but shouldn't make them; start with execution tasks and use saved hours to sharpen your judgment.",
         },
         {
           label: "B",
@@ -215,6 +229,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Start with low-risk, high-volume tasks. Sensitive data tasks require governance, legal review, and privacy architecture before AI touches them. Don't start there.",
+          wrongFeedback: "**Data Governance** must come before automation; sensitive data requires legal and privacy review long before AI enters the workflow.",
+          wrongStoryText: "Carlos pastes employee records into the prompt. A compliance alert fires. HR is notified. The workflow freezes before it begins.",
         },
         {
           label: "D",
@@ -222,6 +238,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "5-minute tasks that happen 20 times a day are worth automating — but start with the highest-time-cost items first. The weekly report that takes 3 hours beats the quick Slack reply.",
+          wrongFeedback: "**Time-Cost Analysis** means targeting your biggest drains first — a 3-hour weekly report outranks twenty 5-minute tasks combined.",
+          wrongStoryText: "Carlos automates quick Slack replies. Friday arrives and the three-hour report still looms, untouched. He works through the weekend.",
         },
       ],
       xpAward: 150,
@@ -255,6 +273,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Missing: What Not (avoid generic best practices), How (format, audience level), Why (purpose and stakes). This prompt will produce a textbook answer that doesn't reflect your company, team, or situation.",
+          wrongStoryText: "Carlos rubs his chin. 'Without constraints or format, we will get textbook answers that don't apply to our startup.'",
+          wrongFeedback: "Without **What Not**, **How**, and **Why** pillars, AI defaults to textbook answers that ignore your real audience and stakes.",
         },
         {
           label: "B",
@@ -269,6 +289,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Politeness is fine, but the ask is completely undefined. AI doesn't know if you want analysis, a summary, a presentation, or talking points. Be direct and specific.",
+          wrongFeedback: "Politeness without **Prompt Specificity** leaves AI guessing your format, depth, and purpose — directness is professional, not rude.",
+          wrongStoryText: "Carlos hits send. Claude responds warmly with a question: 'What would you like me to do with these results?' He groans.",
         },
         {
           label: "D",
@@ -276,6 +298,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "This is a search query, not a Maestro prompt. You asked for generic research, not analysis of your specific data. Your actual survey results don't even appear in this prompt.",
+          wrongFeedback: "A **Context-Free Prompt** produces generic research — your actual survey data never appears, so AI can't analyze what it can't see.",
+          wrongStoryText: "Carlos gets a polished list of industry best practices. None mention his team. He reads it twice, hoping something fits. It doesn't.",
         },
       ],
       xpAward: 200,
@@ -296,6 +320,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Claude is excellent at document review. The problem is the prompt. 'Review this' gives AI no direction. It defaults to being helpful-but-vague because it doesn't know your standards or what you actually need.",
+          wrongStoryText: "Carlos sighs. 'Claude is excellent at document review. The prompt was just too vague.'",
+          wrongFeedback: "Claude excels at document review — the failure was **Prompt Direction**; without your standards defined, AI defaults to vague encouragement.",
         },
         {
           label: "B",
@@ -310,6 +336,8 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Telling Claude to 'be more critical' without specifying what you need critique on still produces vague output — just with a more assertive tone. Define the specific dimension you want challenged.",
+          wrongFeedback: "**Critique Dimension Specificity** matters — 'be more critical' just sharpens tone, not focus; name exactly what you want challenged.",
+          wrongStoryText: "Carlos asks for harsher feedback. Claude obliges — same points, firmer wording. The structural flaw he feared goes completely unmentioned.",
         },
         {
           label: "D",
@@ -317,9 +345,25 @@ export const game3: Game = {
           correct: false,
           feedback:
             "Chunking can help with very long documents, but it doesn't solve the core problem: 'Review this section' is as vague as 'Review this document.' The issue is the absence of criteria, not document length.",
+          wrongFeedback: "Chunking addresses length, not vagueness — 'Review this section' suffers the same missing **Feedback Criteria** as the original prompt.",
+          wrongStoryText: "Carlos splits the doc into thirds. Claude praises each one warmly. He stares at three pages of encouragement and still has no real answers.",
         },
       ],
       xpAward: 175,
+    },
+
+    {
+      id: "w3-s5-prompt",
+      type: "prompt",
+      location: "BOARDROOM · 2:20 PM",
+      promptChallenge: {
+        context:
+          "Carlos wants Claude to review his 12-page strategic proposal. He doesn't want polite summaries. He needs a direct critique for a board of 6 non-technical executives focusing on: logical flow, missing evidence, and unsupported claims. He specifically wants to exclude grammar or formatting edits.",
+        goal:
+          "Write the prompt Carlos should type to get a direct, substantive critique of his proposal from Claude based on these requirements.",
+        placeholder: "Write Carlos's review prompt..."
+      },
+      xpAward: 100,
     },
 
     // ── SCENE 6: AI verification ──────────────────────────────────────────────
@@ -337,7 +381,9 @@ export const game3: Game = {
           correct: false,
           feedback:
             "AI is genuinely useful for structuring research, generating hypotheses, and synthesizing information you provide. The problem isn't AI research generally — it's using AI-generated statistics without verification. Numbers, dates, names, and revenue figures always need a primary source.",
+          wrongStoryText: "Carlos looks disappointed. 'Using AI for competitive analysis is fine. Presenting figures without verifying them is the failure.'",
           leadsTo: "w3-s6-consequence",
+          wrongFeedback: "AI is valuable for structuring and synthesizing research — the real rule is: always trace **Specific Statistics** back to a **Primary Source**.",
         },
         {
           label: "B",
@@ -353,7 +399,9 @@ export const game3: Game = {
           correct: false,
           feedback:
             "AI cannot verify its own outputs against real-world data at the time of generation. Asking it to 'double-check' doesn't trigger a database lookup — it just re-generates text that may confirm the original error. Verification is always a human step.",
+          wrongStoryText: "Carlos winces. 'AI cannot check its own facts in real-time. Verification is always a human step.'",
           leadsTo: "w3-s6-consequence",
+          wrongFeedback: "Asking AI to self-verify doesn't trigger a database lookup — it's **Hallucination Reinforcement**, regenerating text that may confidently repeat the original error.",
         },
         {
           label: "D",
@@ -361,7 +409,9 @@ export const game3: Game = {
           correct: false,
           feedback:
             "A disclaimer doesn't fix wrong data — it just preemptively apologizes for it. The board still made decisions based on false information. The only real solution is verification before presentation.",
+          wrongStoryText: "Carlos shakes his head. 'A disclaimer doesn't excuse incorrect facts. The board made decisions based on false data.'",
           leadsTo: "w3-s6-consequence",
+          wrongFeedback: "A disclaimer doesn't correct **False Data** — it just signals you already suspected the problem and presented it anyway.",
         },
       ],
       xpAward: 175,
@@ -382,6 +432,19 @@ export const game3: Game = {
         quote:     "Even the finest saxophonist must tune his instrument before stepping on stage. You treated the AI's confident tone as a signature of truth. If there is a number on your slide, verify it yourself—or expect the audience to do it for you.",
         rejoinsAt: "w3-revelation",
       },
+    },
+
+    // ─── NEAR-TRANSFER: Same Framework, Different Brief ────────────────────────
+    {
+      id:       "w3-near-transfer",
+      type:     "learn",
+      location: "BEFORE THE PRESENTATION",
+      xpAward:  0,
+      concept: {
+        title: "Same Framework. Different Brief.",
+        body:  "Sofia is a litigator. She stopped asking AI to 'write her arguments' and started using the Maestro Method as a legal brief: WHAT — identify the three weakest points in my opposing counsel's filing. WHAT NOT — do not cite cases outside this jurisdiction. HOW — return as a numbered list with one counterargument per point. WHY — this goes to the judge in 48 hours, language must be precise. The output she got was adversarial, specific, and actually useful. The same four pillars. A completely different courtroom.",
+      },
+      learnHighlight: "A good framework doesn't care what field you're in. It just needs you to fill in the blanks honestly.",
     },
 
     // ── REVELATION ───────────────────────────────────────────────────────────
@@ -455,6 +518,7 @@ export const game3: Game = {
             correct: false,
             feedback: "Speed helps in drafting sprints, not in precision documents. And browsing only matters if you need live data — a strategy memo usually draws on what you already know. The bottleneck here is precision and reliability, not speed.",
             wrongFeedback: "Speed helps in drafting sprints, not in precision documents. And browsing only matters if you need live data — a strategy memo usually draws on what you already know. The bottleneck here is precision and reliability, not speed.",
+          wrongStoryText: "Carlos picks the faster tool. The memo arrives quickly — polished, confident, and slipping a fabricated stat past him into the CEO's inbox.",
           },
           {
             label: "C",
@@ -462,6 +526,7 @@ export const game3: Game = {
             correct: false,
             feedback: "Run the same 6-constraint professional prompt through both. Claude typically holds more rules simultaneously and is more likely to say 'I'm not certain about this statistic.' For a document that represents you professionally, those differences matter.",
             wrongFeedback: "Run the same 6-constraint professional prompt through both. Claude typically holds more rules simultaneously and is more likely to say 'I'm not certain about this statistic.' For a document that represents you professionally, those differences matter.",
+          wrongStoryText: "Carlos treats them as equal. The memo ignores two of his four constraints. He catches it only after sending it. Almost.",
           },
         ],
       },

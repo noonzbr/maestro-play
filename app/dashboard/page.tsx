@@ -281,9 +281,9 @@ function PowerupCard({
 }
 
 /* ─── Game card ─────────────────────────────────────────────────────────── */
-function GameCard({ game, xpEarned, isBonus }: { game: Game; xpEarned: number; isBonus?: boolean }) {
+function GameCard({ game, xpEarned, isBonus, hasPremium }: { game: Game; xpEarned: number; isBonus?: boolean; hasPremium?: boolean }) {
   const completed = xpEarned > 0
-  const isLocked  = !game.free && !completed
+  const isLocked  = !game.free && !completed && !hasPremium
   const accent    = game.accentColor ?? "#00d4f0"
 
   return (
@@ -394,6 +394,67 @@ function GameCard({ game, xpEarned, isBonus }: { game: Game; xpEarned: number; i
   )
 }
 
+interface NpcEvent {
+  id: string
+  npc: string
+  avatar: string
+  action: string
+  timestamp: string
+}
+
+const NPCS = [
+  { name: "Jake", avatar: "/images/guitarplayer1.png", color: "#00d4f0", specialties: [
+    "optimized a guitar tab parsing system in Copilot Studio",
+    "prompt-designed a raw guitar solo progression inspired by Arctic Monkeys",
+    "configured a local VS Code helper to organize his chord sheets"
+  ]},
+  { name: "Zoe", avatar: "/images/zoe.png", color: "#e040fb", specialties: [
+    "synchronized her drum pad midi inputs using a prompt temperature of 0.3",
+    "programmed a structural drum loop script with Python code interpreter",
+    "drafted an AI prompt template to auto-slice electronic synth samples"
+  ]},
+  { name: "Sam", avatar: "/images/sam.png", color: "#4488ff", specialties: [
+    "debugged a nested AWS VPC peering Terraform configuration with Gemini CLI",
+    "optimized multi-stage Docker build caching for a deployment pipeline",
+    "scripted a prompt to audit active security groups on Kubernetes pods"
+  ]},
+  { name: "Carlos", avatar: "/images/carlos.png", color: "#00e676", specialties: [
+    "designed a custom system prompt to protect a client's support bot from injections",
+    "mapped enterprise prompt variables to customer billing API endpoints",
+    "optimized a batch classification pipeline using low-temperature models"
+  ]},
+  { name: "Jordan", avatar: "/images/jordan.png", color: "#ffb700", specialties: [
+    "built a structured Claude Project workspace to plan a Q3 consulting roadmap",
+    "created a custom Claude Artifact to parse vendor invoices from PDF dumps",
+    "drafted a prompt to synthesize action items from customer meeting transcripts"
+  ]},
+  { name: "Kai", avatar: "/images/kai.png", color: "#ff6b35", specialties: [
+    "simulated canvas physics for a new platformer game engine using Python",
+    "debugged a recursive sorting algorithm with AI-guided debugger loops",
+    "refactored a Pygame screen-refresh loop to hit a clean 60 FPS"
+  ]},
+  { name: "Priya", avatar: "/images/priya.png", color: "#00e676", specialties: [
+    "synthesized user feedback data from CSV tables to draft the weekly report",
+    "prompt-analyzed startup cohort retention curves in Python code interpreter",
+    "created an Excel cleaning script to deduplicate customer email registries"
+  ]},
+  { name: "Alex", avatar: "/images/alex.png", color: "#ff3d00", specialties: [
+    "drafted a detailed PRD for the collaborative sound sharing feature",
+    "structured competitor feature logs using the What/What-Not prompt framework",
+    "categorized the JIRA roadmap backlog using an automated taxonomy prompt"
+  ]},
+  { name: "Luna", avatar: "/images/luna.png", color: "#e040fb", specialties: [
+    "synthesized common friction patterns from 15 remote user interview transcripts",
+    "prompted a comprehensive target user persona card for the mobile player base",
+    "drafted a user feedback survey concerning AI assistant onboarding flow"
+  ]},
+  { name: "Aria", avatar: "/images/aria.png", color: "#00d4f0", specialties: [
+    "generated a classical violin sheet music structure in MusicXML format",
+    "analyzed minor key resolution patterns of Bach's cello suites",
+    "drafted prompt constraints to write dialogue lines for the visual novel"
+  ]}
+]
+
 /* ─── Main Dashboard ────────────────────────────────────────────────────── */
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -406,6 +467,14 @@ export default function DashboardPage() {
   const [lastPlay, setLastPlay] = useState("")
   const [syncing,  setSyncing]  = useState(false)
   const [dueCount, setDueCount] = useState(0)
+  const [fsrsMastery, setFsrsMastery] = useState(0)  // 0-100 FSRS retention mastery score
+  const [hasPremium, setHasPremium] = useState(false)
+
+  // Autonomous NPC World
+  const [npcEvents, setNpcEvents] = useState<NpcEvent[]>([])
+  const [showAwayBanner, setShowAwayBanner] = useState(false)
+  const [newEventsCount, setNewEventsCount] = useState(0)
+  const [unreadChatterCount, setUnreadChatterCount] = useState(0)
 
   // Lives
   const [lives,    setLives]    = useState(3)
@@ -472,6 +541,34 @@ export default function DashboardPage() {
         0%,100% { filter:drop-shadow(0 0 4px rgba(0,212,240,0.3)); }
         50%     { filter:drop-shadow(0 0 12px rgba(0,212,240,0.7)); }
       }
+      @keyframes maestro-summons-pulse {
+        0%,100% { box-shadow: 0 0 0 0 rgba(0,212,240,0), 0 0 40px rgba(0,212,240,0.08); }
+        50%     { box-shadow: 0 0 0 8px rgba(0,212,240,0.06), 0 0 60px rgba(0,212,240,0.18); }
+      }
+      @keyframes summons-orb-spin {
+        0%   { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes summons-orb-pulse {
+        0%,100% { opacity:0.55; transform:scale(0.94); }
+        50%     { opacity:1;    transform:scale(1.06); }
+      }
+      @keyframes summons-text-in {
+        from { opacity:0; transform:translateY(6px); }
+        to   { opacity:1; transform:translateY(0); }
+      }
+      @keyframes summons-cta-pulse {
+        0%,100% { box-shadow: 0 0 20px rgba(0,212,240,0.25); }
+        50%     { box-shadow: 0 0 40px rgba(0,212,240,0.55), 0 0 80px rgba(224,64,251,0.2); }
+      }
+      @keyframes npc-pulse-green {
+        0%, 100% { transform: scale(1); opacity: 0.4; }
+        50% { transform: scale(1.3); opacity: 1; }
+      }
+      @keyframes activity-item-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
     `
     document.head.appendChild(s)
   }, [])
@@ -510,13 +607,21 @@ export default function DashboardPage() {
     for (let w = 1; w <= 16; w++) xps[w] = getGameXp(w)
     setGameXps(xps)
 
-    // FSRS Local due count fallback
+    // FSRS Local due count + mastery score
     try {
       const localCardsJson = localStorage.getItem("maestro_review_cards") || "[]"
       const localCards: any[] = JSON.parse(localCardsJson)
       const now = new Date()
       const dueCards = localCards.filter(c => new Date(c.due) <= now)
       setDueCount(dueCards.length)
+      // Mastery = average stability across ALL reviewed cards, capped at 100
+      // stability in FSRS represents days until forgetting — higher = more retained
+      const reviewedCards = localCards.filter(c => c.reps > 0)
+      if (reviewedCards.length > 0) {
+        const avgStab = reviewedCards.reduce((sum: number, c: any) => sum + (c.stability ?? 0), 0) / reviewedCards.length
+        // Normalize: stability of ~30 days = 100% mastery (diminishing returns past that)
+        setFsrsMastery(Math.min(100, Math.round((avgStab / 30) * 100)))
+      }
     } catch {}
 
     // Power-up unlock states (computed, not stored — derived from stats)
@@ -528,6 +633,82 @@ export default function DashboardPage() {
     if (puAct.shield   && puAct.shield   < now) puAct.shield   = null
     setPuActive(puAct)
     setShieldActive(!!(puAct.shield && puAct.shield > now))
+
+    // NPC World Simulation
+    try {
+      const lastSeenStr = localStorage.getItem("maestro_last_seen")
+      const nowMs = Date.now()
+      localStorage.setItem("maestro_last_seen", String(nowMs))
+
+      const existingEventsJson = localStorage.getItem("maestro_npc_events") || "[]"
+      let existingEvents: NpcEvent[] = JSON.parse(existingEventsJson)
+
+      const generateEvents = (count: number, startTime: number, endTime: number): NpcEvent[] => {
+        const list: NpcEvent[] = []
+        const usedNpcNames = new Set<string>()
+        for (let i = 0; i < count; i++) {
+          const availableNpcs = NPCS.filter(n => !usedNpcNames.has(n.name))
+          const npcInfo = availableNpcs.length > 0
+            ? availableNpcs[Math.floor(Math.random() * availableNpcs.length)]
+            : NPCS[Math.floor(Math.random() * NPCS.length)]
+          usedNpcNames.add(npcInfo.name)
+          const action = npcInfo.specialties[Math.floor(Math.random() * npcInfo.specialties.length)]
+          const ts = Math.round(startTime + Math.random() * (endTime - startTime))
+          list.push({
+            id: Math.random().toString(36).substring(2, 9),
+            npc: npcInfo.name,
+            avatar: npcInfo.avatar,
+            action,
+            timestamp: String(ts)
+          })
+        }
+        return list.sort((a, b) => parseInt(b.timestamp) - parseInt(a.timestamp))
+      }
+
+      if (!lastSeenStr) {
+        // First visit or cleared cache: generate initial dummy history
+        const generated = generateEvents(4, nowMs - 4 * 3600 * 1000, nowMs)
+        existingEvents = generated
+        localStorage.setItem("maestro_npc_events", JSON.stringify(generated))
+        setNpcEvents(generated)
+      } else {
+        const lastSeen = parseInt(lastSeenStr)
+        const elapsed = nowMs - lastSeen
+        // Only run simulation if more than 5 minutes elapsed
+        if (elapsed > 5 * 60 * 1000) {
+          const hoursElapsed = elapsed / (3600 * 1000)
+          const count = Math.min(6, Math.max(1, Math.round(hoursElapsed * 1.5) || 1))
+          const generated = generateEvents(count, lastSeen, nowMs)
+          const combined = [...generated, ...existingEvents].slice(0, 15)
+          localStorage.setItem("maestro_npc_events", JSON.stringify(combined))
+          setNpcEvents(combined)
+          setNewEventsCount(count)
+          setShowAwayBanner(true)
+        } else {
+          setNpcEvents(existingEvents.slice(0, 15))
+        }
+      }
+      
+      // Calculate unread radio chatter transmissions
+      try {
+        const CHATTER_VOICE_NOTES = [
+          { id: "jake-1", unlockedAt: 1 },
+          { id: "felipe-1", unlockedAt: 2 },
+          { id: "vega-1", unlockedAt: 4 },
+          { id: "zoe-1", unlockedAt: 7 },
+          { id: "maya-1", unlockedAt: 13 },
+        ]
+        const readList = JSON.parse(localStorage.getItem("maestro_read_transmissions") ?? "[]")
+        const unlocked = CHATTER_VOICE_NOTES.filter(t => {
+          const week = t.unlockedAt
+          return week === 1 || (parseInt(localStorage.getItem(`maestro_game_${week}_xp`) ?? "0") || 0) > 0
+        })
+        const unread = unlocked.filter(t => !readList.includes(t.id))
+        setUnreadChatterCount(unread.length)
+      } catch {}
+    } catch (e) {
+      console.warn("Failed to simulate NPC events", e)
+    }
   }, [])
 
   /* ── Sync from Supabase ── */
@@ -570,6 +751,35 @@ export default function DashboardPage() {
         .then(r => r.json())
         .then(data => { if (typeof data.total_due === "number") setDueCount(data.total_due) })
         .catch(() => {})
+
+      // Check for active premium license
+      supabaseBrowser()
+        .from("purchases")
+        .select("id")
+        .eq("user_id", user.id)
+        .in("game_slug", ["maestro-bundle", "conductor-edition"])
+        .maybeSingle()
+        .then(({ data }) => {
+          const premium = !!data
+          setHasPremium(premium)
+
+          // Auto-verify if license_key is present in URL search params
+          if (typeof window !== "undefined" && !premium) {
+            const params = new URLSearchParams(window.location.search)
+            const queryKey = params.get("license_key")
+            if (queryKey) {
+              fetch("/api/gumroad/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ licenseKey: queryKey.trim(), userId: user.id }),
+              })
+              .then(res => {
+                if (res.ok) setHasPremium(true)
+              })
+              .catch(() => {})
+            }
+          }
+        })
     }).catch(() => setSyncing(false))
   }, [user])
 
@@ -584,7 +794,15 @@ export default function DashboardPage() {
   const bonusGames     = allGames.filter(g => g.week > 12)
   const completedWeeks = Object.entries(gameXps).filter(([, xp]) => xp > 0).map(([w]) => Number(w))
   const completedCount = completedWeeks.length
-  const fluency        = Math.min(100, Math.round((completedCount / allGames.length) * 60) + Math.min(40, Math.round(totalXp / 75)))
+  // AI Fluency Score — reformed to measure actual mastery, not just engagement
+  // Formula: 40% game breadth + 20% XP depth + 40% FSRS retention mastery
+  // This means a player who completed 5 games and drilled them deeply scores
+  // higher than a player who rushed all 14 and forgot everything.
+  const fluency = Math.min(100, Math.round(
+    (completedCount / allGames.length) * 40   // breadth: games completed
+    + Math.min(20, Math.round(totalXp / 150))  // depth: XP effort (capped at 20pts)
+    + fsrsMastery * 0.40                       // retention: FSRS avg stability score
+  ))
 
   const completedTracks = TRACKS.filter(t => t.weeks.every(w => (gameXps[w] ?? 0) > 0)).length
 
@@ -617,6 +835,17 @@ export default function DashboardPage() {
     }
     // Hint and MaestroMode are stateless (handled in-game)
   }, [unlocked, puActive])
+
+  function formatRelativeTime(tsStr: string): string {
+    const ts = parseInt(tsStr)
+    const diffMs = Date.now() - ts
+    const mins = Math.max(1, Math.floor(diffMs / 60000))
+    if (mins < 60) return `${mins}m ago`
+    const hours = Math.floor(mins / 60)
+    if (hours < 24) return `${hours}h ago`
+    const days = Math.floor(hours / 24)
+    return `${days}d ago`
+  }
 
   /* ─── render ─────────────────────────────────────────────────────────── */
   return (
@@ -774,6 +1003,78 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* ══ PREMIUM UNLOCK BANNER ═══════════════════════════════════════ */}
+          {mounted && !hasPremium && (
+            <div style={{
+              background: "linear-gradient(90deg, rgba(0,212,240,0.08) 0%, rgba(224,64,251,0.08) 100%)",
+              border: "1.5px solid rgba(0,212,240,0.3)",
+              borderRadius: "20px",
+              padding: "1.25rem 1.75rem",
+              marginBottom: "1.5rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "1.2rem",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+              animation: "dash-up 0.45s 0.02s ease both"
+            }}>
+              <div style={{ flex: 1, minWidth: "260px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", marginBottom: "0.3rem" }}>
+                  <span style={{ fontSize: "1.1rem" }}>⚡</span>
+                  <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.85rem", color: "#fff", letterSpacing: "-0.01em" }}>
+                    Unlock the Conductor&apos;s Edition
+                  </span>
+                </div>
+                <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.76rem", color: "rgba(240,238,255,0.65)", lineHeight: 1.5, margin: 0 }}>
+                  Get complete access to all 14 visual novel chapters, unlimited lives, the FSRS dashboard, and advanced Socratic guides.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                <Link
+                  href="/#store"
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 800,
+                    fontSize: "0.72rem",
+                    color: "#08060f",
+                    background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                    padding: "0.55rem 1.25rem",
+                    borderRadius: "100px",
+                    textDecoration: "none",
+                    boxShadow: "0 0 16px rgba(0,212,240,0.3)",
+                    transition: "transform 0.15s",
+                    display: "inline-block"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.transform = "scale(1.03)"}
+                  onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                >
+                  Buy Edition
+                </Link>
+                <Link
+                  href="/settings"
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.72rem",
+                    color: "#fff",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    padding: "0.55rem 1.25rem",
+                    borderRadius: "100px",
+                    textDecoration: "none",
+                    transition: "background 0.2s",
+                    display: "inline-block"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
+                >
+                  Enter Key 🗝️
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* ══ TOP ROW: XP + LIVES + STREAK ════════════════════════════════ */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "1rem", marginBottom: "1.25rem", alignItems: "stretch" }}>
 
@@ -919,6 +1220,7 @@ export default function DashboardPage() {
           {/* ══ AI FLUENCY + DAILY CHALLENGE ══════════════════════════════ */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.25rem" }}>
 
+
             {/* Fluency score */}
             <div style={{
               background: "rgba(10,7,20,0.92)", border: "1px solid rgba(224,64,251,0.22)",
@@ -941,76 +1243,349 @@ export default function DashboardPage() {
                   borderRadius: "3px", transition: "width 1.5s cubic-bezier(0.16,1,0.3,1)",
                 }} />
               </div>
-              <div style={{ fontFamily: "Inter, sans-serif", fontSize: "0.68rem", color: "var(--muted)" }}>
-                {completedCount} of {allGames.length} games complete · {completedTracks} track{completedTracks !== 1 ? "s" : ""} finished
+              {/* Score breakdown */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.22rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "Inter, sans-serif", fontSize: "0.6rem", color: "var(--muted)" }}>
+                  <span>📚 Breadth ({completedCount}/{allGames.length} games)</span>
+                  <span>{Math.round((completedCount / allGames.length) * 40)}/40</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "Inter, sans-serif", fontSize: "0.6rem", color: "var(--muted)" }}>
+                  <span>⚡ Depth (XP effort)</span>
+                  <span>{Math.min(20, Math.round(totalXp / 150))}/20</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "Inter, sans-serif", fontSize: "0.6rem", color: fsrsMastery > 0 ? "rgba(0,212,240,0.7)" : "var(--muted)" }}>
+                  <span>🧠 Retention (FSRS mastery)</span>
+                  <span>{Math.round(fsrsMastery * 0.40)}/40</span>
+                </div>
               </div>
             </div>
 
-            {/* Review Due / Daily Practice */}
-            <div style={{
-              background: dueCount > 0 ? "rgba(0,212,240,0.05)" : "rgba(10,7,20,0.92)",
-              border: dueCount > 0 ? "1px solid rgba(0,212,240,0.3)" : "1px solid rgba(0,212,240,0.18)",
-              borderRadius: "20px", padding: "1.5rem 1.75rem",
-              backdropFilter: "blur(20px)", animation: "dash-up 0.45s 0.25s ease both",
-              display: "flex", flexDirection: "column", justifyContent: "space-between",
-              boxShadow: dueCount > 0 ? "0 0 32px rgba(0,212,240,0.08)" : "none",
-              transition: "border-color 0.3s, box-shadow 0.3s",
-            }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.6rem" }}>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--cyan)", opacity: 0.8 }}>
-                    {dueCount > 0 ? "Review Due" : "Daily Practice"}
-                  </div>
-                  {dueCount > 0 && (
+            {/* Daily Challenge — Maestro Summons Banner when reviews due, quiet card when not */}
+            {dueCount > 0 ? (
+              <Link href="/review" style={{ textDecoration: "none" }}>
+                <div style={{
+                  background: "linear-gradient(135deg, rgba(0,12,20,0.97) 0%, rgba(10,4,22,0.97) 100%)",
+                  border: "1px solid rgba(0,212,240,0.35)",
+                  borderRadius: "20px", padding: "1.5rem 1.75rem",
+                  backdropFilter: "blur(20px)", animation: "dash-up 0.45s 0.25s ease both, maestro-summons-pulse 3s ease-in-out infinite",
+                  display: "flex", flexDirection: "column", justifyContent: "space-between",
+                  cursor: "pointer", position: "relative", overflow: "hidden",
+                }}>
+                  {/* Animated cyan radial glow */}
+                  <div style={{
+                    position: "absolute", top: "-30%", left: "50%", transform: "translateX(-50%)",
+                    width: "200%", height: "160%",
+                    background: "radial-gradient(ellipse at 50% 0%, rgba(0,212,240,0.1) 0%, transparent 60%)",
+                    pointerEvents: "none",
+                  }} />
+
+                  {/* Top row: label + urgency badge */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem", position: "relative" }}>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#00d4f0", opacity: 0.9 }}>
+                      Daily Maestro Challenge
+                    </div>
                     <div style={{
-                      fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.6rem",
-                      color: "#08060f", background: "#00d4f0",
-                      borderRadius: "100px", padding: "0.1rem 0.55rem",
-                      letterSpacing: "0.02em",
+                      fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "0.65rem",
+                      color: "#08060f", background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                      borderRadius: "100px", padding: "0.18rem 0.6rem",
+                      letterSpacing: "0.04em", animation: "badge-in 0.4s 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
                     }}>
-                      {dueCount}
+                      {dueCount} due
+                    </div>
+                  </div>
+
+                  {/* Orb + summons text */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.2rem", position: "relative" }}>
+                    {/* Animated Maestro orb */}
+                    <div style={{
+                      width: "52px", height: "52px", flexShrink: 0, borderRadius: "50%",
+                      background: "radial-gradient(circle at 35% 32%, rgba(0,212,240,0.65) 0%, rgba(224,64,251,0.35) 55%, rgba(8,6,15,0.9) 100%)",
+                      border: "1.5px solid rgba(0,212,240,0.5)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1.55rem",
+                      animation: "summons-orb-pulse 2.2s ease-in-out infinite",
+                      boxShadow: "0 0 24px rgba(0,212,240,0.3), inset 0 0 12px rgba(0,212,240,0.1)",
+                    }}>🎼</div>
+                    <div>
+                      <div style={{
+                        fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                        fontSize: "1.08rem", color: "rgba(240,238,255,0.92)", lineHeight: 1.35,
+                        marginBottom: "0.3rem",
+                        animation: "summons-text-in 0.5s 0.3s ease both",
+                      }}>
+                        The Maestro summons you.
+                      </div>
+                      <div style={{
+                        fontFamily: "Inter, sans-serif", fontSize: "0.68rem",
+                        color: "rgba(0,212,240,0.65)", lineHeight: 1.4,
+                        animation: "summons-text-in 0.5s 0.5s ease both",
+                      }}>
+                        {dueCount} concept{dueCount !== 1 ? "s" : ""} are fading from memory. The orchestra waits.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Streak indicator (if any) */}
+                  {streak > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "1rem", position: "relative" }}>
+                      <span style={{ fontSize: "0.9rem", animation: "flame-flicker 1.8s ease-in-out infinite" }}>🔥</span>
+                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.68rem", color: "#ff9800", fontWeight: 700 }}>
+                        {streak}-day streak — keep it alive
+                      </span>
                     </div>
                   )}
+
+                  {/* CTA */}
+                  <div style={{
+                    display: "inline-flex", alignItems: "center", gap: "0.5rem",
+                    fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.85rem",
+                    color: "#08060f",
+                    background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                    padding: "0.65rem 1.5rem", borderRadius: "100px",
+                    letterSpacing: "0.02em",
+                    animation: "summons-cta-pulse 2.5s ease-in-out infinite",
+                    alignSelf: "flex-start",
+                    position: "relative",
+                  }}>
+                    🧠 Begin Review Session →
+                  </div>
                 </div>
-                <div style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.05rem", color: "rgba(240,238,255,0.7)", lineHeight: 1.5, marginBottom: "1rem" }}>
-                  {dueCount > 0
-                    ? `${dueCount} concept${dueCount !== 1 ? "s" : ""} ready for spaced repetition review.`
-                    : `"The Maestro summons you to the practice room."`
-                  }
+              </Link>
+            ) : (
+              <div style={{
+                background: "rgba(10,7,20,0.92)",
+                border: "1px solid rgba(0,212,240,0.18)",
+                borderRadius: "20px", padding: "1.5rem 1.75rem",
+                backdropFilter: "blur(20px)", animation: "dash-up 0.45s 0.25s ease both",
+                display: "flex", flexDirection: "column", justifyContent: "space-between",
+              }}>
+                <div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--cyan)", opacity: 0.8, marginBottom: "0.6rem" }}>
+                    Daily Practice
+                  </div>
+                  <div style={{ fontFamily: "Cormorant Garamond, serif", fontStyle: "italic", fontSize: "1.05rem", color: "rgba(240,238,255,0.7)", lineHeight: 1.5, marginBottom: "1rem" }}>
+                    &ldquo;The Maestro summons you to the practice room.&rdquo;
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {dueCount > 0 && (
-                  <Link href="/review" style={{ textDecoration: "none" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <Link href="/games" style={{ textDecoration: "none" }}>
                     <div style={{
                       display: "inline-flex", alignItems: "center", gap: "0.45rem",
                       fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem",
-                      color: "#08060f",
-                      background: "linear-gradient(90deg, #00d4f0, #e040fb)",
+                      color: dueCount > 0 ? "var(--cyan)" : "#08060f",
+                      background: dueCount > 0 ? "rgba(0,212,240,0.08)" : (playedToday ? "rgba(88,204,2,0.85)" : "linear-gradient(90deg, #00d4f0, #e040fb)"),
+                      border: dueCount > 0 ? "1px solid rgba(0,212,240,0.3)" : "none",
                       padding: "0.6rem 1.4rem", borderRadius: "100px",
                       cursor: "pointer", letterSpacing: "0.02em",
-                      boxShadow: "0 0 24px rgba(0,212,240,0.25)",
                     }}>
-                      🧠 Start Review Session →
+                      {playedToday ? "✓ Played today — play more →" : "Begin today's game →"}
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ══ AUTONOMOUS NPC WORLD WIDGET ════════════════════════════════ */}
+          <div style={{
+            background: "rgba(10,7,20,0.92)",
+            border: "1px solid rgba(0,212,240,0.18)",
+            borderLeft: "4px solid #00d4f0",
+            borderRadius: "20px",
+            padding: "1.5rem 1.75rem",
+            backdropFilter: "blur(20px)",
+            marginBottom: "1.25rem",
+            animation: "dash-up 0.45s 0.28s ease both",
+          }}>
+            {/* Header row */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "1.25rem" }}>🤖</span>
+                <h2 style={{
+                  fontFamily: "Cormorant Garamond, serif",
+                  fontWeight: 700,
+                  fontSize: "1.35rem",
+                  color: "#fff",
+                  margin: 0,
+                }}>
+                  While you were away...
+                </h2>
+                {unreadChatterCount > 0 && (
+                  <Link href="/games?tab=chatter" style={{ textDecoration: "none" }}>
+                    <div style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.28rem",
+                      background: "rgba(224, 64, 251, 0.15)",
+                      border: "1px solid rgba(224, 64, 251, 0.45)",
+                      borderRadius: "100px",
+                      padding: "0.18rem 0.6rem",
+                      cursor: "pointer",
+                      animation: "badge-in 0.4s ease both, ring-glow 2s infinite",
+                    }}>
+                      <span style={{ fontSize: "0.75rem" }}>📻</span>
+                      <span style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontWeight: 800,
+                        fontSize: "0.58rem",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        color: "var(--pink)",
+                      }}>
+                        {unreadChatterCount} Unread Radio Log{unreadChatterCount !== 1 ? "s" : ""}
+                      </span>
                     </div>
                   </Link>
                 )}
-                <Link href="/games" style={{ textDecoration: "none" }}>
-                  <div style={{
-                    display: "inline-flex", alignItems: "center", gap: "0.45rem",
-                    fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "0.82rem",
-                    color: dueCount > 0 ? "var(--cyan)" : "#08060f",
-                    background: dueCount > 0 ? "rgba(0,212,240,0.08)" : (playedToday ? "rgba(88,204,2,0.85)" : "linear-gradient(90deg, #00d4f0, #e040fb)"),
-                    border: dueCount > 0 ? "1px solid rgba(0,212,240,0.3)" : "none",
-                    padding: "0.6rem 1.4rem", borderRadius: "100px",
-                    cursor: "pointer", letterSpacing: "0.02em",
-                  }}>
-                    {playedToday ? "✓ Played today — play more →" : "Begin today's game →"}
-                  </div>
-                </Link>
+              </div>
+              
+              {/* Blinking green live simulation status */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <div style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: "#00e676",
+                  boxShadow: "0 0 8px #00e676",
+                  animation: "npc-pulse-green 1.5s ease-in-out infinite",
+                }} />
+                <span style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 700,
+                  fontSize: "0.58rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "rgba(0, 230, 118, 0.75)",
+                }}>
+                  Autonomous NPC Simulation
+                </span>
               </div>
             </div>
 
+            {/* Away notifications banner */}
+            {showAwayBanner && newEventsCount > 0 && (
+              <div style={{
+                background: "rgba(0, 212, 240, 0.06)",
+                border: "1px solid rgba(0, 212, 240, 0.2)",
+                borderRadius: "12px",
+                padding: "0.6rem 0.95rem",
+                marginBottom: "0.85rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                animation: "activity-item-in 0.4s ease both",
+              }}>
+                <span style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: "0.78rem",
+                  color: "#00d4f0",
+                }}>
+                  ✨ {newEventsCount} new activity log{newEventsCount !== 1 ? "s" : ""} generated since your last visit.
+                </span>
+                <button
+                  onClick={() => setShowAwayBanner(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "rgba(240, 238, 255, 0.4)",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    padding: "2px",
+                  }}
+                  title="Dismiss notification"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Event list */}
+            {npcEvents.length === 0 ? (
+              <div style={{
+                fontFamily: "Cormorant Garamond, serif",
+                fontStyle: "italic",
+                fontSize: "1rem",
+                color: "rgba(240,238,255,0.45)",
+                textAlign: "center",
+                padding: "1.5rem 0",
+              }}>
+                The campus is quiet. Recording studios are prepped...
+              </div>
+            ) : (
+              <div style={{
+                maxHeight: "185px",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.55rem",
+                paddingRight: "6px",
+              }} className="scrollbar-thin">
+                {npcEvents.map((evt, idx) => {
+                  const npcColor = NPCS.find(n => n.name === evt.npc)?.color ?? "var(--cyan)"
+                  return (
+                    <div
+                      key={evt.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        padding: "0.5rem 0.75rem",
+                        background: "rgba(255, 255, 255, 0.02)",
+                        border: "1px solid rgba(255, 255, 255, 0.04)",
+                        borderRadius: "12px",
+                        animation: `activity-item-in 0.4s ${idx * 0.04}s ease both`,
+                        transition: "background 0.2s, border-color 0.2s",
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)"
+                        e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)"
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = "rgba(255, 255, 255, 0.02)"
+                        e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.04)"
+                      }}
+                    >
+                      {/* Avatar with specialty ring */}
+                      <div style={{
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "50%",
+                        border: `1.5px solid ${npcColor}`,
+                        boxShadow: `0 0 8px ${npcColor}22`,
+                        overflow: "hidden",
+                        flexShrink: 0,
+                      }}>
+                        <img
+                          src={evt.avatar}
+                          alt={evt.npc}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
+                        />
+                      </div>
+
+                      {/* Log text */}
+                      <div style={{ flex: 1, minWidth: 0, fontFamily: "Inter, sans-serif", fontSize: "0.78rem", lineHeight: 1.4 }}>
+                        <span style={{ fontWeight: 800, color: npcColor, marginRight: "0.35rem" }}>
+                          {evt.npc}
+                        </span>
+                        <span style={{ color: "rgba(240, 238, 255, 0.82)" }}>
+                          {evt.action}
+                        </span>
+                      </div>
+
+                      {/* Relative time */}
+                      <div style={{
+                        fontFamily: "Inter, sans-serif",
+                        fontSize: "0.68rem",
+                        color: "rgba(240, 238, 255, 0.3)",
+                        whiteSpace: "nowrap",
+                      }}>
+                        {formatRelativeTime(evt.timestamp)}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* ══ POWER-UPS ═══════════════════════════════════════════════════ */}
@@ -1087,7 +1662,7 @@ export default function DashboardPage() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))", gap: "0.75rem" }}>
               {mainGames.map(game => (
-                <GameCard key={game.slug} game={game} xpEarned={gameXps[game.week] ?? 0} />
+                <GameCard key={game.slug} game={game} xpEarned={gameXps[game.week] ?? 0} hasPremium={hasPremium} />
               ))}
             </div>
           </div>
@@ -1106,7 +1681,7 @@ export default function DashboardPage() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(148px, 1fr))", gap: "0.75rem" }}>
                 {bonusGames.map(game => (
-                  <GameCard key={game.slug} game={game} xpEarned={gameXps[game.week] ?? 0} isBonus />
+                  <GameCard key={game.slug} game={game} xpEarned={gameXps[game.week] ?? 0} isBonus hasPremium={hasPremium} />
                 ))}
               </div>
             </div>

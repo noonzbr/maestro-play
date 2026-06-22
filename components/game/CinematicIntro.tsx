@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { motion } from "framer-motion"
 import { GameIntro, IntroBeat } from "@/lib/games/types"
 
 // ── Default (Jake game 1) ──────────────────────────────────────────────────
@@ -130,19 +131,48 @@ export default function CinematicIntro({ onComplete, startMusic, intro, fastText
         alignItems: "center",
         justifyContent: "center",
         background: data.sceneColor ?? "#050810",
+        overflow: "hidden",
       }}>
         {data.sceneImage && (
-          <img
-            src={data.sceneImage}
-            alt=""
-            draggable={false}
-            style={{
-              height: "100%",
-              width: "auto",
-              display: "block",
-              animation: "cin-ken-burns 30s ease-in-out forwards",
-            }}
-          />
+          <>
+            {/* Blurred background fill */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              backgroundImage: `url(${data.sceneImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center center",
+              filter: "blur(40px) brightness(0.28)",
+              transform: "scale(1.1)",
+              zIndex: 0,
+            }} />
+            
+            {/* Sharp centered image */}
+            <motion.img
+              src={data.sceneImage}
+              alt=""
+              draggable={false}
+              animate={{
+                scale: [1.01, 1.05, 1.02, 1.04, 1.01],
+                x: [0, -6, 4, -2, 0],
+                y: [0, 3, -2, 1, 0],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 25,
+                ease: "linear",
+              }}
+              style={{
+                position: "relative",
+                height: "100%",
+                width: "auto",
+                objectFit: "contain",
+                display: "block",
+                zIndex: 1,
+                boxShadow: "0 0 50px rgba(0,0,0,0.8)",
+              }}
+            />
+          </>
         )}
       </div>
 

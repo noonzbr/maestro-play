@@ -9,23 +9,21 @@ export const game12: Game = {
   accentColor: "#8764b8",
   audioTrack: "/audio/concrete-riot.mp3",
   characterName: "Jake",
-  characterRole: "17-year-old bot builder",
-  characterBlurb:
-    "Jake builds a no-code AI assistant for his music club — without writing a single line of code",
+  characterRole: "17-year-old guitarist and music club officer",
+  characterBlurb: "Jake builds a no-code AI assistant for the music club under President Tyler's guidance",
   characterImage: "/images/guitarplayer1.png",
-  maestroImage: "/images/maestroplayer1.png",
+  maestroImage: "/images/maestro-jake.png",
   maestroLine:
     "The last time he thought 'building AI' required a computer science degree...",
-  maestroSubline:
-    "Jake deployed his first AI agent. The music plays on — and the bot handles the questions.",
+  maestroSubline: "Jake deployed his first AI agent. The music plays on — and the bot handles the questions.",
   intro: {
     sceneImage: "/images/scene-jake-studio.png",
     sceneColor: "#08060a",
     noteOrigin: { bottom: "42%", left: "48%" },
     beats: [
       { type: "location",  text: "MUSIC CLUB ROOM · FRIDAY · 4:02 PM" },
-      { type: "narration", text: "Thirty-one emails in a week, each one a question the handbook already answered — Jake was the club president, not the club search engine." },
-      { type: "dialogue",  speaker: "Tyler", text: "You could build a bot for this. No code. Copilot Studio, drag and drop, live on the website by Saturday. Or you could keep answering the same five questions forever. Your call." },
+      { type: "narration", text: "Thirty-one emails with the same questions — Tyler was the club president, but Jake was handling the FAQ." },
+      { type: "dialogue",  speaker: "Tyler", text: "Build a no-code bot with Copilot Studio. Drag and drop, live by Saturday. Or keep answering the same questions forever." },
       { type: "final",     text: "You don't need to write the code. You need to understand the problem well enough to hand it off." },
     ],
   },
@@ -47,57 +45,45 @@ export const game12: Game = {
     {
       id: "w12-s1",
       type: "scenario",
-      character: "Jake, Music Club President, 17",
+      character: "Jake, Music Club Officer, 17",
       location: "WESTBROOK HIGH · MUSIC ROOM · FRIDAY · 3:45 PM",
       dialogue: [
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text:
-            "Thirty-one emails this week. Thirty-one. 'When are auditions?' 'How do I join?' 'Do I need my own instrument?' Same five questions, over and over. I'm the president, not the FAQ page.",
+            "Thirty-one emails this week. Same questions over and over. I'm a guitarist, not an FAQ page.",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
-          text: "Why not put the answers on the website?",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
+          text: "As president, I need you focused on music, not admin. Why not put the answers on the website?",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text:
-            "They're already there. In the club handbook. People just don't read it — they email me instead. I need something that answers for me.",
+            "They're in the handbook, but people don't read it. I need something that auto-answers.",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "You need a chatbot. Not a static FAQ — an actual bot that lives on the site, reads the question, and responds. And before you say you can't code: you don't have to.",
+            "You need an interactive chatbot on the site. And you don't need to code it.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
-          text: "I'm a guitarist, not a developer. What are we talking about here?",
+          speaker: "Jake", avatar: "jake",
+          text: "I'm a guitarist, not a developer. What is this?",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "Microsoft Copilot Studio. It's a drag-and-drop platform for building AI agents. You describe what the bot should know, give it your documents, set up the conversation flows — no code. It's built for exactly this.",
+            "Microsoft Copilot Studio. It's a no-code drag-and-drop platform for building custom AI agents.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
-          text: "And it actually understands what students are asking? Like, natural language?",
+          speaker: "Jake", avatar: "jake",
+          text: "And it understands natural language?",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "It's powered by large language models. Students can type anything — 'yo when are tryouts' — and it understands the intent. Let's build it.",
+            "Yes, LLMs power it. Students can type naturally, and it gets the intent. Let's build it.",
         },
       ],
       concept: {
@@ -113,6 +99,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Copilot Studio is not an email auto-responder or template system. It's a full AI agent builder — you create a conversational agent that understands natural language and responds intelligently, not a simple reply bot.",
+          wrongFeedback: "Copilot Studio is a **low-code AI agent builder** — it creates intelligent, conversational agents, not simple auto-reply template systems.",
+          wrongStoryText: "Jake expects a polished out-of-office tool. The console hums quietly: 'You found a blueprint for a brain — and called it a sticky note.'",
         },
         {
           label: "B",
@@ -127,6 +115,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Copilot Studio is explicitly designed to not require coding. It uses a visual designer, not a script editor. Developers can extend it with code if they want, but the whole point is that non-developers can build fully functional agents.",
+          wrongFeedback: "Copilot Studio's power is its **Low-Code/No-Code** design — a visual builder replaces Python scripts entirely, empowering non-developers.",
+          wrongStoryText: "Jake blinks at the screen. No terminal, no syntax errors — just drag-and-drop flows. 'Code isn't the only way to build,' the console reminds him.",
         },
         {
           label: "D",
@@ -134,6 +124,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "That describes a document generation feature, not an AI agent platform. Copilot Studio builds interactive agents that have live conversations with users — not static documents.",
+          wrongFeedback: "Copilot Studio builds **Conversational AI Agents** for live dialogue — not static FAQ documents that sit on a page.",
+          wrongStoryText: "Jake clicks through the interface. Conversations branch and respond in real time. 'This talks back,' he murmurs, surprised.",
         },
       ],
       xpAward: 100,
@@ -144,7 +136,7 @@ export const game12: Game = {
       id: "w12-s2",
       type: "quiz",
       scenarioText:
-        "Jake opens Copilot Studio for the first time at studio.microsoft.com. The interface is nothing like he expected — no blank code editor staring back at him. Instead, there's a visual canvas with conversation flow diagrams, a 'Topics' panel where he can define what his agent responds to, and a 'Knowledge' section where he can upload documents or point to websites.\n\nCopilot Studio was previously called Power Virtual Agents before Microsoft rebranded it in 2023. It's part of the Power Platform — the same family as Power Automate (workflow automation) and Power Apps (no-code app builder). Agents built in Copilot Studio can use generative AI to answer questions from uploaded documents, and they can also follow structured conversation paths (called Topics) for more controlled interactions. Most importantly, they can be published to a website embed code, Microsoft Teams, a mobile app, or a custom URL — with one click.",
+        "Jake opens Copilot Studio at studio.microsoft.com. Instead of a code editor, he finds a visual designer with conversation flow diagrams, a 'Topics' panel, and a 'Knowledge' section. Formerly called Power Virtual Agents, Copilot Studio handles both structured dialogues (Topics) and generative AI answers from uploaded files.",
       question:
         "Jake wants to understand where Copilot Studio fits in Microsoft's product ecosystem. What is its relationship to Power Virtual Agents?",
       choices: [
@@ -154,6 +146,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "They are not competitors. Power Virtual Agents was rebranded and evolved into Copilot Studio in 2023. All Power Virtual Agents functionality exists within Copilot Studio, which adds generative AI capabilities on top.",
+          wrongFeedback: "Power Virtual Agents wasn't replaced by a competitor — it **evolved** directly into Copilot Studio through a **Rebranding** in 2023.",
+          wrongStoryText: "Jake reads the release notes. One product, one story — just a new name and new powers. 'They grew up,' he thinks.",
         },
         {
           label: "B",
@@ -168,6 +162,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Copilot Studio is not restricted to enterprise. It's available to Microsoft 365 and Power Platform subscribers at various license levels — including educational institutions. Jake can use it for his school music club.",
+          wrongFeedback: "Copilot Studio isn't exclusive to enterprises — its **Licensing** spans Microsoft 365 and Power Platform tiers, including schools.",
+          wrongStoryText: "Jake checks his school account. Access granted. MelodyBot's home is right here — no Fortune 500 budget required.",
         },
         {
           label: "D",
@@ -175,6 +171,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "This is not the distinction. Power Virtual Agents was the predecessor product, not a specialised voice layer. Copilot Studio is the unified platform that handles both structured conversation flows and generative AI responses.",
+          wrongFeedback: "Power Virtual Agents was a **Predecessor Platform**, not a voice specialist — Copilot Studio unifies **Structured Topics** and **Generative AI** together.",
+          wrongStoryText: "Jake finds no separate voice console — just one unified studio. 'It was always one thing,' he realises, scrolling back through the history.",
         },
       ],
       xpAward: 100,
@@ -188,58 +186,45 @@ export const game12: Game = {
       location: "WESTBROOK HIGH · COMPUTER LAB · SATURDAY · 11:00 AM",
       dialogue: [
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "Okay. Step one: create the agent. Click 'New agent', give it a name, and write two or three sentences describing what it's for. That description becomes its core personality.",
+            "Step one: click 'New agent', name it, and write its description to set its personality.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text: "Name: MelodyBot. And for the description...",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text:
-            "[types]: 'MelodyBot helps students at Westbrook High learn about the Music Club — auditions, membership, rehearsal schedules, and events. It's friendly, encouraging, and focused only on music club topics.'",
+            "[types]: 'MelodyBot helps students learn about the Music Club. It's friendly, encouraging, and focused only on club info.'",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "Good. That description is doing a lot of work — it tells the AI what role to play and what to stay focused on. Now, Topics. Think of Topics as the conversation scripts for specific situations.",
+            "Good. That description defines its boundaries. Now let's set up Topics, which are conversational paths.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text: "Like — 'how to join' is one topic?",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "Exactly. Each Topic has trigger phrases — the things someone might say — and then the bot's response flow. You can make it ask a follow-up question, branch based on the answer, or just give a direct response.",
+            "Yes. Each Topic has trigger phrases and a response flow, which can branch based on questions.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text:
-            "So I set up a 'How to Join' topic with triggers like 'how do I join', 'sign up', 'membership' — and then MelodyBot walks them through the process?",
+            "So I set up a 'How to Join' topic with triggers like 'sign up', and it walks them through?",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "Exactly. And you don't have to think of every way someone might phrase it — the AI infers intent. Someone typing 'yo i wanna be in the band' hits the same topic.",
+            "Exactly. The AI infers intent, so 'yo i wanna be in the band' routes to the same topic.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text: "That's actually impressive. This is starting to feel real.",
         },
       ],
@@ -256,6 +241,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Copilot Studio doesn't require exact string matching. It uses AI to understand intent. 'Audition for the orchestra' signals joining intent clearly — the agent recognises this and routes to the 'How to Join' topic, even without a literal match.",
+          wrongFeedback: "Copilot Studio uses **Intent Recognition** to understand meaning — not exact string matching — so natural variations always reach the right **Topic**.",
+          wrongStoryText: "The message lands. MelodyBot doesn't hesitate — it understands 'audition' means joining. Jake grins. 'She gets it.'",
         },
         {
           label: "B",
@@ -270,6 +257,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Asking users to rephrase in a specific way defeats the purpose of a natural-language agent. Copilot Studio is built to handle the natural variation in how people express the same idea — the burden of exact phrasing is on the system, not the user.",
+          wrongFeedback: "In **Natural Language Understanding**, the system absorbs phrasing variation — users should never be forced to match your exact **Trigger Phrases**.",
+          wrongStoryText: "Jake imagines a student typing carefully, word by word. 'That's not a conversation,' he thinks. 'That's a form.'",
         },
         {
           label: "D",
@@ -277,6 +266,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Fallback only fires when the agent genuinely cannot determine intent. 'I wanna audition for the orchestra' is a clear signal of joining intent — the AI understands this. Fallback is a safety net, not the default for anything slightly unexpected.",
+          wrongFeedback: "**Fallback** is a last resort — when **Intent Recognition** clearly reads 'audition,' the agent routes correctly rather than surrendering to uncertainty.",
+          wrongStoryText: "MelodyBot pauses only a beat, then routes smoothly. Jake exhales. 'Fallback stays in its lane,' he notes approvingly.",
         },
       ],
       xpAward: 100,
@@ -290,59 +281,45 @@ export const game12: Game = {
       location: "WESTBROOK HIGH · COMPUTER LAB · SATURDAY · 12:30 PM",
       dialogue: [
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text:
-            "Okay, Topics are set up for joining and auditions. But the club has way more detail in the handbook — rehearsal policies, equipment rules, the code of conduct. I can't build a Topic for every single thing.",
+            "Topics are set for joining. But what about all the policies in the handbook? I can't build a Topic for everything.",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "You don't have to. That's what the Knowledge section is for. Upload the handbook as a PDF. The agent reads it, indexes it, and can answer questions from it using generative AI — without you writing a single topic.",
+            "You don't have to. Just upload the handbook PDF. Generative AI will answer questions directly from it.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
-          text: "Just... upload the file and it knows?",
+          speaker: "Jake", avatar: "jake",
+          text: "Just upload it and it knows?",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "Essentially. It's called Generative Answers. A student asks something that isn't covered by a Topic — the agent searches the knowledge source, finds the relevant passage, and generates a response grounded in that content. It even cites where the answer came from.",
+            "Yes, Generative Answers searches the PDF, answers using its content, and even cites the source.",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
+          text: "What else counts besides PDFs?",
+        },
+        {
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "What counts as a knowledge source? Just PDFs?",
+            "Word files, SharePoint, websites. Point it to a SharePoint folder and it updates automatically.",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
+          speaker: "Jake", avatar: "jake",
           text:
-            "PDFs, Word docs, SharePoint sites, public websites — basically any structured content. If your school stores club documents on SharePoint, you can point MelodyBot directly at that folder. The bot stays up to date automatically as the documents change.",
+            "So when I update the SharePoint file next semester, the bot learns it automatically?",
         },
         {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Tyler", avatar: "npc", npcKey: "tyler",
           text:
-            "So I upload the handbook now, and when we update the schedule next semester, I just update the SharePoint doc and MelodyBot automatically knows?",
+            "Exactly. You just maintain the source documents, and the bot reflects the changes.",
         },
         {
-          speaker: "Tyler",
-          avatar: "npc",
-          npcKey: "tyler",
-          text:
-            "That's exactly how it works. You're not maintaining the bot and the handbook separately — you maintain the handbook, and the bot reflects it.",
-        },
-        {
-          speaker: "Jake",
-          avatar: "jake",
+          speaker: "Jake", avatar: "jake",
           text: "This is what I should have had at the start of the year.",
         },
       ],
@@ -359,6 +336,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Fallback fires when the agent has no knowledge to draw from. Jake uploaded the handbook — which presumably covers attendance policy. The Generative Answers feature searches the document and responds from the content, rather than giving up.",
+          wrongFeedback: "**Generative Answers** actively reads your uploaded **Knowledge Sources** — so the agent responds from documents even without a matching Topic.",
+          wrongStoryText: "The handbook sat quietly in the Knowledge panel — but MelodyBot found the answer anyway. Jake hadn't written a single word of that response.",
         },
         {
           label: "B",
@@ -373,6 +352,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "This confuses Topics (structured conversation flows) with knowledge sources (documents the AI can read). Generative Answers is a core Copilot Studio feature that lets the agent respond to questions from uploaded documents, independent of Topics.",
+          wrongFeedback: "**Topics** handle structured flows; **Generative Answers** reads documents — your PDF is an active **Knowledge Source**, not decoration.",
+          wrongStoryText: "Jake stares at the uploaded PDF. It wasn't just sitting there — MelodyBot had already read every page, ready to answer.",
         },
         {
           label: "D",
@@ -380,6 +361,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Copilot Studio's Generative Answers is grounded in your knowledge sources — it searches the actual documents you've uploaded, not the model's general training data. This prevents hallucination and keeps answers accurate to your specific content.",
+          wrongFeedback: "**Generative Answers** always searches your uploaded knowledge sources first — it never ignores them in favour of general training data.",
+          wrongStoryText: "Jake's eyes widen as MelodyBot rambles about generic rehearsal etiquette. The handbook sits ignored. Tyler sighs: 'You uploaded it for a reason.'",
         },
       ],
       xpAward: 100,
@@ -390,7 +373,7 @@ export const game12: Game = {
       id: "w12-s5",
       type: "quiz",
       scenarioText:
-        "Jake's agent is taking shape. Tyler explains one more critical piece: what happens when MelodyBot genuinely can't help. This is called escalation — and it's a deliberate, designed behaviour, not a failure mode.\n\nIn Copilot Studio, the Escalate system topic is triggered when a student says something like 'talk to a real person' or 'I need help with something else.' It can also be triggered automatically if the agent's confidence in its answer falls below a threshold. The escalation flow Jake designs sends a message to the student explaining that a human will follow up, and it logs the conversation so Jake can review it later.\n\nThere's also the Fallback topic — activated when the agent genuinely cannot parse what the student typed. Fallback should acknowledge the confusion politely and offer to either rephrase or escalate. A well-designed fallback is the difference between a frustrating dead end and a graceful handoff.\n\nThe agent's analytics dashboard shows Jake exactly how often each topic fires, where conversations drop off, and which questions trigger fallback most frequently. That data tells him exactly what to improve next.",
+        "Jake's agent is taking shape. Tyler explains the role of escalation and fallback topics. When MelodyBot can't help or confidence is low, it triggers the Escalate topic, notifying Jake and informing the student. If it can't parse the question, it uses Fallback to politely ask the student to rephrase.",
       question:
         "A student types 'I need to talk to someone about a scheduling conflict for the concert.' MelodyBot doesn't have a Topic for scheduling conflicts. What should happen?",
       choices: [
@@ -400,6 +383,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Generating a confident-sounding non-answer is one of the worst outcomes in agent design. Students lose trust instantly when they realise the bot is bluffing. The right design is honest acknowledgment and a clear path forward — not a hallucinated response.",
+          wrongFeedback: "Generating a confident non-answer is called **hallucination** — and it destroys student trust the moment they realise the bot was bluffing.",
+          wrongStoryText: "MelodyBot chirps encouragingly. The student nods — then checks with Jake anyway. Trust, once faked, is hard to rebuild.",
         },
         {
           label: "B",
@@ -414,6 +399,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Abruptly ending the conversation is poor design. The student came with a real need. The right response is to acknowledge the gap, offer a path forward (escalation, contact info, a different question), and keep the experience positive even when the bot can't fully help.",
+          wrongFeedback: "Abrupt termination ignores the student's real need — good **Fallback design** keeps the experience constructive by offering escalation or a clear next step.",
+          wrongStoryText: "The screen flashes: 'Error. Restart.' The student stares, frustrated. Jake winces — a door slammed shut on someone who needed help.",
         },
         {
           label: "D",
@@ -421,6 +408,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Fabricating information the agent doesn't have is a hallucination — and in Copilot Studio, Generative Answers is specifically grounded to your knowledge sources to prevent this. If the scheduling conflict policy isn't in the documents, the agent should say so and escalate, not invent an answer.",
+          wrongFeedback: "Inventing missing information is **hallucination** — **Generative Answers** is grounded to your documents precisely so the agent admits gaps instead of fabricating answers.",
+          wrongStoryText: "MelodyBot confidently invents a scheduling rule. Tyler catches it and shakes his head: 'A bot that makes things up is worse than no bot.'",
         },
       ],
       xpAward: 150,
@@ -434,7 +423,7 @@ export const game12: Game = {
       location: "WESTBROOK HIGH · COMPUTER LAB · SATURDAY · 1:45 PM",
       promptChallenge: {
         context:
-          "Jake is configuring MelodyBot's system instructions — the description that tells the AI agent its identity, purpose, and boundaries. This is the most important text in the whole agent: it shapes every response MelodyBot gives, keeps it on topic, sets the right tone for high school students, and tells it what to do when it doesn't know something. Jake needs to write this description for Copilot Studio's 'Instructions' field. It should be specific enough to keep the bot focused, friendly enough for nervous freshmen, and honest enough to handle its own limitations gracefully.",
+          "Jake is writing MelodyBot's system instructions to define its identity, purpose, and boundaries in Copilot Studio. The prompt must keep the bot on-topic, friendly for freshmen, and ready to escalate gracefully when it doesn't know an answer.",
         goal:
           "Write the system instructions (agent description/personality prompt) for MelodyBot — the Westbrook High Music Club AI assistant.",
         placeholder:
@@ -443,12 +432,25 @@ export const game12: Game = {
       xpAward: 150,
     },
 
+    // ── NEAR-TRANSFER: Same Studio, Different Service ─────────────────────────
+    {
+      id:       "w12-near-transfer",
+      type:     "learn",
+      location: "WESTBROOK HIGH · COMPUTER LAB · SATURDAY · 1:45 PM",
+      xpAward:  0,
+      concept: {
+        title: "Same Studio. Different Service.",
+        body:  "Nadia, a customer experience manager at a boutique hotel chain, wanted to build a chatbot to help guests book rooms, check check-in times, and order room service. She used Copilot Studio to build 'ConciergeBot.' She mapped out specific conversational paths ('Topics') for room booking and checkout. In the system settings, she uploaded the hotel's raw guidelines as a knowledge base to handle random questions (pool hours, pet policy). She set up an fallback path that automatically routes the conversation to a front desk receptionist for complex requests. ConciergeBot handled 80% of daily guest questions. Same Copilot Studio building. Completely different customer service.",
+      },
+      learnHighlight: "Building custom bots in Copilot Studio means combining structured logic (Topics), unstructured knowledge lookup (RAG), and graceful human-in-the-loop escalation.",
+    },
+
     // ── Scene 6 ── Boss: Conductor Test ───────────────────────────────────────
     {
       id: "w12-s6",
       type: "boss",
       scenarioText:
-        "CONDUCTOR TEST — MelodyBot is ready to publish. Ms. Chen, the school principal, wants to understand exactly what Jake built before it goes live on the school website. Jake has 60 seconds to answer her toughest question.",
+        "CONDUCTOR TEST — Principal Chen wants to know how MelodyBot handles questions that aren't in the handbook or pre-built topics before it goes live on the website. Jake has 60 seconds to answer.",
       question:
         "Ms. Chen asks: 'If a student asks MelodyBot something that isn't in our club handbook and isn't covered by any Topic Jake built — what does the bot do?' What is the correct answer?",
       choices: [
@@ -458,6 +460,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "By default, Copilot Studio agents are grounded to their configured knowledge sources — not the open internet. Jake controls exactly what MelodyBot can draw from. It won't go searching the web unless Jake explicitly connects a web search action. This is a deliberate safety boundary.",
+          wrongFeedback: "Copilot Studio agents are **grounded to configured knowledge sources** by default — web search only activates if Jake explicitly adds that **action**.",
+          wrongStoryText: "MelodyBot pulls a random website answer. Ms. Chen frowns. Jake goes pale — that wasn't in any school document he'd ever approved.",
         },
         {
           label: "B",
@@ -472,6 +476,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "This is the nightmare scenario that Copilot Studio's grounded knowledge approach is specifically designed to prevent. Generative Answers pulls from your documents — not the model's general training data. An agent that contradicts actual school policy would be a serious problem, and a well-configured Copilot Studio agent doesn't do this.",
+          wrongFeedback: "**Grounded knowledge** in Copilot Studio pulls from your documents — never general training data — preventing the agent from contradicting real school policies.",
+          wrongStoryText: "MelodyBot states a policy that directly contradicts the handbook. Ms. Chen's expression hardens. Jake's 60 seconds just ran out.",
         },
         {
           label: "D",
@@ -479,6 +485,8 @@ export const game12: Game = {
           correct: false,
           feedback:
             "Copilot Studio agents don't crash when they hit an unknown question — they route to system topics designed for exactly this situation. The Fallback topic is always present as a safety net. Unknown questions are a normal operating condition, not an error state.",
+          wrongFeedback: "Unknown questions are a **normal operating condition** — Copilot Studio's built-in **Fallback topic** is always the safety net, not a crash state.",
+          wrongStoryText: "The chatbot goes dark. A student refreshes the page three times. Tyler puts a hand on Jake's shoulder: 'Bots don't crash — bad designs do.'",
         },
       ],
       xpAward: 250,
@@ -560,6 +568,7 @@ export const game12: Game = {
             correct: false,
             feedback: "Custom GPTs are simpler to build — but they can't natively connect to SharePoint or deploy inside Teams. Jake would lose the M365 integration that makes the bot actually useful for his school context.",
             wrongFeedback: "Custom GPTs are simpler to build — but they can't natively connect to SharePoint or deploy inside Teams. Jake would lose the M365 integration that makes the bot actually useful for his school context.",
+          wrongStoryText: "Jake launches his Custom GPT proudly — then realises it can't see SharePoint or reach Teams. Tyler smiles gently: 'Right idea, wrong tool.'",
           },
           {
             label: "B",
@@ -573,12 +582,13 @@ export const game12: Game = {
             correct: false,
             feedback: "They're not equivalent here. The specific requirements — SharePoint grounding and Teams channels — are core features in Copilot Studio and workarounds (or impossible) in Custom GPTs. Platform fit matters.",
             wrongFeedback: "They're not equivalent here. The specific requirements — SharePoint grounding and Teams channels — are core features in Copilot Studio and workarounds (or impossible) in Custom GPTs. Platform fit matters.",
+          wrongStoryText: "Jake shrugs and picks randomly. Weeks later, the SharePoint connection fails again. Tyler crosses his arms: 'Equivalent tools don't have equivalent limitations.'",
           },
         ],
       },
     },
 
-    // ═══ HANDOFF ═════════════════════════════════════════════════════════════
+    // ─── HANDOFF ─────────────────────────────────────────────────────────────
     {
       id: "w12-handoff",
       type: "handoff",
@@ -589,27 +599,27 @@ export const game12: Game = {
         {
           speaker: "Jake",
           avatar: "protagonist" as const,
-          text: "MelodyBot handled 94 conversations in its first week. Zero email threads. Zero me explaining the rehearsal schedule for the hundredth time.",
+          text: "MelodyBot handled 94 conversations in its first week. No emails, no repeating schedules.",
         },
         {
           speaker: "Jake",
           avatar: "protagonist" as const,
-          text: "We've been through a lot together. Jake the guitarist. Jake the music club president. Jake the bot builder. All the same guy — just with better tools each time.",
+          text: "I've come a long way. Jake the guitarist, the president, the bot builder. Same guy, just better tools.",
         },
         {
           speaker: "Jake",
           avatar: "protagonist" as const,
-          text: "But here's what I kept thinking: all of this — every AI tool, every workflow, every result — comes down to one thing. How you talk to it.",
+          text: "But it all comes down to one thing: how you talk to it.",
         },
         {
           speaker: "Jake",
           avatar: "protagonist" as const,
-          text: "The words you choose. The structure. The context. The constraints. We've called it prompting throughout this whole journey — but we haven't gone DEEP on it. The actual craft of it.",
+          text: "The words, structure, context. We call it prompting, but we haven't gone deep into the actual craft.",
         },
         {
           speaker: "Jake",
           avatar: "protagonist" as const,
-          text: "There's a designer named Maya who made that her entire specialty. And trust me — after you see the before-and-after of her prompts, you're going to rethink every conversation you've ever had with an AI.",
+          text: "Maya, a UX designer, made this her specialty. Her prompts will make you rethink how you talk to AI.",
         },
       ],
     },

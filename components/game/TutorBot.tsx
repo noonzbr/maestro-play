@@ -473,7 +473,9 @@ export default function TutorBot({ scene, game, accentColor = "#00d4f0", playerS
                     color:       msg.role === "user" ? "rgba(240,238,255,0.9)" : "rgba(240,238,255,0.78)",
                     lineHeight:  1.55,
                   }}>
-                    {msg.content}
+                    {msg.content.split("**").map((chunk, idx) => (
+                      idx % 2 === 1 ? <strong key={idx} style={{ color: accentColor, fontWeight: 800, textShadow: `0 0 6px ${accentColor}55` }}>{chunk}</strong> : chunk
+                    ))}
                   </div>
                 </div>
               ))}

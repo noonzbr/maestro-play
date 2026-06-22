@@ -103,6 +103,8 @@ export const game14: Game = {
           correct: false,
           feedback: "Vera learned this lesson the hard way — a 'premium' site with a 23% bounce rate increase because it buried the one thing users actually came to find. Feeling is an input, not an answer.",
           leadsTo: "wd-taste-lesson",
+          wrongFeedback: "**Aesthetic Intuition** is an input, not an answer — without knowing user goals, 'premium' is just a feeling that can quietly destroy conversion.",
+          wrongStoryText: "Vera picks the sleek one. It looks stunning. Three weeks later, Marcus forwards the bounce rate data. Her stomach drops reading it.",
         },
         {
           label:   "B — Start with user goals",
@@ -116,6 +118,8 @@ export const game14: Game = {
           correct: false,
           feedback: "Marcus knows Jake's brand — but he doesn't know what his audience needs to DO on the site. Client preference is one signal; user goals are the north star. If those conflict, user goals win.",
           leadsTo: "wd-taste-lesson",
+          wrongFeedback: "Client preference is one signal, but **User Goals** are the north star — when they conflict, what users need to DO always wins.",
+          wrongStoryText: "Marcus loves the choice. The site launches beautifully. Then the support inbox fills with users who can't find what they came for.",
         },
         {
           label:   "D — Check competitors",
@@ -161,6 +165,7 @@ export const game14: Game = {
           text:    "\"12px still renders on modern screens. Users can zoom if needed.\"",
           correct: false,
           feedback: "12px body text fails the WCAG 2.1 minimum for readability and creates barriers for users with low vision. 'They can zoom' is not an accessible design philosophy — it transfers the burden to the user.",
+          wrongStoryText: "Vera shakes her head. '12px body text is a disaster for anyone reading on mobile in daylight.'",
           wrongFeedback: "The WCAG guidance on text size exists for a reason: 12px body text is unreadable for a significant portion of your audience, especially on mobile in direct sunlight. Never make users zoom to read your content.",
         },
         {
@@ -180,6 +185,7 @@ export const game14: Game = {
           correct: false,
           feedback: "Compromise is not always the right answer in design. 14px for body text is still below the recommended minimum, especially for mobile viewing. The user's need (readability) should outweigh the client's aesthetic preference (density).",
           wrongFeedback: "Meeting in the middle on accessibility is not a compromise — it's just a different failure. 14px still creates real readability issues for a significant portion of users.",
+          wrongStoryText: "Vera sends the 14px counter-proposal feeling diplomatic. Her phone buzzes — a friend over 50 opened the demo link and immediately pinched to zoom.",
         },
         {
           label:   "D — Use 14px for desktop, 16px for mobile",
@@ -187,6 +193,7 @@ export const game14: Game = {
           correct: false,
           feedback: "Closer, but still not right. 16px should be the minimum on ALL screen sizes. On mobile, many designers actually use 17-18px to account for viewing distance and smaller displays. The correct approach is 16px minimum everywhere, scaled up for mobile with clamp().",
           wrongFeedback: "Body text at 14px on desktop still creates issues — especially in lower-contrast environments. The 16px minimum applies everywhere. Mobile-first means you design for the most constrained context first.",
+          wrongStoryText: "Vera nods, but Reid taps the mobile preview. The 14px text blurs. 'Comfortable on a monitor,' he says, 'means nothing on a bus.'",
         },
       ],
     },
@@ -208,6 +215,7 @@ export const game14: Game = {
           text:    "\"Use a different background color for each section — that will differentiate them visually.\"",
           correct: false,
           feedback: "Color can support hierarchy but doesn't create it. Four equally prominent sections with different backgrounds are still four equally prominent sections — the user still doesn't know what to look at first.",
+          wrongStoryText: "Vera crosses her arms. 'Color variety doesn't solve hierarchy. If everything is loud, nothing is heard.'",
           wrongFeedback: "Background colors change the aesthetic, not the priority. Hierarchy requires size, weight, contrast, and whitespace working together — not just color switching.",
         },
         {
@@ -216,6 +224,7 @@ export const game14: Game = {
           correct: false,
           feedback: "Reducing sections addresses the quantity problem but not the hierarchy problem. A page with two equally-weighted sections is still unclear about what the user should do first. The fix is establishing priority, not just removing content.",
           wrongFeedback: "Fewer sections doesn't solve hierarchy — it just reduces the confusion. You still need to tell the user: 'THIS is the most important thing on this page.'",
+          wrongStoryText: "Vera deletes two sections. The page shrinks. Reid tilts his head. 'Now it's a shorter mystery. What does Jake *want* them to do?'",
         },
         {
           label:   "C — Establish a clear primary CTA",
@@ -234,6 +243,7 @@ export const game14: Game = {
           correct: false,
           feedback: "Making the hero bigger is a tactic, not a strategy. A massive hero section with no clear CTA is just a big version of the same problem. The question is: what should the hero communicate, and what should the visitor do next?",
           wrongFeedback: "Size is one element of hierarchy, but it only works when combined with a clear message and CTA. A big, empty hero section just delays the confusion rather than solving it.",
+          wrongStoryText: "Vera stretches the hero to full screen. Reid stares at it. 'Beautiful emptiness,' he says quietly. 'What happens after they admire it?'",
         },
       ],
     },
@@ -255,6 +265,7 @@ export const game14: Game = {
           text:    "\"Gold is a strong, attention-grabbing color. Users will see it. The low ratio just reflects the nature of yellow hues.\"",
           correct: false,
           feedback: "Visible ≠ accessible. WCAG 2.1 SC 1.4.3 requires a minimum 4.5:1 contrast ratio for normal text. 1.8:1 fails catastrophically — this button is essentially invisible to people with low vision, in bright sunlight, or on OLED screens.",
+          wrongStoryText: "Vera winces. 'Contrast ratio is a math problem, not an opinion. Yellow on white is invisible.'",
           wrongFeedback: "The argument 'I can see it' is not an accessibility argument. The WCAG standard exists precisely because what seems visible to some people is invisible to others. 1.8:1 fails Level A, the minimum accessibility standard.",
         },
         {
@@ -274,6 +285,7 @@ export const game14: Game = {
           correct: false,
           feedback: "The contrast is correct (~15:1, well above WCAG AAA), but this throws away the gold accent entirely. The better solution preserves the brand palette while fixing the contrast — navy text on gold button. Don't abandon the brand to solve an accessibility problem; find a solution within the constraints.",
           wrongFeedback: "Good instinct on the contrast math — 15:1 definitely passes. But there's a solution that keeps Jake's gold accent AND passes WCAG AA. Design constraints aren't always either/or.",
+          wrongStoryText: "Vera swaps to navy on white. The button passes. Marcus frowns at the screen. 'Where did the gold go? That's Jake's whole identity.'",
         },
         {
           label:   "D — The ratio rule only applies to large text",
@@ -281,6 +293,7 @@ export const game14: Game = {
           correct: false,
           feedback: "The large-text threshold (3:1) applies at 18pt (24px) normal weight or 14pt (approximately 18.67px) bold. Standard CTA button text at 16px-17px doesn't qualify as 'large text' and requires 4.5:1. And even at 24px, 1.8:1 still fails the 3:1 requirement for large text.",
           wrongFeedback: "Even if large text only needs 3:1, 1.8:1 fails that too. And most button text doesn't qualify as 'large text' under WCAG. The fix is the same either way: increase the contrast.",
+          wrongStoryText: "Vera cites the large-text rule confidently. Reid pulls up the spec. '16px, normal weight. That's not large text, Vera. That's a fail.'",
         },
       ],
     },
@@ -319,7 +332,9 @@ export const game14: Game = {
           text:    "\"The client is always right. I'll add everything he asked for and make it work somehow.\"",
           correct: false,
           feedback: "Vera said yes once. LCP hit 9.2 seconds, bounce rate went to 78%, and the client paid for a redesign eight weeks later. 'The client is always right' is not a design philosophy — it's an abdication.",
+          wrongStoryText: "Vera's shoulders drop. 'Saying yes to every client request is the easiest path to a bloated, unusable site.'",
           leadsTo: "wd-bloat-lesson",
+          wrongFeedback: "Saying yes to everything isn't service — it's an abdication of **design judgment** that will cost the client far more later.",
         },
         {
           label:   "B — Defend the focus",
@@ -333,6 +348,8 @@ export const game14: Game = {
           correct: false,
           feedback: "Figma AI can generate all seven components flawlessly — beautiful, production-ready code. It cannot tell you whether adding them serves Jake's users or destroys his conversion rate. That judgment requires a brain, not a prompt.",
           leadsTo: "wd-bloat-lesson",
+          wrongFeedback: "AI tools execute **design decisions** flawlessly — but only *you* can judge whether those decisions serve the user's actual goals.",
+          wrongStoryText: "Figma AI builds all seven components perfectly. Vera presents them. Jake's bounce rate spikes. The AI never warned her. It never could.",
         },
         {
           label:   "D — Prioritize the top 2",
@@ -388,6 +405,7 @@ export const game14: Game = {
           text:    "\"Set Cache-Control headers for all static assets. Returning visitors will load the site instantly.\"",
           correct: false,
           feedback: "Caching helps returning visitors, not first-time visitors — and Lighthouse tests first-visit performance. For a 6.8s LCP, the bottleneck is image loading, not caching. Fix the image first.",
+          wrongStoryText: "Vera rubs her temples. 'Caching doesn't compress a 2MB image. It only helps the first load.'",
           wrongFeedback: "Caching is a great optimization, but it doesn't help the first visit. The LCP problem is about how fast the hero image loads — that requires image optimization, not cache headers.",
         },
         {
@@ -395,6 +413,7 @@ export const game14: Game = {
           text:    "\"Remove all JavaScript from the initial render path — pure HTML/CSS will load instantly.\"",
           correct: false,
           feedback: "Reducing JavaScript is valuable, but if the hero image is 2.4MB, the page will still be slow regardless of JavaScript weight. Find the actual bottleneck before rebuilding everything.",
+          wrongStoryText: "Vera sighs. 'Removing JavaScript is great, but it won't download a huge PNG any faster.'",
           wrongFeedback: "JS optimization is a valid long-term goal, but it won't fix a 2.4MB PNG hero image. Diagnose the bottleneck first — in this case, it's the image, not the framework.",
         },
         {
@@ -402,6 +421,7 @@ export const game14: Game = {
           text:    "\"Host images on a CDN with global edge caching. Geographic latency is the real problem.\"",
           correct: false,
           feedback: "CDNs help with geographic latency and caching, but they don't compress a 2.4MB PNG. A 2.4MB image on a CDN is still 2.4MB. The fix is image optimization — then optionally a CDN for distribution.",
+          wrongStoryText: "Vera crosses her arms. 'A CDN is fast, but it still has to deliver 2.4 megabytes. Compress the image first.'",
           wrongFeedback: "A CDN serves the file faster from a nearby server, but it still has to serve the full 2.4MB. You need to make the file smaller before you optimize delivery.",
         },
       ],
@@ -424,6 +444,7 @@ export const game14: Game = {
           text:    "\"Placeholders are visible until typing begins. Most users will understand the field before they click.\"",
           correct: false,
           feedback: "WCAG 2.1 SC 1.3.1 (Info and Relationships) and SC 3.3.2 (Labels or Instructions) both require that form inputs have programmatic labels. Placeholder text disappears when the user types, creating a memory burden — especially for users with cognitive disabilities or anyone who needs to review what they've entered.",
+          wrongStoryText: "Vera sighs. 'Placeholders as labels is the #1 cause of contact form abandonment.'",
           wrongFeedback: "Placeholders as labels is one of the most common web accessibility failures. They disappear on input, aren't announced consistently by screen readers, fail in low-vision scenarios, and violate WCAG SC 3.3.2. Always use `<label>` elements.",
         },
         {
@@ -442,6 +463,7 @@ export const game14: Game = {
           text:    "\"Add `aria-label='Email address'` to each input — screen readers will announce the label even though it's not visible.\"",
           correct: false,
           feedback: "aria-label fixes the screen reader problem, but NOT the visual/cognitive accessibility problem — the label is still invisible to sighted users with cognitive disabilities. The correct fix is a visible `<label>` element, which also handles the aria association automatically via `<label for>` or wrapping.",
+          wrongStoryText: "Vera winces. 'ARIA labels help screen readers, but sighted users still need to see what they are typing.'",
           wrongFeedback: "ARIA is the last resort, not the first fix. The HTML spec has a native solution: `<label>`. Use it. Visible labels fix the screen reader AND the cognitive problem in one move.",
         },
         {
@@ -449,6 +471,7 @@ export const game14: Game = {
           text:    "\"Users understand form patterns after the first field. Add a label to the email field only.\"",
           correct: false,
           feedback: "Every input needs its own label. Users don't maintain a mental model of 'what comes next' — they look at the field they're filling in. WCAG SC 3.3.2 explicitly requires labels for ALL user inputs, not just the first.",
+          wrongStoryText: "Vera shakes her head. 'A user shouldn't have to guess what field they are filling out. Label all of them.'",
           wrongFeedback: "Cognitive load doesn't work by accumulation — users don't remember the pattern from the first field. Each field needs its own visible label, period.",
         },
       ],
@@ -468,6 +491,31 @@ export const game14: Game = {
         body:  "I spent three months trying to get Figma AI to just GIVE me the right answer.\n\nI'd type: 'Create a hero section for a musician named Jake.' It gave me 12 variations. Some were beautiful. Some were generic. One had yellow text on a white background.\n\nI kept thinking: why can't the AI just KNOW which one is right?\n\nThen I realized — it can't know, because 'right' requires context the AI doesn't have:\n- Who is Jake's audience?\n- What action should they take?\n- What does 'professional but authentic' mean for THIS specific artist?\n- Does it need to rank in Google? Load fast on 3G in India?\n\nThe AI generates OPTIONS. The decision requires JUDGMENT. And judgment requires knowing things the brief doesn't say.\n\nFigma AI can produce 12 layouts in 4 seconds. v0.dev can write the React code before I've had my coffee. Framer AI can deploy a complete site in 8 minutes.\n\nBut not one of them can tell you if it's GOOD. That's still you.\n\nYour job as a designer didn't disappear. It upgraded. You used to spend 40% of your time on execution. Now you spend 80% on decisions.",
       },
       learnHighlight: "AI generates options at machine speed. The decision still requires a brain. Your brain.",
+    },
+    {
+      id: "wd-prompt",
+      type: "prompt",
+      location: "Design Studio",
+      promptChallenge: {
+        context:
+          "Vera wants Claude to perform a WCAG AA accessibility audit on a CSS code snippet she will paste. She needs Claude to: check if the body text font size is at least 16px, verify if the contrast ratio between background and text colors passes the 4.5:1 ratio, and flag if any interactive elements lack clear hover/focus states.",
+        goal:
+          "Write the prompt Vera should send to Claude to perform this specific WCAG AA contrast and size audit on her CSS snippet.",
+        placeholder: "Write Vera's audit prompt..."
+      },
+      nextLeadsTo: "w14-near-transfer",
+      xpAward: 100,
+    },
+    {
+      id:       "w14-near-transfer",
+      type:     "learn",
+      location: "Design Studio",
+      xpAward:  0,
+      concept: {
+        title: "Same Guidelines. Different Stage.",
+        body:  "Leo, a product designer at an educational tech startup, had to redesign the student dashboard. It was cluttered, had poor text contrast, and lacked keyboard navigation support. Instead of adding decorative elements, Leo applied the same web design systems principles: he implemented an 8pt spacing grid, scaled body typography to 16px, and audited the colors to ensure a WCAG AA contrast ratio of 4.5:1. He also added aria-labels and keyboard focus indicators. The redesign led to a 35% increase in assignments completed. Same design systems guidelines. Completely different student dashboard.",
+      },
+      learnHighlight: "Visual excellence in design isn't about cosmetic decorations or trends. It's about building a robust, accessible, and consistent system that users can navigate without friction.",
     },
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -490,6 +538,8 @@ export const game14: Game = {
               text:    "\"Impact is designed for headlines — bold, attention-grabbing. It does what a hero headline should do.\"",
               correct: false,
               feedback: "Impact is a display font with very poor spacing and readability at web sizes. All-caps at 80px creates tracking issues (letterspacing too tight in Impact) and fails WCAG's lowercase readability patterns. For web, a modern variable font with intentional display weight is always superior.",
+              wrongStoryText: "Professor Reid sighs, clicking her pen. 'Bold isn't the same as legible, Vera. You know this.'",
+          wrongFeedback: "Impact's **tight tracking** and poor **web hinting** make it a problematic display choice — attention-grabbing doesn't equal screen-readable.",
             },
             {
               label:   "B — It fails tracking and web rendering",
@@ -502,12 +552,16 @@ export const game14: Game = {
               text:    "\"The size is the issue — 80px is too large for most viewports and will wrap on mobile.\"",
               correct: false,
               feedback: "Size is one issue, but Impact's inherent design problems (tight tracking, poor web hinting, no optical sizing) are the primary concern. Even at 48px, Impact is a poor web font choice.",
+              wrongStoryText: "Professor Reid taps the screen. 'The font is absolutely not fine. It was designed for newsprint, not LCD panels.'",
+          wrongFeedback: "Size matters, but Impact's core problems — **tight tracking**, no **optical sizing** — make it a poor web font at *any* scale.",
             },
             {
               label:   "D — All-caps is the problem, not the font",
               text:    "\"Remove all-caps — the rest is fine.\"",
               correct: false,
               feedback: "Removing all-caps improves readability, but Impact's tight tracking and lack of optical sizing still make it a problematic web font choice. Both issues need to be addressed.",
+              wrongStoryText: "Professor Reid shakes her head. 'Fixing the case doesn't fix the underlying tracking disaster.'",
+          wrongFeedback: "All-caps hurts **readability**, but Impact's **poor web hinting** and tight **letter-spacing** remain problems that need addressing too.",
             },
           ],
         },
@@ -520,6 +574,8 @@ export const game14: Game = {
               text:    "\"Fitts's Law says targets should be large and close. Three large, close buttons actually helps usability.\"",
               correct: false,
               feedback: "Fitts's Law addresses the physical ease of clicking a target — it's about size and distance. The problem here is the number of choices and their equal visual weight, which is Hick's Law territory.",
+              wrongStoryText: "Professor Reid frowns. 'Fitts's Law is about physical targets, not cognitive overload. Try again.'",
+          wrongFeedback: "**Fitts's Law** is about click accuracy — **Hick's Law** explains why equal-weight choices trigger decision paralysis, not physical effort.",
             },
             {
               label:   "B — Hick's Law",
@@ -532,12 +588,16 @@ export const game14: Game = {
               text:    "\"Miller's Law: 7±2 items in working memory. Three items is well within the limit.\"",
               correct: false,
               feedback: "Miller's Law applies to working memory capacity, not decision-making speed. Three items is within the memory limit, but Hick's Law still applies to the decision burden of three equal-weight options.",
+              wrongStoryText: "Professor Reid checks her notebook. 'Miller's Law is about short-term memory capacity. Our issue here is decision paralysis.'",
+          wrongFeedback: "**Miller's Law** governs memory capacity, not choice speed — **Hick's Law** shows even three equal options logarithmically slow your decision time.",
             },
             {
               label:   "D — The Aesthetic-Usability Effect",
               text:    "\"Users perceive attractive designs as more usable. Beautiful buttons will overcome decision fatigue.\"",
               correct: false,
               feedback: "The Aesthetic-Usability Effect (Kurosu & Kashimura, 1995) shows beautiful designs are perceived as more usable — but it doesn't override Hick's Law. Users still experience decision paralysis with equal-weight options, regardless of how beautiful they are.",
+              wrongStoryText: "Professor Reid scoffs. 'A beautiful interface that nobody can navigate is just art. We are building software.'",
+          wrongFeedback: "The **Aesthetic-Usability Effect** shapes perception, not decision speed — **Hick's Law** paralysis persists regardless of how beautiful the buttons are.",
             },
           ],
         },
@@ -547,9 +607,11 @@ export const game14: Game = {
           choices: [
             {
               label:   "A — It's fine — gold is an accent color",
+              wrongStoryText: "Professor Reid crosses her arms. 'Consistent illegibility is not a design system. It's a lawsuit.'",
               text:    "\"The gold is used throughout the brand. Consistency in the nav is appropriate.\"",
               correct: false,
               feedback: "1.19:1 contrast is nearly invisible. Regardless of brand consistency, this combination fails every accessibility standard including WCAG Level A. A 'no contrast' white-on-gold combination makes the nav unusable for a large portion of users.",
+          wrongFeedback: "**Brand consistency** never overrides **WCAG 1.4.3** — a 1.19:1 contrast ratio is a compliance failure, not a design preference.",
             },
             {
               label:   "B — Fails WCAG at every level",
@@ -562,12 +624,16 @@ export const game14: Game = {
               text:    "\"Add a semi-transparent black overlay on the gold — that will bring the contrast up on white text.\"",
               correct: false,
               feedback: "An overlay on the gold background would work technically but muddies the brand color and creates an artificial solution to a solvable problem. The cleaner fix: navy text on gold — same brand palette, dramatically better contrast.",
+          wrongFeedback: "An overlay doesn't change the **contrast ratio formula** — navy text on gold achieves **7.2:1** cleanly, without muddying your brand color.",
+          wrongStoryText: "Vera reaches for the opacity slider. Reid stops her. 'You're painting over a crack,' he says. 'The wall still needs fixing.'",
             },
             {
               label:   "D — Use a different font weight",
               text:    "\"Bold white text on gold will be more readable than regular weight.\"",
               correct: false,
               feedback: "Font weight affects legibility slightly, but it doesn't change contrast ratio. 1.19:1 in bold is still 1.19:1. Contrast is a mathematical property of the colors, not the font.",
+              wrongStoryText: "Professor Reid taps her fingers. 'Mathematical contrast does not care about font weight. Bold zero is still zero.'",
+          wrongFeedback: "**Font weight** cannot alter a **contrast ratio** — 1.19:1 bold is still 1.19:1, because contrast is purely a mathematical color relationship.",
             },
           ],
         },
@@ -583,21 +649,27 @@ export const game14: Game = {
             },
             {
               label:   "B — The dropdown is the problem",
+              wrongStoryText: "Professor Reid raises an eyebrow. 'The dropdown is annoying, but it's a drop in the ocean of friction you've created here.'",
               text:    "\"Dropdowns are cognitively expensive — replace them with inline options.\"",
               correct: false,
               feedback: "Dropdown accessibility is a real issue, but it's not the primary UX problem here. The volume of fields — 8+ inputs — is the main barrier. Reducing to 3 fields fixes more than any individual field type change.",
+          wrongFeedback: "Dropdown **cognitive cost** is real, but **form field volume** is the primary barrier — 8+ fields kill completion before input type ever matters.",
             },
             {
               label:   "C — The radio buttons need labels",
+              wrongStoryText: "Professor Reid shakes her head. 'Labeling doesn't save a user from filling out ten fields just to say hello.'",
               text:    "\"The 8-option radio group needs a clear label and accessible grouping with `<fieldset>` and `<legend>`.\"",
               correct: false,
               feedback: "Labeling the radio group is an accessibility fix, but it doesn't address the core UX problem: this form is asking for too much information. Even perfectly labeled, 8 radio options for 'How did you hear about us?' adds cognitive load that reduces completion.",
+          wrongFeedback: "**Semantic HTML** improves accessibility, but **form length** is the conversion killer — even perfect markup can't save an eight-field contact form.",
             },
             {
               label:   "D — The budget range is inappropriate",
+              wrongStoryText: "Professor Reid sighs. 'Focus on the total footprint, Vera. The entire form is bloated.'",
               text:    "\"Asking for budget upfront feels invasive — remove that field specifically.\"",
               correct: false,
               feedback: "Budget fields are sometimes inappropriate, but the root problem is the total field count. Removing one field while keeping 7+ others still leaves an over-engineered contact form. The principle: start with 3 fields, add only what you can prove is necessary.",
+          wrongFeedback: "Removing one field leaves seven — **progressive disclosure** and a **3-field baseline** fix completion rates; surgical single-field cuts rarely do.",
             },
           ],
         },
@@ -607,9 +679,11 @@ export const game14: Game = {
           choices: [
             {
               label:   "A — Mobile users have shorter attention spans",
+              wrongStoryText: "Professor Reid looks stern. 'Blaming the user's attention span is the easiest way to hide a bad mobile experience.'",
               text:    "\"Mobile behavior is inherently different — shorter sessions are normal on mobile.\"",
               correct: false,
               feedback: "This is a dangerous rationalization. Research shows mobile users have equivalent intent and attention to desktop users — the difference is the experience. 8s vs 160s is a design problem, not a behavior pattern.",
+          wrongFeedback: "Accepting short **mobile sessions** as normal masks a **mobile-first design** failure — 8s vs 160s is a broken layout, not user behavior.",
             },
             {
               label:   "B — Mobile layout was not designed independently",
@@ -619,15 +693,19 @@ export const game14: Game = {
             },
             {
               label:   "C — The mobile page loads too slowly",
+              wrongStoryText: "Professor Reid checks the metrics. 'Slight latency doesn't explain a 95% drop in engagement. Look at the layout.'",
               text:    "\"Mobile connections are slower — if LCP is 6.8s on fast WiFi, it could be 15s on 4G. Users leave before the page loads.\"",
               correct: false,
               feedback: "Performance IS a contributing factor (and should have been fixed earlier), but 8s average session time with 2:40 on desktop suggests users ARE loading the page — they're leaving because the experience doesn't serve them, not because it failed to load.",
+          wrongFeedback: "**Session Duration** data reveals users *are* loading the page — an 8s average means the **UX**, not load time, is failing them.",
             },
             {
               label:   "D — The font is too small on mobile",
+              wrongStoryText: "Professor Reid shakes her head. 'Squinting is one thing, leaving immediately is another. The hierarchy is broken.'",
               text:    "\"Mobile renders text smaller — users can't read and leave.\"",
               correct: false,
               feedback: "Typography is one factor, but the 8s vs 160s gap points to a more fundamental layout problem. Users are landing on a mobile experience that wasn't designed for them. The fix requires a genuine mobile-first redesign, not just a font size increase.",
+          wrongFeedback: "Font size is a symptom — the real diagnosis is broken **Information Architecture**; **Mobile-First Design** demands a full layout restructure, not a text fix.",
             },
           ],
         },
@@ -716,12 +794,16 @@ export const game14: Game = {
             text:    "Use Figma AI to design the components, then hand off to developers.",
             correct: false,
             feedback: "Figma AI is great for design exploration, but it generates design specs — not deployable code. In 4 hours, you need something you can ship, not something you then need to build.",
+          wrongFeedback: "**Figma AI** produces **design specs**, not deployable code — you still need a developer bridge, which kills your 4-hour **deployment window**.",
+          wrongStoryText: "Vera exports the Figma frames. Beautiful. Unshippable. The clock reads 3:47. The client is calling.",
           },
           {
             label:   "B — v0.dev",
             text:    "Use v0.dev to generate production-ready React/Tailwind components from a text description.",
             correct: false,
             feedback: "v0.dev is excellent, but for a full deployable landing page in 4 hours, Framer AI is faster — it generates, hosts, and deploys in a single workflow. v0.dev is better when you need the code in your own repo.",
+          wrongFeedback: "**v0.dev** excels at component generation but lacks **integrated deployment** — **Framer AI** ships a live URL in one workflow, saving critical time.",
+          wrongStoryText: "Vera's React components look perfect. Then she remembers: there's no host, no domain, no CMS. The clock does not care.",
           },
           {
             label:   "C — Framer AI",
@@ -734,6 +816,8 @@ export const game14: Game = {
             text:    "Use Copilot to write the CSS and layout code quickly in VS Code.",
             correct: false,
             feedback: "Copilot accelerates coding within your editor, but it doesn't generate a full site or handle deployment. 4 hours with Copilot is a fast developer workflow, not a generated prototype workflow.",
+          wrongFeedback: "**GitHub Copilot** accelerates writing code, but offers zero **automated deployment** — you'd spend all 4 hours building, not shipping.",
+          wrongStoryText: "Vera types fast. Copilot helps faster. Two hours in, she has half a layout and no way to deploy it. The client waits.",
           },
         ],
       },

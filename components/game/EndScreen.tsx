@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
 import { Game } from "@/lib/games/types"
 import { allGames } from "@/lib/games"
 import GameIcon from "./GameIcon"
@@ -202,39 +203,48 @@ function YourPath({
         </span>
       </button>
 
-      {open && (
-        <div style={{
-          padding: "0 1rem 0.85rem",
-          display: "flex", flexDirection: "column", gap: "0.5rem",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-        }}>
-          {top3.map((item, i) => (
-            <div key={i} style={{
-              display: "flex", alignItems: "flex-start", gap: "0.55rem",
-            }}>
-              {/* Correct/wrong dot */}
-              <div style={{
-                width: "7px", height: "7px", borderRadius: "50%", flexShrink: 0,
-                marginTop: "0.28rem",
-                background: item.correct ? "rgba(0,212,240,0.85)" : "rgba(255,180,0,0.85)",
-                boxShadow: item.correct
-                  ? "0 0 6px rgba(0,212,240,0.5)"
-                  : "0 0 6px rgba(255,180,0,0.4)",
-              }} />
-              <span style={{
-                fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
-                fontSize: "0.83rem", color: "rgba(240,238,255,0.62)",
-                lineHeight: 1.5,
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            style={{
+              padding: "0 1rem 0.85rem",
+              display: "flex", flexDirection: "column", gap: "0.5rem",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              overflow: "hidden",
+            }}
+          >
+            {top3.map((item, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "flex-start", gap: "0.55rem",
               }}>
-                you chose:{" "}
-                <span style={{ color: "rgba(240,238,255,0.88)", fontStyle: "normal" }}>
-                  {item.chosen.length > 45 ? item.chosen.slice(0, 45) + "…" : item.chosen}
+                {/* Correct/wrong dot */}
+                <div style={{
+                  width: "7px", height: "7px", borderRadius: "50%", flexShrink: 0,
+                  marginTop: "0.28rem",
+                  background: item.correct ? "rgba(0,212,240,0.85)" : "rgba(255,180,0,0.85)",
+                  boxShadow: item.correct
+                    ? "0 0 6px rgba(0,212,240,0.5)"
+                    : "0 0 6px rgba(255,180,0,0.4)",
+                }} />
+                <span style={{
+                  fontFamily: "Cormorant Garamond, serif", fontStyle: "italic",
+                  fontSize: "0.83rem", color: "rgba(240,238,255,0.62)",
+                  lineHeight: 1.5,
+                }}>
+                  you chose:{" "}
+                  <span style={{ color: "rgba(240,238,255,0.88)", fontStyle: "normal" }}>
+                    {item.chosen.length > 45 ? item.chosen.slice(0, 45) + "…" : item.chosen}
+                  </span>
                 </span>
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -509,10 +519,14 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
         )}
 
         {/* XP / Streak */}
-        <div className="glass-card" style={{
-          borderRadius: "14px", padding: "1rem 1.5rem", marginBottom: "1.25rem",
-          display: "flex", justifyContent: "center", gap: "2.5rem",
-        }}>
+        <motion.div 
+          className="glass-card" 
+          whileHover={{ y: -2 }}
+          style={{
+            borderRadius: "14px", padding: "1rem 1.5rem", marginBottom: "1.25rem",
+            display: "flex", justifyContent: "center", gap: "2.5rem",
+          }}
+        >
           <div>
             <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1.7rem", color: accent }}>{totalXp}</div>
             <div className="label-caps" style={{ marginTop: "0.2rem" }}>XP Earned</div>
@@ -523,7 +537,7 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
               <div className="label-caps" style={{ marginTop: "0.2rem" }}>Streak</div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* ── Your Path — echo the choices the player actually made ────── */}
         {choiceHistory && choiceHistory.filter(c => c.question.length > 0).length >= 2 && (
@@ -533,13 +547,21 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
         {/* ── Monday Morning Prompt — Dr. Park's Transfer Bridge ────────── */}
         {/* "Near transfer requires an explicit bridge between the learning   */}
         {/*  context and the application context." — Perkins & Salomon, 1988  */}
-        <div style={{
-          borderRadius: "16px", marginBottom: "1.25rem",
-          background: "rgba(0,212,240,0.04)",
-          border: "1px solid rgba(0,212,240,0.2)",
-          overflow: "hidden",
-          animation: "scene-fade-in 0.6s 0.3s ease both",
-        }}>
+        {/* ── Monday Morning Prompt — Dr. Park's Transfer Bridge ────────── */}
+        {/* "Near transfer requires an explicit bridge between the learning   */}
+        {/*  context and the application context." — Perkins & Salomon, 1988  */}
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.2 }}
+          whileHover={{ y: -3 }}
+          style={{
+            borderRadius: "16px", marginBottom: "1.25rem",
+            background: "rgba(0,212,240,0.04)",
+            border: "1px solid rgba(0,212,240,0.2)",
+            overflow: "hidden",
+          }}
+        >
           {/* Header */}
           <div style={{
             padding: "0.65rem 1rem",
@@ -593,21 +615,30 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
               {promptCopied ? "✓ Copied to clipboard!" : "📋 Copy prompt template"}
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Share + Next */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <a href={certLinkedInUrl ?? linkedInUrl} target="_blank" rel="noopener noreferrer" style={{
-              flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
-              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
-              color: "#fff", background: "#0A66C2",
-              padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
-            }}>
+            <motion.a 
+              whileHover={{ scale: 1.03 }} 
+              whileTap={{ scale: 0.97 }}
+              href={certLinkedInUrl ?? linkedInUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{
+                flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.825rem",
+                color: "#fff", background: "#0A66C2",
+                padding: "0.8rem 0.5rem", borderRadius: "100px", textDecoration: "none",
+              }}
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
               Share on LinkedIn
-            </a>
-            <button
+            </motion.a>
+            <motion.button
+              whileHover={certLoading ? {} : { scale: 1.03 }} 
+              whileTap={certLoading ? {} : { scale: 0.97 }}
               onClick={handleGetCertificate}
               disabled={certLoading}
               style={{
@@ -621,71 +652,78 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
               }}
             >
               {certLoading ? "⏳ Generating…" : "🎓 Get Certificate →"}
-            </button>
+            </motion.button>
           </div>
 
           {/* Explore Jake's World */}
-          <Link
-            href="/worldmap"
-            style={{
-              display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem",
-              fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.9rem",
-              color:"rgba(240,238,255,0.7)",
-              background:"rgba(255,255,255,0.04)",
-              border:"1px solid rgba(255,255,255,0.1)",
-              padding:"0.8rem 2rem", borderRadius:"100px", textDecoration:"none",
-              transition:"background 0.2s, border-color 0.2s, color 0.2s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.08)"; e.currentTarget.style.color="#fff"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)" }}
-            onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.color="rgba(240,238,255,0.7)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.1)" }}
-          >
-            🗺️ Explore Jake's World →
-          </Link>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href="/worldmap"
+              style={{
+                display:"flex", alignItems:"center", justifyContent:"center", gap:"0.5rem",
+                fontFamily:"Inter, sans-serif", fontWeight:700, fontSize:"0.9rem",
+                color:"rgba(240,238,255,0.7)",
+                background:"rgba(255,255,255,0.04)",
+                border:"1px solid rgba(255,255,255,0.1)",
+                padding:"0.8rem 2rem", borderRadius:"100px", textDecoration:"none",
+                transition:"background 0.2s, border-color 0.2s, color 0.2s",
+                width: "100%", boxSizing: "border-box"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background="rgba(255,255,255,0.08)"; e.currentTarget.style.color="#fff"; e.currentTarget.style.borderColor="rgba(255,255,255,0.2)" }}
+              onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.04)"; e.currentTarget.style.color="rgba(240,238,255,0.7)"; e.currentTarget.style.borderColor="rgba(255,255,255,0.1)" }}
+            >
+              🗺️ Explore Jake's World →
+            </Link>
+          </motion.div>
 
           {/* Chat with the Maestro */}
-          <button
-            onClick={() => setShowTutor(true)}
-            style={{
-              width: "100%", fontFamily: "Inter, sans-serif", fontWeight: 700,
-              fontSize: "0.9rem", color: accent,
-              background: `${accent}12`,
-              border: `1px solid ${accent}44`,
-              padding: "0.8rem 2rem", borderRadius: "100px", cursor: "pointer",
-              transition: "background 0.2s, border-color 0.2s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = `${accent}22`; e.currentTarget.style.borderColor = `${accent}88` }}
-            onMouseLeave={e => { e.currentTarget.style.background = `${accent}12`; e.currentTarget.style.borderColor = `${accent}44` }}
-          >
-            🎼 Chat with the Maestro →
-          </button>
-
-          {nextGame ? (
-            <Link href={`/games/${nextGame.slug}`} style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-              fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem",
-              color: "#08060f",
-              background: `linear-gradient(90deg, ${accent}, #e040fb)`,
-              padding: "0.95rem 2rem", borderRadius: "100px", textDecoration: "none",
-              boxShadow: `0 0 32px ${accent}44`,
-              letterSpacing: "0.01em",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 0 48px ${accent}66` }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = `0 0 32px ${accent}44` }}
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <button
+              onClick={() => setShowTutor(true)}
+              style={{
+                width: "100%", fontFamily: "Inter, sans-serif", fontWeight: 700,
+                fontSize: "0.9rem", color: accent,
+                background: `${accent}12`,
+                border: `1px solid ${accent}44`,
+                padding: "0.8rem 2rem", borderRadius: "100px", cursor: "pointer",
+                transition: "background 0.2s, border-color 0.2s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${accent}22`; e.currentTarget.style.borderColor = `${accent}88` }}
+              onMouseLeave={e => { e.currentTarget.style.background = `${accent}12`; e.currentTarget.style.borderColor = `${accent}44` }}
             >
-              <span style={{ fontSize: "1.1rem" }}>{nextGame.emoji ?? "🎵"}</span>
-              {nextGame.free ? `Play Game ${nextGame.week} — Free →` : `Play Game ${nextGame.week} →`}
-            </Link>
-          ) : (
-            <Link href="/games" style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
-              color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
-              padding: "0.9rem 2rem", borderRadius: "100px", textDecoration: "none",
-            }}>
-              View All Games →
-            </Link>
-          )}
+              🎼 Chat with the Maestro →
+            </button>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            {nextGame ? (
+              <Link href={`/games/${nextGame.slug}`} style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: "1rem",
+                color: "#08060f",
+                background: `linear-gradient(90deg, ${accent}, #e040fb)`,
+                padding: "0.95rem 2rem", borderRadius: "100px", textDecoration: "none",
+                boxShadow: `0 0 32px ${accent}44`,
+                letterSpacing: "0.01em",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                width: "100%", boxSizing: "border-box"
+              }}
+              >
+                <span style={{ fontSize: "1.1rem" }}>{nextGame.emoji ?? "🎵"}</span>
+                {nextGame.free ? `Play Game ${nextGame.week} — Free →` : `Play Game ${nextGame.week} →`}
+              </Link>
+            ) : (
+              <Link href="/games" style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem",
+                color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)",
+                padding: "0.9rem 2rem", borderRadius: "100px", textDecoration: "none",
+                width: "100%", boxSizing: "border-box"
+              }}>
+                View All Games →
+              </Link>
+            )}
+          </motion.div>
         </div>
       </div>
 

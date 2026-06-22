@@ -12,6 +12,8 @@ import MatchingScene from "./MatchingScene"
 import OrderingScene from "./OrderingScene"
 import ConstructScene from "./ConstructScene"
 import { playVoiceBlip } from "./NovelScene"
+import ResonanceWave from "./ResonanceWave"
+import HudGauges from "./HudGauges"
 
 /* ── keyframes ─────────────────────────────────────────────────────────── */
 const SCENE_KF_ID = "scene-renderer-kf"
@@ -182,7 +184,9 @@ function MaestroInsight({ elaboration }: { elaboration: string | null | undefine
           margin:0,
           animation:"ai-insight-in 0.55s 0.05s cubic-bezier(0.34,1.1,0.64,1) both",
         }}>
-          {elaboration}
+          {elaboration.split("**").map((chunk, idx) => (
+            idx % 2 === 1 ? <strong key={idx} style={{ color: "var(--cyan)", fontWeight: 800, textShadow: "0 0 8px rgba(0,212,240,0.4)" }}>{chunk}</strong> : chunk
+          ))}
         </p>
       )}
     </div>
@@ -191,7 +195,7 @@ function MaestroInsight({ elaboration }: { elaboration: string | null | undefine
 
 /* ── Feedback panel ────────────────────────────────────────────────────── */
 function FeedbackPanel({
-  correct, feedbackText, streakCount, onNext, aiElaboration, branching
+  correct, feedbackText, streakCount, onNext, aiElaboration, branching, wrongStoryText, consequenceText
 }: {
   correct:        boolean
   feedbackText:   string
@@ -199,6 +203,8 @@ function FeedbackPanel({
   onNext:         () => void
   aiElaboration?: string | null
   branching?:     boolean
+  wrongStoryText?: string
+  consequenceText?: string
 }) {
   const [btnReady, setBtnReady] = useState(false)
   useEffect(() => {
@@ -322,9 +328,11 @@ function FeedbackPanel({
             padding:"0.6rem 0", borderBottom:"1px solid rgba(255,75,75,0.15)",
             animation:"feedback-text-in 0.4s ease both",
           }}>
-            {streakCount === 0
-              ? "Something shifts. The room gets quieter. That wasn't the right move."
-              : "A beat of silence. Even the best conductors have moments like this."}
+            {wrongStoryText || (
+              streakCount === 0
+                ? "Something shifts. The room gets quieter. That wasn't the right move."
+                : "A beat of silence. Even the best conductors have moments like this."
+            )}
           </div>
 
           {/* ── Maestro header row ──── */}
@@ -378,6 +386,41 @@ function FeedbackPanel({
                 color:"rgba(240,238,255,0.88)", lineHeight:1.75, margin:0,
               }}>
                 {feedbackText}
+              </p>
+            </div>
+          )}
+
+          {/* ── Narrative Outcome / Consequence ──── */}
+          {consequenceText && (
+            <div style={{
+              background: "rgba(224, 64, 251, 0.06)",
+              border: "1px solid rgba(224, 64, 251, 0.22)",
+              borderLeft: "4px solid #e040fb",
+              borderRadius: "0 12px 12px 0",
+              padding: "0.75rem 1rem 0.8rem",
+              marginBottom: "0.8rem",
+              animation: "feedback-text-in 0.4s 0.32s ease both",
+            }}>
+              <div style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 800,
+                fontSize: "0.75rem",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "#e040fb",
+                marginBottom: "0.4rem",
+              }}>
+                Outcome / Consequence
+              </div>
+              <p style={{
+                fontFamily: "Cormorant Garamond, serif",
+                fontStyle: "italic",
+                fontSize: "1.1rem",
+                color: "rgba(240,238,255,0.92)",
+                lineHeight: 1.6,
+                margin: 0,
+              }}>
+                {consequenceText}
               </p>
             </div>
           )}
@@ -796,10 +839,65 @@ type Props = {
   /** Whether the last answer was correct — drives character emotional state */
   lastAnswerCorrect?: boolean | null
   fastText?:          boolean
+  branching?:         boolean
+  gameScenes?:        Scene[]
+  onTalkingStateChange?: (isTalking: boolean) => void
 }
 
-export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer, onNext, streakCount=0, playFireworks, aiElaboration, dialogueDone, characterName, accentColor, fastText = false }: Props) {
+function getMetricsForChoice(choice: Choice | null, scene: Scene) {
+  if (!choice) {
+    return { clarity: 30, persona: 20, cliche: 70 }
+  }
+
+  // Tailored metrics for Game 1 Scene 0 choices
+  if (scene.id === "w1-branch-1") {
+    if (choice.label === "A") return { clarity: 15, persona: 5, cliche: 95 }
+    if (choice.label === "B") return { clarity: 55, persona: 40, cliche: 45 }
+    if (choice.label === "C") return { clarity: 65, persona: 50, cliche: 35 }
+    if (choice.label === "D") return { clarity: 95, persona: 90, cliche: 10 }
+  }
+
+  // Tailored metrics for Game 1 Vega Moment
+  if (scene.id === "w1-vega-moment") {
+    if (choice.label === "A") return { clarity: 20, persona: 10, cliche: 85 }
+    if (choice.label === "B") return { clarity: 90, persona: 85, cliche: 15 }
+  }
+
+  // Fallback based on correct/wrong
+  if (choice.correct) {
+    return { clarity: 85, persona: 80, cliche: 15 }
+  } else {
+    const text = choice.text.toLowerCase()
+    let clarity = 35
+    let persona = 25
+    let cliche = 80
+    if (text.length > 50) {
+      clarity += 10
+      cliche -= 5
+    }
+    if (text.includes("specific") || text.includes("describe") || text.includes("key")) {
+      clarity += 15
+      persona += 10
+      cliche -= 15
+    }
+    return { clarity, persona, cliche }
+  }
+}
+
+export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer, onNext, streakCount=0, playFireworks, aiElaboration, dialogueDone, characterName, accentColor, fastText = false, branching = false, gameScenes, onTalkingStateChange }: Props) {
   useEffect(() => { ensureSceneKeyframes() }, [])
+
+  const [hoveredChoice, setHoveredChoice] = useState<Choice | null>(null)
+
+  // If answered, lock to selected label; otherwise, follow hover state
+  const activeChoice = hoveredChoice 
+    ? hoveredChoice 
+    : (answered && selectedLabel)
+      ? scene.choices?.find(c => c.label === selectedLabel) || null
+      : null
+
+  const metrics = getMetricsForChoice(activeChoice, scene)
+  const resonanceVal = Math.round((metrics.clarity + metrics.persona + (100 - metrics.cliche)) / 3)
 
   // ── Dr. Park's "Think Pause" — choices hidden until player actively chooses to see them
   // This forces construction mindset before passive selection (Gee Principle #14)
@@ -848,6 +946,16 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
     !fastText,
     scene.character ?? characterName ?? "AI"
   )
+
+  // Trigger callback when talking state changes
+  const isTalking = !!scene.npcLine && !npcDone
+  const lastIsTalkingRef = useRef(false)
+  useEffect(() => {
+    if (onTalkingStateChange && lastIsTalkingRef.current !== isTalking) {
+      lastIsTalkingRef.current = isTalking
+      onTalkingStateChange(isTalking)
+    }
+  }, [isTalking, onTalkingStateChange])
 
   if (scene.type === "predict") {
     return (
@@ -928,6 +1036,13 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
       : (selectedChoice.feedback ?? "")
     : ""
 
+  const targetConsequenceScene = (answered && selectedChoice && selectedChoice.leadsTo && gameScenes)
+    ? gameScenes.find(s => s.id === selectedChoice.leadsTo)
+    : null
+  const consequenceText = targetConsequenceScene?.type === "consequence"
+    ? targetConsequenceScene.consequenceText
+    : undefined
+
   /* spring preset reused across elements */
   const spring = { type: "spring" as const, stiffness: 380, damping: 30 }
 
@@ -967,8 +1082,20 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
         </motion.div>
       )}
 
+      {/* ── Interactive HUD Layer — gauges and dynamic canvas wave ── */}
+      {(scene.choices || scene.question) && (
+        <motion.div
+          initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }}
+          transition={{ ...spring, delay:0.02 }}
+          style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "0.95rem" }}
+        >
+          <ResonanceWave resonance={resonanceVal} accentColor={accentColor} />
+          <HudGauges clarity={metrics.clarity} persona={metrics.persona} cliche={metrics.cliche} accentColor={accentColor} />
+        </motion.div>
+      )}
+
       {/* ── Unified Storytelling Panel ────────────────────────────── */}
-      {!hasDialogue && (scene.scenarioText || scene.npcLine || scene.concept) && (
+      {(!hasDialogue || dialogueDone) && (scene.scenarioText || scene.npcLine || scene.concept) && (
         <motion.div
           initial={{ opacity:0, y:12 }}
           animate={{ opacity:1, y:0 }}
@@ -1073,6 +1200,8 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
               initial={{ opacity:0, x:16 }}
               animate={{ opacity:1, x:0 }}
               transition={{ ...spring, delay: !answered ? 0.22 + i * 0.07 : 0 }}
+              onMouseEnter={() => setHoveredChoice(choice)}
+              onMouseLeave={() => setHoveredChoice(null)}
             >
               <ChoiceButton
                 choice={choice}
@@ -1080,7 +1209,7 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
                 answered={answered}
                 selectedLabel={selectedLabel}
                 onSelect={onAnswer}
-                branching
+                branching={branching}
               />
             </motion.div>
           ))}
@@ -1120,7 +1249,9 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
           streakCount={streakCount}
           onNext={onNext}
           aiElaboration={correct ? undefined : aiElaboration}
-          branching
+          branching={branching}
+          wrongStoryText={selectedChoice.wrongStoryText}
+          consequenceText={consequenceText}
         />
       )}
     </div>
