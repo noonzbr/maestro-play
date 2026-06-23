@@ -238,6 +238,8 @@ export function useSoundEngine() {
   }, [])
 
   const startSequencer = useCallback(() => {
+    // Disabled sequencer stems to prevent conflict with real MP3 tracks
+    return
     if (sequencerTimerRef.current) return
     let step = 0
     sequencerTimerRef.current = setInterval(() => {
@@ -391,8 +393,8 @@ export function useSoundEngine() {
         }, { once: true })
       }
 
-      // Set background music volume to 25% (0.25) as requested
-      const targetVol = 0.25
+      // Set background music volume to 10% (0.10) as requested (60% lower than 0.25)
+      const targetVol = 0.10
       const fadeInDuration = mood === "cinematic" ? 4000 : 2500
       const steps = fadeInDuration / 50
 
