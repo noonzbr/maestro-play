@@ -12,16 +12,54 @@ export function supabaseBrowser(): SupabaseClient {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (!url || !key) {
-      // Return a no-op client stub so the app doesn't crash without credentials
-      throw new Error("Supabase env vars not set: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY required")
+      console.warn("Supabase env vars not set. Falling back to local dummy client.")
+      _client = new Proxy({
+        auth: {
+          getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+          getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+          onAuthStateChange: (cb: any) => {
+            setTimeout(() => cb("INITIAL_SESSION", null), 0)
+            return { data: { subscription: { unsubscribe: () => {} } } }
+          },
+          signInWithPassword: () => Promise.resolve({ data: {}, error: null }),
+          signUp: () => Promise.resolve({ data: {}, error: null }),
+          signInWithOAuth: () => Promise.resolve({ data: {}, error: null }),
+          signOut: () => Promise.resolve({ error: null }),
+        },
+        from: () => {
+          const chain = {
+            select: () => chain,
+            eq: () => chain,
+            in: () => chain,
+            maybeSingle: () => Promise.resolve({ data: null, error: null }),
+            single: () => Promise.resolve({ data: null, error: null }),
+            insert: () => Promise.resolve({ data: null, error: null }),
+            update: () => Promise.resolve({ data: null, error: null }),
+            delete: () => Promise.resolve({ data: null, error: null }),
+            then: (resolve: any) => resolve({ data: null, error: null }),
+          }
+          return chain
+        }
+      } as any, {
+        get(target, prop) {
+          if (prop in target) return target[prop]
+          return () => new Proxy({}, {
+            get(t, p) {
+              if (p === "then") return (r: any) => r({ data: null, error: null })
+              return () => new Proxy({}, {})
+            }
+          })
+        }
+      }) as any as SupabaseClient
+    } else {
+      _client = createClient(url, key, {
+        auth: {
+          persistSession:    true,
+          autoRefreshToken:  true,
+          detectSessionInUrl: true,
+        },
+      })
     }
-    _client = createClient(url, key, {
-      auth: {
-        persistSession:    true,
-        autoRefreshToken:  true,
-        detectSessionInUrl: true,
-      },
-    })
   }
   return _client
 }
