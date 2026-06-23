@@ -393,8 +393,8 @@ export function useSoundEngine() {
         }, { once: true })
       }
 
-      // Set background music volume to 10% (0.10) as requested (60% lower than 0.25)
-      const targetVol = 0.10
+      // Set background music volume to 20% (0.20) for Concrete Riot, 10% (0.10) for others
+      const targetVol = src.includes("concrete-riot") ? 0.20 : 0.10
       const fadeInDuration = mood === "cinematic" ? 4000 : 2500
       const steps = fadeInDuration / 50
 
