@@ -1,7 +1,7 @@
 // MaestroPlay Service Worker
 // v3: removed /_next/static/ chunk caching — Turbopack builds invalidate chunks
 // on every restart and cached chunks cause "module factory not available" errors.
-const CACHE_NAME = "maestroplay-v3"
+const CACHE_NAME = "maestroplay-v4"
 
 // Pre-cache these on install
 const PRECACHE = [

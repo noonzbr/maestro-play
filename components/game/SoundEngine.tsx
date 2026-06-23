@@ -362,7 +362,10 @@ export function useSoundEngine() {
   const startAmbient = useCallback((mood: SoundMood = "normal", startAt = 0) => {
     try {
       moodRef.current = mood
-      const src = getTrack(mood)
+      let src = getTrack(mood)
+      if (src.includes("concrete-riot")) {
+        src = src.includes("?") ? `${src}&v=2` : `${src}?v=2`
+      }
       const current = trackRef.current
 
       // If same file is already playing, don't restart
