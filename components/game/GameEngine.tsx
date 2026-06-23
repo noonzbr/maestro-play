@@ -3222,12 +3222,12 @@ export default function GameEngine({ game: initialGame }: Props) {
                     maxWidth: "none",
                     marginLeft: "max(1.5rem, 5vw)",
                     marginRight: "clamp(280px, 33vw, 500px)",
-                    padding: "4.5rem 1.5rem 4rem",
+                    padding: "clamp(1.5rem, 5vh, 4.5rem) 1.5rem clamp(1rem, 4vh, 4rem)",
                   }
                 : {
                     maxWidth: "680px",
                     margin: "0 auto",
-                    padding: "4.5rem 1.5rem 4rem",
+                    padding: "clamp(1.5rem, 5vh, 4.5rem) 1.5rem clamp(1rem, 4vh, 4rem)",
                   }}
             >
               {/* Scene label row */}

@@ -89,10 +89,20 @@ if (!fs.existsSync(screenshotDir)) {
     }
     await delay(500);
 
+    // Dismiss the "Meet Coda" onboarding popover if present
+    const gotItBtn = page.locator('button:has-text("Got it")');
+    if (await gotItBtn.count() > 0) {
+      console.log("Dismissing Coda onboarding popover...");
+      await gotItBtn.click();
+      await delay(500);
+    }
+
     // 9. Select Option D (Take fifteen minutes to write detailed prompt)
     console.log("9. Selecting Option D (The Conductor path)...");
     const optionD = page.locator('button:has-text("He takes fifteen minutes")');
-    await optionD.click();
+    await optionD.waitFor({ state: 'visible', timeout: 5000 });
+    await delay(1200); // Wait for the spring animation to settle completely
+    await optionD.click({ force: true });
     await delay(2000);
     await page.screenshot({ path: path.join(screenshotDir, 'path_d_09_conductor1_loaded.png') });
 
@@ -173,6 +183,11 @@ if (!fs.existsSync(screenshotDir)) {
 
   } catch (err) {
     console.error("ERROR DURING TEST:", err);
+    try {
+      await page.screenshot({ path: path.join(screenshotDir, 'path_d_error.png') });
+    } catch (e) {
+      console.error("Failed to take error screenshot:", e);
+    }
   } finally {
     await browser.close();
     console.log("=== TEST COMPLETE ===");

@@ -102,7 +102,7 @@ export default function ChoiceButton({ choice, index, answered, selectedLabel, o
       style={{
         width: "100%",
         textAlign: "left",
-        padding: "0.55rem 1rem",
+        padding: "0.45rem 0.85rem",
         borderRadius: "12px",
         border: `2px solid ${borderColor()}`,
         background: bgColor(),

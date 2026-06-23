@@ -1083,7 +1083,7 @@ export default function SceneRenderer({ scene, answered, selectedLabel, onAnswer
       )}
 
       {/* ── Interactive HUD Layer — gauges and dynamic canvas wave ── */}
-      {(scene.choices || scene.question) && (
+      {activeChoice && (scene.choices || scene.question) && (
         <motion.div
           initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }}
           transition={{ ...spring, delay:0.02 }}
