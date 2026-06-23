@@ -391,8 +391,8 @@ export function useSoundEngine() {
         }, { once: true })
       }
 
-      // LOWERED ANOTHER 70%: music is background ambience only, SFX must cut through clearly
-      const targetVol = mood === "cinematic" ? 0.003 : mood === "revelation" ? 0.004 : 0.002
+      // Set background music volume to 25% (0.25) as requested
+      const targetVol = 0.25
       const fadeInDuration = mood === "cinematic" ? 4000 : 2500
       const steps = fadeInDuration / 50
 

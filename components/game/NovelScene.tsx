@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Scene } from "@/lib/games/types"
 
 /* ── Voice Synthesis (Web Speech API) ──────────────────────────────────── */
-let ttsEnabled = true  // user can toggle off
+let ttsEnabled = false  // user can toggle off
 
 function speakLine(text: string, speakerName: string, onStart?: () => void, onEnd?: () => void) {
   if (typeof window === "undefined" || !window.speechSynthesis) return
@@ -460,20 +460,11 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
   const visibleText = skip ? line.text : displayed
   const textDone    = skip || done
 
-  /* Speak the current line using Web Speech API */
+  /* Speak the current line using Web Speech API (Disabled - characters do not speak) */
   useEffect(() => {
-    if (fastText) return  // skip voice in fast/review mode
-    const currentLine = lines[lineIndex]
-    if (!currentLine?.text) return
-    // Small delay so the first character appears before speech starts
-    const timer = setTimeout(() => {
-      speakLine(currentLine.text, currentLine.speaker ?? "")
-    }, 120)
     return () => {
-      clearTimeout(timer)
       stopSpeech()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineIndex])
 
   /* ── Reading-speed auto-advance ─────────────────────────────────────── */
