@@ -16,7 +16,7 @@ export const game9: Game = {
   characterBlurb: "A researcher who uses Gemini to work at the speed of thought",
   characterImage: "/images/luna.png",
   maestroImage:   "/images/maestro-luna.png",
-  audioTrack:     "/audio/concrete-riot.mp3",
+  audioTrack:     "/audio/concrete-riot-instrumental.mp3",
   intro: {
     sceneImage: "/images/scene-luna.png",
     sceneColor: "#060808",

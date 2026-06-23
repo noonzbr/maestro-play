@@ -7,7 +7,7 @@ export const game11: Game = {
   title: "Microsoft Copilot — AI in Your M365",
   emoji: "🪟",
   accentColor: "#0078d4",
-  audioTrack: "/audio/concrete-riot.mp3",
+  audioTrack: "/audio/concrete-riot-instrumental.mp3",
   characterName: "Jake",
   characterRole: "17-year-old guitarist and music club officer",
   characterBlurb: "Jake discovers the AI already living inside the music club's Microsoft 365",

@@ -16,7 +16,7 @@ export const game10: Game = {
   characterBlurb: "A terminal wizard who adds Gemini CLI to his command-line arsenal",
   characterImage: "/images/sam.png",
   maestroImage:   "/images/maestro-sam.png",
-  audioTrack:     "/audio/concrete-riot.mp3",
+  audioTrack:     "/audio/concrete-riot-instrumental.mp3",
   intro: {
     sceneImage: "/images/scene-sam.png",
     sceneColor: "#060a06",

@@ -41,7 +41,7 @@ export const game14: Game = {
   icon:          "metronome" as const,
   duration:      "18 min",
   accentColor:   "#06b6d4",
-  audioTrack:    "/audio/concrete-riot.mp3",
+  audioTrack:    "/audio/concrete-riot-instrumental.mp3",
 
   characterName:   "Vera",
   characterRole:   "29-year-old Senior Frontend Developer",

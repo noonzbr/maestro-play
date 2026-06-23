@@ -45,7 +45,7 @@ export const game1v2: Game = {
   maestroLine:     "The last time he was just a guitarist...",
   maestroSubline:  "Jake's story is just beginning. The orchestra awaits.",
   accentColor:    "#00d4f0",
-  audioTrack:     "/audio/concrete-riot.mp3",
+  audioTrack:     "/audio/concrete-riot-instrumental.mp3",
   protagonistVideo:"/videos/JakeRocking.mp4",
   aiModel:         "claude",
   felipeOutroVideo:   "/videos/felipe-game1v2.mp4",

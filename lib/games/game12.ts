@@ -7,7 +7,7 @@ export const game12: Game = {
   title: "Copilot Studio — Build Your Own AI Agent",
   emoji: "🏗️",
   accentColor: "#8764b8",
-  audioTrack: "/audio/concrete-riot.mp3",
+  audioTrack: "/audio/concrete-riot-instrumental.mp3",
   characterName: "Jake",
   characterRole: "17-year-old guitarist and music club officer",
   characterBlurb: "Jake builds a no-code AI assistant for the music club under President Tyler's guidance",
