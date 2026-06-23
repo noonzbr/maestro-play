@@ -233,10 +233,6 @@ type CharacterImageProps = {
 }
 
 function CharacterImage({ baseSrc, emotion, alt, className, style }: CharacterImageProps) {
-  const [currentSrc, setCurrentSrc] = useState(baseSrc)
-  const [lastBaseSrc, setLastBaseSrc] = useState(baseSrc)
-  const [lastEmotion, setLastEmotion] = useState(emotion)
-
   const getEmotionUrl = useCallback((src: string, emo: string) => {
     if (emo === "neutral" || !src) return src
     const urlParts = src.split('?')
@@ -248,6 +244,23 @@ function CharacterImage({ baseSrc, emotion, alt, className, style }: CharacterIm
     }
     return src
   }, [])
+
+  const [currentSrc, setCurrentSrc] = useState(() => getEmotionUrl(baseSrc, emotion))
+  const [lastBaseSrc, setLastBaseSrc] = useState(baseSrc)
+  const [lastEmotion, setLastEmotion] = useState(emotion)
+
+  // Preload all emotions on baseSrc change to keep them in browser cache
+  useEffect(() => {
+    if (!baseSrc) return
+    const emotions = ["neutral", "excited", "thinking", "tense"]
+    emotions.forEach(emo => {
+      const url = getEmotionUrl(baseSrc, emo)
+      if (url) {
+        const img = new window.Image()
+        img.src = url
+      }
+    })
+  }, [baseSrc, getEmotionUrl])
 
   if (baseSrc !== lastBaseSrc || emotion !== lastEmotion) {
     setLastBaseSrc(baseSrc)
@@ -263,29 +276,18 @@ function CharacterImage({ baseSrc, emotion, alt, className, style }: CharacterIm
   }
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <AnimatePresence mode="popLayout">
-        <motion.img
-          key={currentSrc}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.12, ease: "linear" }}
-          src={currentSrc}
-          alt={alt}
-          draggable={false}
-          className={className}
-          style={{
-            ...style,
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-          }}
-          onError={handleError}
-        />
-      </AnimatePresence>
-    </div>
+    <img
+      src={currentSrc}
+      alt={alt}
+      draggable={false}
+      className={className}
+      style={{
+        ...style,
+        width: "100%",
+        height: "100%",
+      }}
+      onError={handleError}
+    />
   )
 }
 

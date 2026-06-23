@@ -56,6 +56,19 @@ if (!fs.existsSync(screenshotDir)) {
 
     // 6. Skip Coda dialogue
     console.log("6. Skipping onboarding tutor dialogue...");
+    // Finish typing first beat
+    await page.click('body');
+    await delay(200);
+    
+    const continueBtn = page.locator('button:has-text("Continue")');
+    if (await continueBtn.count() > 0) {
+      await continueBtn.click();
+      await delay(500);
+      // Finish typing second beat
+      await page.click('body');
+      await delay(200);
+    }
+    
     const beginQuestBtn = page.locator('button:has-text("Begin Game")');
     await beginQuestBtn.waitFor({ state: 'visible', timeout: 10000 });
     await beginQuestBtn.click();
@@ -122,8 +135,8 @@ if (!fs.existsSync(screenshotDir)) {
 
     // 12. Complete lesson and refill hearts
     console.log("12. Completing lesson (refilling hearts)...");
-    const continueBtn = page.locator('button:has-text("I Understand")');
-    await continueBtn.click();
+    const understandBtn = page.locator('button:has-text("I Understand")');
+    await understandBtn.click();
     await delay(2000);
     await page.screenshot({ path: path.join(screenshotDir, 'game_over_04_refilled_game.png') });
 

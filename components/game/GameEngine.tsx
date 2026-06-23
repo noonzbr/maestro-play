@@ -252,6 +252,11 @@ export default function GameEngine({ game: initialGame }: Props) {
         {
           speaker: "Coda & Felipe",
           text: "Welcome, Conductor! I'm Coda, your AI guide, and this is Felipe. Tap my icon for Socratic clues if you get stuck. Let's begin!"
+        },
+        {
+          speaker: "Felipe",
+          text: "In this journey, you'll guide Jake — a talented 17-year-old guitarist. He starts out feeling threatened by his friends' fast AI beats, but he's about to discover that his deep musical instincts are exactly what he needs to conduct AI with precision. Take a look at Jake...",
+          showJakeReference: true
         }
       ]
     }
@@ -1786,7 +1791,113 @@ export default function GameEngine({ game: initialGame }: Props) {
 
         {/* Dynamic Portrait Display */}
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginBottom: "4rem" }}>
-          {isBoth ? (
+          {activeBeat.showJakeReference ? (
+            <div style={{
+              display: "flex",
+              position: "relative",
+              width: "265px",
+              height: "150px",
+              justifyContent: "center",
+              alignItems: "center",
+            }}>
+              {/* Felipe Portrait (Left, active speaker) */}
+              <div style={{
+                position: "absolute",
+                left: "15px",
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(224,64,251,0.4) 0%, rgba(255,109,0,0.4) 100%)",
+                padding: "3px",
+                boxShadow: `0 0 35px rgba(224, 64, 251, 0.3)`,
+                animation: "maestro-pulse 4s ease-in-out infinite",
+                zIndex: 12,
+              }}>
+                <div style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "#0c0816",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                }}>
+                  <img
+                    src="/images/maestroplayer1.png?v=2"
+                    alt="Felipe"
+                    className="char-breathe"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      mixBlendMode: "normal",
+                      transform: "scale(1.0)",
+                      objectPosition: "center",
+                      animation: "intro-hologram-flicker 5s ease-in-out infinite",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Jake Reference Portrait (Right, static reference) */}
+              <div style={{
+                position: "absolute",
+                right: "15px",
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%)",
+                padding: "2px",
+                boxShadow: `0 0 20px rgba(255, 255, 255, 0.1)`,
+                zIndex: 11,
+                opacity: 0.8,
+              }}>
+                <div style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "#0c0816",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                }}>
+                  <img
+                    src="/images/guitarplayer1.png?v=2"
+                    alt="Jake Reference"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "bottom center",
+                    }}
+                  />
+                </div>
+                {/* Reference badge */}
+                <div style={{
+                  position: "absolute",
+                  bottom: "-6px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "rgba(255,255,255,0.12)",
+                  color: "#fff",
+                  fontSize: "0.5rem",
+                  padding: "0.1rem 0.4rem",
+                  borderRadius: "4px",
+                  whiteSpace: "nowrap",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 800,
+                  letterSpacing: "0.05em",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}>
+                  REF: JAKE
+                </div>
+              </div>
+            </div>
+          ) : isBoth ? (
             <div style={{
               display: "flex",
               position: "relative",

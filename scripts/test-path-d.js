@@ -69,6 +69,19 @@ if (!fs.existsSync(screenshotDir)) {
 
     // 7. Skip Coda dialogue
     console.log("7. Skipping Coda's onboarding dialogue...");
+    // Finish typing first beat
+    await page.click('body', { position: { x: 100, y: 100 } });
+    await delay(200);
+    
+    const continueBtn = page.locator('button:has-text("Continue")');
+    if (await continueBtn.count() > 0) {
+      await continueBtn.click();
+      await delay(500);
+      // Finish typing second beat
+      await page.click('body', { position: { x: 100, y: 100 } });
+      await delay(200);
+    }
+    
     const beginQuestBtn = page.locator('button:has-text("Begin Game")');
     await beginQuestBtn.waitFor({ state: 'visible', timeout: 10000 });
     await beginQuestBtn.click();
