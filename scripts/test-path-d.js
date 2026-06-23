@@ -41,15 +41,15 @@ if (!fs.existsSync(screenshotDir)) {
 
     // 3. Skip Brand Video
     console.log("3. Skipping brand video...");
-    await page.click('body');
+    await page.click('body', { position: { x: 100, y: 100 } });
     await delay(1000);
 
     // 4. Click through Story Beats
     console.log("4. Advancing through the story beats...");
     for (let i = 0; i < 15; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(300);
     }
     await delay(1000);
@@ -82,9 +82,9 @@ if (!fs.existsSync(screenshotDir)) {
     // Advance through the new scene 0 dialogue (4 lines)
     console.log("Advancing through scene 0 dialogue...");
     for (let i = 0; i < 4; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(350);
     }
     await delay(500);
@@ -109,9 +109,9 @@ if (!fs.existsSync(screenshotDir)) {
     // 10. Walk through w1-conductor-1 dialogue (13 lines)
     console.log("10. Advancing through Scene 5 (w1-conductor-1) dialogue...");
     for (let i = 0; i < 13; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(350);
     }
     await delay(1000);
@@ -144,9 +144,9 @@ if (!fs.existsSync(screenshotDir)) {
     // 12. Walk through w1-conductor-2 dialogue (6 lines)
     console.log("12. Advancing through Scene 6 (w1-conductor-2) dialogue...");
     for (let i = 0; i < 8; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(350);
     }
     await delay(1500);

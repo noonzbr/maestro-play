@@ -164,8 +164,10 @@ export default function CinematicIntro({ onComplete, startMusic, intro, fastText
               }}
               style={{
                 position: "relative",
-                height: "100%",
+                maxWidth: "100%",
+                maxHeight: "100%",
                 width: "auto",
+                height: "auto",
                 objectFit: "contain",
                 display: "block",
                 zIndex: 1,

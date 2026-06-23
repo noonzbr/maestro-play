@@ -364,7 +364,7 @@ export function useSoundEngine() {
       moodRef.current = mood
       let src = getTrack(mood)
       if (src.includes("concrete-riot")) {
-        src = src.includes("?") ? `${src}&v=2` : `${src}?v=2`
+        src = src.includes("?") ? `${src}&v=3` : `${src}?v=3`
       }
       const current = trackRef.current
 

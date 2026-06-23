@@ -1359,7 +1359,7 @@ export default function GameEngine({ game: initialGame }: Props) {
 
     return (
       <div style={{
-        height: "100vh",
+        height: "100dvh",
         background: "#08060f",
         display: "flex",
         flexDirection: "column",
@@ -1709,7 +1709,7 @@ export default function GameEngine({ game: initialGame }: Props) {
           }
         }}
         style={{
-          height: "100vh",
+          height: "100dvh",
           background: "#08060f",
           display: "flex",
           flexDirection: "column",
@@ -2008,7 +2008,7 @@ export default function GameEngine({ game: initialGame }: Props) {
   }
 
   return (
-    <div ref={engineRootRef} style={{ height: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
+    <div ref={engineRootRef} style={{ height: "100dvh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
 
       <FloatingNotes mood={currentMood} />
       <AchievementToast trigger={achievement} />
@@ -2484,7 +2484,7 @@ export default function GameEngine({ game: initialGame }: Props) {
                 <div style={{
                   position: "absolute", bottom: 0, left: "50%",
                   transform: "translateX(-50%)",
-                  height: "82vh", maxWidth: "420px", width: "100%",
+                  height: isMobile ? "58vh" : "82vh", maxWidth: "420px", width: "100%",
                   maskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.6) 8%, black 30%, black 72%, transparent 100%)",
                   WebkitMaskImage: "linear-gradient(to top, transparent 0%, rgba(0,0,0,0.6) 8%, black 30%, black 72%, transparent 100%)",
                 }}>
@@ -3202,7 +3202,7 @@ export default function GameEngine({ game: initialGame }: Props) {
 
       {/* ——— GAME CONTENT (not used for boss, prompt, handoff, consequence, felipe, track-select) ——— */}
       {state !== "intro" && currentScene?.type !== "prompt" && currentScene?.type !== "boss" && currentScene?.type !== "handoff" && currentScene?.type !== "consequence" && currentScene?.type !== "felipe" && currentScene?.type !== "track-select" && (
-        <div style={{ height: "100vh", overflow: "auto", position: "relative", zIndex: 10 }}>
+        <div style={{ height: "100dvh", overflow: "auto", position: "relative", zIndex: 10 }}>
           <AnimatePresence mode="wait">
             {/* When a side-character is standing on the right (quiz/scenario decision
                 moments), shift the reading column LEFT so text + Jake form two columns

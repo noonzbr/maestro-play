@@ -759,8 +759,8 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
             style={{
               position:   "absolute",
               bottom:     0,
-              left:       isMobile ? "10%" : "3%",
-              width:      isMobile ? "80%" : "clamp(260px, 32vw, 540px)",
+              left:       isMobile ? "2%" : "3%",
+              width:      isMobile ? "auto" : "clamp(260px, 32vw, 540px)",
               height:     "100%",
               zIndex:     npcActive ? 10 : 2,
             }}
@@ -786,10 +786,11 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
             }} />
             {/* Aspect-ratio matched container to align mouth coordinates exactly */}
             <div style={{
-              position: "absolute",
+              position: isMobile ? "relative" : "absolute",
               bottom: 0,
               left: 0,
-              width: "100%",
+              width: isMobile ? "auto" : "100%",
+              height: isMobile ? "100%" : "auto",
               aspectRatio: "1/1",
               zIndex: 1,
             }}>
@@ -960,8 +961,8 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
             style={{
               position:   "absolute",
               bottom:     0,
-              right:      isMobile ? "10%" : "3%",
-              width:      isMobile ? "80%" : "clamp(260px, 32vw, 540px)",
+              right:      isMobile ? "2%" : "3%",
+              width:      isMobile ? "auto" : "clamp(260px, 32vw, 540px)",
               height:     "100%",
               zIndex:     isJake ? 10 : 2,
             }}
@@ -987,10 +988,11 @@ export default function NovelScene({ scene, onComplete, protagonistImage, protag
             }} />
             {/* Aspect-ratio matched container to align mouth coordinates exactly */}
             <div style={{
-              position: "absolute",
+              position: isMobile ? "relative" : "absolute",
               bottom: 0,
               right: 0,
-              width: "100%",
+              width: isMobile ? "auto" : "100%",
+              height: isMobile ? "100%" : "auto",
               aspectRatio: "1/1",
               zIndex: 1,
             }}>

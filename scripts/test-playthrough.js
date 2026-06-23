@@ -39,7 +39,7 @@ if (!fs.existsSync(screenshotDir)) {
     // 3. Skip Brand Video
     console.log("3. Skipping brand video...");
     // The screen click skips the intro video
-    await page.click('body');
+    await page.click('body', { position: { x: 100, y: 100 } });
     await delay(1000);
     await page.screenshot({ path: path.join(screenshotDir, '03_story_beats_started.png') });
 
@@ -47,9 +47,9 @@ if (!fs.existsSync(screenshotDir)) {
     console.log("4. Advancing through the story beats...");
     // 15 beats in the cinematic intro. We click twice per beat to skip typewriter and advance.
     for (let i = 0; i < 15; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(400);
     }
     await delay(1000); // Wait for transition animation
@@ -86,9 +86,9 @@ if (!fs.existsSync(screenshotDir)) {
     // Advance dialogue (4 lines)
     console.log("Advancing through scene 0 dialogue...");
     for (let i = 0; i < 4; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(350);
     }
     await delay(500);
@@ -108,9 +108,9 @@ if (!fs.existsSync(screenshotDir)) {
     // 10. Advance dialogue in path B (8 lines)
     console.log("10. Advancing through Dialogue in Path B...");
     for (let i = 0; i < 8; i++) {
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(120);
-      await page.click('body');
+      await page.click('body', { position: { x: 100, y: 100 } });
       await delay(450);
     }
     await delay(1000);
@@ -119,6 +119,11 @@ if (!fs.existsSync(screenshotDir)) {
 
   } catch (err) {
     console.error("ERROR DURING PLAYTHROUGH VERIFICATION:", err);
+    try {
+      await page.screenshot({ path: path.join(screenshotDir, 'playthrough_error.png') });
+    } catch (e) {
+      console.error("Failed to take error screenshot:", e);
+    }
   } finally {
     await browser.close();
     console.log("=== VERIFICATION COMPLETE ===");

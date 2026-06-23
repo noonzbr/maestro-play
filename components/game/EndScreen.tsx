@@ -126,7 +126,7 @@ function MaestroTransformation({
 
   return (
     <div style={{
-      minHeight: "100vh",
+      minHeight: "100dvh",
       background: "var(--bg-primary)",
       display: "flex",
       alignItems: "center",
@@ -468,7 +468,7 @@ export default function EndScreen({ game, totalXp, streak, choiceHistory }: Prop
 
   return (
     <div style={{
-      minHeight: "100vh",
+      minHeight: "100dvh",
       background: "var(--bg-primary)",
       display: "flex",
       alignItems: "center",

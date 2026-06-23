@@ -166,7 +166,7 @@ export default function StoryIntro({ onComplete, startMusic }: Props) {
     <div
       onClick={!current.isFinal ? advance : undefined}
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         background: "var(--bg-primary)",
         display: "flex",
         flexDirection: "column",
