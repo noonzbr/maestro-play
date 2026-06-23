@@ -1662,24 +1662,31 @@ export default function GameEngine({ game: initialGame }: Props) {
     // Dynamic speaker style settings
     const isFelipe = activeBeat.speaker === "Felipe"
     const isSystem = activeBeat.speaker === "SYSTEM"
+    const isBoth = activeBeat.speaker === "Coda & Felipe"
     
     const borderColor = isSystem 
       ? "rgba(255, 255, 255, 0.2)" 
-      : isFelipe 
-        ? "rgba(224, 64, 251, 0.45)" 
-        : "rgba(0, 212, 240, 0.45)"
+      : isBoth
+        ? "rgba(0, 212, 240, 0.45)"
+        : isFelipe 
+          ? "rgba(224, 64, 251, 0.45)" 
+          : "rgba(0, 212, 240, 0.45)"
 
     const tagColor = isSystem 
       ? "rgba(255, 255, 255, 0.45)" 
-      : isFelipe 
-        ? "#e040fb" 
-        : "var(--cyan)"
+      : isBoth
+        ? "rgba(0, 212, 240, 0.9)"
+        : isFelipe 
+          ? "#e040fb" 
+          : "var(--cyan)"
 
     const glowColor = isSystem 
       ? "rgba(255, 255, 255, 0.05)" 
-      : isFelipe 
-        ? "rgba(224, 64, 251, 0.25)" 
-        : "rgba(0, 212, 240, 0.25)"
+      : isBoth
+        ? "rgba(0, 212, 240, 0.25)"
+        : isFelipe 
+          ? "rgba(224, 64, 251, 0.25)" 
+          : "rgba(0, 212, 240, 0.25)"
 
     const btnGradient = isSystem
       ? "linear-gradient(90deg, #6b7280, #374151)"
@@ -1779,49 +1786,141 @@ export default function GameEngine({ game: initialGame }: Props) {
 
         {/* Dynamic Portrait Display */}
         <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginBottom: "4rem" }}>
-          <div style={{
-            width: "180px",
-            height: "180px",
-            borderRadius: "50%",
-            background: portraitBorder,
-            padding: "3px",
-            boxShadow: `0 0 50px ${glowColor}`,
-            animation: "maestro-pulse 4s ease-in-out infinite",
-          }}>
+          {isBoth ? (
             <div style={{
-              width: "100%",
-              height: "100%",
-              borderRadius: "50%",
-              background: "#0c0816",
-              overflow: "hidden",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               position: "relative",
+              width: "250px",
+              height: "150px",
+              justifyContent: "center",
+              alignItems: "center",
             }}>
-              <img
-                src={
-                  isSystem
-                    ? "/images/ai-character.png?v=2"
-                    : isFelipe
-                      ? "/images/maestroplayer1.png?v=2"
-                      : "/images/ai-tutor.png?v=2"
-                }
-                alt={activeBeat.speaker}
-                className="char-breathe"
-                style={{
+              {/* Coda Portrait (Left, slightly back) */}
+              <div style={{
+                position: "absolute",
+                left: "15px",
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(0,212,240,0.4) 0%, rgba(224,64,251,0.4) 100%)",
+                padding: "3px",
+                boxShadow: `0 0 30px rgba(0, 212, 240, 0.25)`,
+                animation: "maestro-pulse 4s ease-in-out infinite",
+                zIndex: 11,
+              }}>
+                <div style={{
                   width: "100%",
                   height: "100%",
-                  objectFit: "cover",
-                  mixBlendMode: isSystem || isFelipe ? "normal" : "screen",
-                  transform: isSystem ? "scale(1)" : (isFelipe ? "scale(1.0)" : "scale(1.15)"),
-                  objectPosition: "center",
-                  animation: isSystem ? "none" : "intro-hologram-flicker 5s ease-in-out infinite",
+                  borderRadius: "50%",
+                  background: "#0c0816",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                }}>
+                  <img
+                    src="/images/ai-tutor.png?v=2"
+                    alt="Coda"
+                    className="char-breathe"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      mixBlendMode: "screen",
+                      transform: "scale(1.15)",
+                      objectPosition: "center",
+                      animation: "intro-hologram-flicker 5s ease-in-out infinite",
+                    }}
+                  />
+                </div>
+              </div>
 
-                }}
-              />
+              {/* Felipe Portrait (Right, overlapping slightly in front) */}
+              <div style={{
+                position: "absolute",
+                right: "15px",
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(224,64,251,0.4) 0%, rgba(255,109,0,0.4) 100%)",
+                padding: "3px",
+                boxShadow: `0 0 35px rgba(224, 64, 251, 0.3)`,
+                animation: "maestro-pulse 4s ease-in-out infinite 1s",
+                zIndex: 12,
+              }}>
+                <div style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "#0c0816",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                }}>
+                  <img
+                    src="/images/maestroplayer1.png?v=2"
+                    alt="Felipe"
+                    className="char-breathe"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      mixBlendMode: "normal",
+                      transform: "scale(1.0)",
+                      objectPosition: "center",
+                      animation: "intro-hologram-flicker 5s ease-in-out infinite",
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div style={{
+              width: "180px",
+              height: "180px",
+              borderRadius: "50%",
+              background: portraitBorder,
+              padding: "3px",
+              boxShadow: `0 0 50px ${glowColor}`,
+              animation: "maestro-pulse 4s ease-in-out infinite",
+            }}>
+              <div style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                background: "#0c0816",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+              }}>
+                <img
+                  src={
+                    isSystem
+                      ? "/images/ai-character.png?v=2"
+                      : isFelipe
+                        ? "/images/maestroplayer1.png?v=2"
+                        : "/images/ai-tutor.png?v=2"
+                  }
+                  alt={activeBeat.speaker}
+                  className="char-breathe"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    mixBlendMode: isSystem || isFelipe ? "normal" : "screen",
+                    transform: isSystem ? "scale(1)" : (isFelipe ? "scale(1.0)" : "scale(1.15)"),
+                    objectPosition: "center",
+                    animation: isSystem ? "none" : "intro-hologram-flicker 5s ease-in-out infinite",
+                  }}
+                />
+              </div>
+            </div>
+          )}
           <div style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 800,
@@ -1833,9 +1932,11 @@ export default function GameEngine({ game: initialGame }: Props) {
           }}>
             {isSystem 
               ? "Socratic Network" 
-              : isFelipe 
-                ? "Felipe · The Maestro" 
-                : "Coda Companion"}
+              : isBoth
+                ? "Coda & Felipe · The Guides"
+                : isFelipe 
+                  ? "Felipe · The Maestro" 
+                  : "Coda Companion"}
           </div>
         </div>
 
