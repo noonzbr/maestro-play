@@ -64,20 +64,6 @@ function useReveal() {
   }, [])
 }
 
-async function startCheckout(slug: string) {
-  try {
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug }),
-    })
-    const data = await res.json()
-    if (data.url) window.location.href = data.url
-    else console.error("Checkout error:", data)
-  } catch (e) {
-    console.error("Checkout fetch failed:", e)
-  }
-}
 
 // Sound blips for simulator
 const playSynthTone = (freq: number, duration: number, type: OscillatorType = "sine", vol = 0.1) => {
@@ -416,8 +402,6 @@ const CHARACTER_SCENARIOS: Record<MockCharacter, CharacterScenario> = {
 }
 
 export default function HomePage() {
-  useReveal()
-  const [checkingOut, setCheckingOut] = useState<string | null>(null)
   const [hasProgress, setHasProgress] = useState(false)
 
   // Tab systems: Vn vs Dashboard
@@ -506,11 +490,6 @@ export default function HomePage() {
     } catch {}
   }, [])
 
-  const handlePurchase = useCallback(async (slug: string) => {
-    setCheckingOut(slug)
-    await startCheckout(slug)
-    setCheckingOut(null)
-  }, [])
 
   const handleMockChoice = (choice: "choiceA" | "choiceB") => {
     const sc = CHARACTER_SCENARIOS[activeChar]
@@ -667,9 +646,6 @@ export default function HomePage() {
                     </Link>
                   )}
                 </motion.div>
-                <Link href="#store" style={{ display: "inline-flex", alignItems: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.95rem", color: "#fff", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: "1.1rem 2.25rem", borderRadius: "100px", textDecoration: "none", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"} onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}>
-                  View Pricing Plans
-                </Link>
               </div>
             </div>
 
@@ -1472,108 +1448,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════════════
-            THE SHOP (Pricing Plans)
-        ══════════════════════════════════════════════════════════════════════ */}
-        <span id="store"></span>
-        <section style={{ padding: "6rem 2rem", background: "#05040a", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <div style={{ maxWidth: "1060px", margin: "0 auto" }}>
-
-            <div className="reveal" style={{ textAlign: "center", marginBottom: "4rem" }}>
-              <div className="label-caps" style={{ color: "#ffd740", marginBottom: "0.75rem" }}>Pricing plans</div>
-              <h2 style={{ fontFamily: "Cormorant Garamond, serif", fontWeight: 700, fontSize: "clamp(2rem,5vw,3.2rem)", color: "#fff", lineHeight: 1.1, margin: 0 }}>
-                Conductor&apos;s Store
-              </h2>
-            </div>
-
-            {/* Pack tiers */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "2rem", alignItems: "stretch", maxWidth: "960px", margin: "0 auto" }}>
-              
-              {/* Free Tier */}
-              <div className="reveal glass-card" style={{ borderRadius: "20px", padding: "2rem", display: "flex", flexDirection: "column", background: "rgba(12,8,22,0.4)" }}>
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "0.6rem" }}>Free Apprentice</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", marginBottom: "0.4rem" }}>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.6rem", color: "#fff", letterSpacing: "-0.03em" }}>$0.00</span>
-                  </div>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>Diagnose your prompting weaknesses and try basics.</p>
-                </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.75rem" }}>
-                  {["Access to Game Chapter 1","3 starter lives","Basic prompt sandbox","Play directly in browser"].map(f => (
-                    <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                      <span aria-hidden="true" style={{ color: "#ffd740", fontSize: "0.75rem" }}>✦</span>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.78)" }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <Link href="/games/welcome-to-ai-v2" style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#fff", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "0.7rem", borderRadius: "100px", textDecoration: "none" }}>
-                  Play Now
-                </Link>
-              </div>
-
-              {/* Starter Pack */}
-              <div className="reveal glass-card" style={{ borderRadius: "20px", padding: "2rem", display: "flex", flexDirection: "column", background: "rgba(12,8,22,0.5)" }}>
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "0.6rem" }}>Starter Pack</div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", marginBottom: "0.4rem" }}>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.6rem", color: "#fff", letterSpacing: "-0.03em" }}>$2.99</span>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)" }}>one-time</span>
-                  </div>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>Break the habit of passive, generic prompting.</p>
-                </div>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.75rem" }}>
-                  {["5 extra lives (replenish instantly)","3 Hint Tokens for tests","2 Double XP boosts (lasts 24h)","1 Second Chance safety net"].map(f => (
-                    <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                      <span aria-hidden="true" style={{ color: "#00d4f0", fontSize: "0.75rem" }}>✦</span>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.78)" }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => handlePurchase("starter-pack")}
-                  disabled={checkingOut === "starter-pack"}
-                  style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "rgba(240,238,255,0.8)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: "0.7rem", borderRadius: "100px", cursor: checkingOut === "starter-pack" ? "wait" : "pointer", transition: "background 0.2s", opacity: checkingOut && checkingOut !== "starter-pack" ? 0.5 : 1 }}
-                  onMouseEnter={e => { if (!checkingOut) e.currentTarget.style.background="rgba(255,255,255,0.1)" }}
-                  onMouseLeave={e => { e.currentTarget.style.background="rgba(255,255,255,0.06)" }}>
-                  {checkingOut === "starter-pack" ? "Opening checkout…" : "Get Starter Pack →"}
-                </button>
-              </div>
-
-              {/* Maestro Bundle */}
-              <div className="reveal" style={{ borderRadius: "20px", padding: "2px", background: "linear-gradient(135deg, #00d4f0, #7b2fbe, #e040fb)", display: "flex", flexDirection: "column" }}>
-                <div style={{ borderRadius: "18px", padding: "2rem", background: "rgba(12,8,22,0.98)", flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "linear-gradient(90deg,#00d4f0,#e040fb)", borderRadius: "100px", padding: "0.2rem 0.75rem", marginBottom: "1rem", alignSelf: "flex-start" }}>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "#08060f" }}>Best Value</span>
-                  </div>
-                  <div style={{ marginBottom: "1.5rem" }}>
-                    <div style={{ fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.62rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "#00d4f0", marginBottom: "0.6rem" }}>Maestro Bundle</div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem", marginBottom: "0.4rem" }}>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 900, fontSize: "2.6rem", color: "#fff", letterSpacing: "-0.03em" }}>$6.99</span>
-                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)" }}>one-time</span>
-                    </div>
-                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.5 }}>Gain absolute control over LLM outputs.</p>
-                  </div>
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.75rem" }}>
-                    {["15 extra lives (replenish instantly)","8 Hint Tokens for prompt tests","5 Double XP boosts (lasts 24h)","3 Streak Shields & 2 Second Chances","1 Streak Restore & 1 Jackpot multiplier","All 14 Visual Novel tracks unlocked"].map(f => (
-                      <div key={f} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                        <span style={{ color: "#00d4f0", fontSize: "0.75rem" }}>✦</span>
-                        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.82rem", color: "rgba(240,238,255,0.86)" }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => handlePurchase("maestro-bundle")}
-                    disabled={checkingOut === "maestro-bundle"}
-                    style={{ display: "block", width: "100%", textAlign: "center", fontFamily: "Inter, sans-serif", fontWeight: 700, fontSize: "0.875rem", color: "#08060f", background: "linear-gradient(90deg,#00d4f0,#e040fb)", padding: "0.7rem", borderRadius: "100px", cursor: checkingOut === "maestro-bundle" ? "wait" : "pointer", border: "none", opacity: checkingOut && checkingOut !== "maestro-bundle" ? 0.5 : 1 }}>
-                    {checkingOut === "maestro-bundle" ? "Opening checkout…" : "Get Maestro Bundle →"}
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
 
         {/* ══════════════════════════════════════════════════════════════════════
             PLAYER LOGS (Testimonials)
